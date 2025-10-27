@@ -17,8 +17,17 @@ const {
   getConstructionProjectDetail,
   getDesignRequestDetail,
   getBidDetail,
-  getJobApplicationDetail
+  getJobApplicationDetail,
+  verifyCompany,
+  rejectCompany,
+  verifyWorker,
+  rejectWorker
 } = require('../controllers/adminController');
+// Verify/Reject company/worker
+router.patch('/admin/verify-company/:id', verifyCompany);
+router.patch('/admin/reject-company/:id', rejectCompany);
+router.patch('/admin/verify-worker/:id', verifyWorker);
+router.patch('/admin/reject-worker/:id', rejectWorker);
 const authadmin = require('../middlewares/authadmin');
 
 // Admin dashboard route (protected)
