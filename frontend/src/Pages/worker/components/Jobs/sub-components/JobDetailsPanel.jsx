@@ -1,6 +1,6 @@
 import React from 'react';
 
-const JobDetailsPanel = ({ selectedJob, onAccept, onReject, formatDate }) => {
+const JobDetailsPanel = ({ selectedJob, onAccept, onReject, onCreateProposal, formatDate }) => {
   if (!selectedJob) {
     return (
       <section className="wkj-job-details-panel">
@@ -126,18 +126,38 @@ const JobDetailsPanel = ({ selectedJob, onAccept, onReject, formatDate }) => {
         )}
 
         <div className="wkj-job-action-buttons">
-          <button 
-            className="wkj-job-action-button wkj-accept-button" 
-            onClick={onAccept}
-          >
-            <i className="fas fa-check"></i> Accept Job
-          </button>
-          <button 
-            className="wkj-job-action-button wkj-deny-button" 
-            onClick={onReject}
-          >
-            <i className="fas fa-times"></i> Deny Job
-          </button>
+          {selectedJob.status === 'Pending' ? (
+            <>
+              <button 
+                className="wkj-job-action-button wkj-accept-button" 
+                onClick={onCreateProposal}
+              >
+                <i className="fas fa-file-signature"></i> Create Proposal
+              </button>
+              <button 
+                className="wkj-job-action-button wkj-deny-button" 
+                onClick={onReject}
+              >
+                <i className="fas fa-times"></i> Deny Job
+              </button>
+            </>
+          ) : selectedJob.status === 'Proposal Sent' || selectedJob.status === 'proposal_sent' ? (
+            <button 
+              className="wkj-job-action-button" 
+              disabled
+              style={{ backgroundColor: '#7f8c8d', cursor: 'not-allowed' }}
+            >
+              <i className="fas fa-check"></i> Proposal Submitted
+            </button>
+          ) : (
+            <button 
+              className="wkj-job-action-button" 
+              disabled
+              style={{ backgroundColor: '#95a5a6', cursor: 'not-allowed' }}
+            >
+              <i className="fas fa-info-circle"></i> {selectedJob.status}
+            </button>
+          )}
         </div>
       </div>
     </section>
