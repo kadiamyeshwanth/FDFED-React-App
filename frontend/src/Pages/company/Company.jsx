@@ -15,6 +15,7 @@ import CompanyHiring from "./components/company-hiring/CompanyHiring";
 import CompanyEmployees from "./components/company-employees/CompanyEmployees";
 import CompanySettings from "./components/company-settings/CompanySettings";
 import CompanyAddNewProject from "./components/forms/company-addnewproject/CompanyAddNewProject";
+import Chat from "../../components/Chat/Chat";
 
 // Placeholder for Project Requests (you can create later)
 const ProjectRequests = () => <div>Project Requests Page</div>;
@@ -37,6 +38,7 @@ const Company = () => {
               <Route path="my-employees" element={<CompanyEmployees />} />
               <Route path="companySettings" element={<CompanySettings />} />
               <Route path="addnewproject" element={<CompanyAddNewProject />} />
+              <Route path="chat/:roomId" element={<Chat userRole="company" />} />
 
               {/* Fallback to dashboard */}
               <Route path="*" element={<CompanyDashboard />} />
