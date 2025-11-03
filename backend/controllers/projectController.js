@@ -299,8 +299,138 @@ const updateProject = async (req, res) => {
       return res.status(400).json({ message: "Invalid project ID" });
     }
     const project = await ConstructionProjectSchema.findById(projectId);
-    if (!project) {
-      return res.status(404).json({ message: "Project not found" });
+    if (!project) return res.status(404).json({ message: "Project not found" });
+
+    // Handle milestone updates with validation
+    if (milestonePercentage) {
+      const milestonePercent = parseInt(milestonePercentage);
+      const checkpoints = [25, 50, 75, 100];
+      const isCheckpoint = checkpoints.includes(milestonePercent);
+      
+      // Message is required only for checkpoint values
+      if (isCheckpoint && !milestoneMessage) {
+        return res.status(400).json({ message: `Checkpoint ${milestonePercent}% requires a message for the customer.` });
+      }
+      
+      // Check if milestone is valid
+      if (milestonePercent < 0 || milestonePercent > 100) {
+        return res.status(400).json({ message: "Invalid milestone percentage. Must be between 0 and 100." });
+      }
+
+      // Check if this is an update to a checkpoint that needs revision
+      const checkpointNeedingRevision = project.milestones.find(
+        m => m.percentage === milestonePercent && m.isCheckpoint && m.needsRevision
+      );
+      
+      // Check for backward progression (allow same percentage if checkpoint needs revision)
+      const maxCompletedPercentage = project.completionPercentage || 0;
+      
+      if (!checkpointNeedingRevision && milestonePercent < maxCompletedPercentage) {
+        return res.status(400).json({ 
+          message: `Cannot move backward. Current progress is at ${maxCompletedPercentage}%. Please select a higher percentage.` 
+        });
+      }
+      
+      // Find the last checkpoint that needs approval
+      const lastApprovedCheckpoint = checkpoints.reduce((lastApproved, checkpoint) => {
+        const checkpointMilestone = project.milestones.find(
+          m => m.percentage === checkpoint && m.isCheckpoint
+        );
+        if (checkpointMilestone && checkpointMilestone.isApprovedByCustomer) {
+          return checkpoint;
+        }
+        return lastApproved;
+      }, 0);
+
+      // Find next checkpoint that needs approval
+      const nextCheckpoint = checkpoints.find(c => c > lastApprovedCheckpoint) || 100;
+
+      // Check if trying to cross a checkpoint without approval
+      if (milestonePercent > nextCheckpoint) {
+        const pendingCheckpoint = project.milestones.find(
+          m => m.percentage === nextCheckpoint && m.isCheckpoint && !m.isApprovedByCustomer
+        );
+        
+        if (pendingCheckpoint) {
+          return res.status(400).json({ 
+            message: `Cannot proceed beyond ${nextCheckpoint}%. The ${nextCheckpoint}% checkpoint needs customer approval first.` 
+          });
+        }
+        
+        return res.status(400).json({ 
+          message: `Cannot proceed beyond ${nextCheckpoint}%. You must reach the ${nextCheckpoint}% checkpoint and get customer approval first.` 
+        });
+      }
+
+      // If this is a checkpoint, check if it exists
+      if (isCheckpoint) {
+        const existingCheckpoint = project.milestones.find(
+          m => m.percentage === milestonePercent && m.isCheckpoint
+        );
+        
+        if (existingCheckpoint) {
+          // If checkpoint exists and needs revision, allow update
+          if (existingCheckpoint.needsRevision) {
+            // Add company response to conversation
+            existingCheckpoint.conversation = existingCheckpoint.conversation || [];
+            existingCheckpoint.conversation.push({
+              sender: 'company',
+              message: milestoneMessage,
+              timestamp: new Date()
+            });
+            // Update the existing checkpoint message
+            existingCheckpoint.companyMessage = milestoneMessage;
+            existingCheckpoint.needsRevision = false;
+            existingCheckpoint.customerFeedback = "";
+            existingCheckpoint.submittedAt = new Date();
+          } else if (existingCheckpoint.isApprovedByCustomer) {
+            // Already approved, cannot update
+            return res.status(400).json({ 
+              message: `Checkpoint ${milestonePercent}% has already been approved by the customer. Cannot update.` 
+            });
+          } else {
+            // Still pending approval, cannot resubmit
+            return res.status(400).json({ 
+              message: `Checkpoint ${milestonePercent}% has already been submitted and is awaiting customer approval.` 
+            });
+          }
+        } else {
+          // New checkpoint - add it
+          project.milestones.push({
+            percentage: milestonePercent,
+            companyMessage: milestoneMessage || `Progress update to ${milestonePercent}%`,
+            isApprovedByCustomer: false,
+            needsRevision: false,
+            submittedAt: new Date(),
+            isCheckpoint: isCheckpoint,
+            conversation: [{
+              sender: 'company',
+              message: milestoneMessage || `Progress update to ${milestonePercent}%`,
+              timestamp: new Date()
+            }]
+          });
+        }
+      } else {
+        // Non-checkpoint milestone, just add it if message provided
+        if (milestoneMessage) {
+          project.milestones.push({
+            percentage: milestonePercent,
+            companyMessage: milestoneMessage,
+            isApprovedByCustomer: false,
+            needsRevision: false,
+            submittedAt: new Date(),
+            isCheckpoint: false,
+            conversation: [{
+              sender: 'company',
+              message: milestoneMessage,
+              timestamp: new Date()
+            }]
+          });
+        }
+      }
+
+      // Update completion percentage
+      project.completionPercentage = milestonePercent;
     }
 
     // Determine incoming progress value (support legacy completionPercentage field)
@@ -314,10 +444,6 @@ const updateProject = async (req, res) => {
         return res.status(400).json({ message: "Progress must be between 0 and 100." });
       }
 
-<<<<<<< Updated upstream
-    if (completionPercentage)
-      project.completionPercentage = parseInt(completionPercentage);
-=======
       const checkpoints = [25, 50, 75, 100];
       const isCheckpoint = checkpoints.includes(progressValue);
 
@@ -379,7 +505,6 @@ const updateProject = async (req, res) => {
       project.completionPercentage = progressValue;
     }
 
->>>>>>> Stashed changes
     if (targetCompletionDate)
       project.targetCompletionDate = new Date(targetCompletionDate);
     if (currentPhase) project.currentPhase = currentPhase;
@@ -390,6 +515,20 @@ const updateProject = async (req, res) => {
       project.additionalImagePaths = req.files.additionalImages.map((file) =>
         file.path.replace(/\//g, "\\")
       );
+    
+    // Handle completion images when project reaches 100%
+    if (req.files && req.files.completionImages && project.completionPercentage === 100) {
+      const completionImagePaths = req.files.completionImages.map((file) =>
+        file.path.replace(/\\/g, "/")
+      );
+      // Append to existing completion images or create new array
+      if (project.completionImages && project.completionImages.length > 0) {
+        project.completionImages = [...project.completionImages, ...completionImagePaths];
+      } else {
+        project.completionImages = completionImagePaths;
+      }
+    }
+    
     if (updates) {
       const updateImages = req.files.updateImages || [];
       const updatesArray = Array.isArray(updates) ? updates : [updates];
@@ -547,8 +686,7 @@ const rejectWorkerRequest = async (req, res) => {
   }
 };
 
-<<<<<<< Updated upstream
-=======
+
 const approveMilestone = async (req, res) => {
   try {
     const { projectId, milestonePercentage } = req.body;
@@ -629,7 +767,14 @@ const requestMilestoneRevision = async (req, res) => {
 
     milestone.needsRevision = true;
     milestone.customerFeedback = feedback;
-    milestone.feedbackAt = new Date();
+    
+    // Add customer feedback to conversation
+    milestone.conversation = milestone.conversation || [];
+    milestone.conversation.push({
+      sender: 'customer',
+      message: feedback,
+      timestamp: new Date()
+    });
 
     await project.save();
 
@@ -644,7 +789,193 @@ const requestMilestoneRevision = async (req, res) => {
   }
 };
 
->>>>>>> Stashed changes
+const submitProjectReview = async (req, res) => {
+  try {
+    const { projectId, rating, reviewText } = req.body;
+    const customerId = req.user.user_id;
+
+    if (!projectId || !rating) {
+      return res.status(400).json({ error: "Project ID and rating are required" });
+    }
+
+    if (rating < 1 || rating > 5) {
+      return res.status(400).json({ error: "Rating must be between 1 and 5" });
+    }
+
+    const project = await ConstructionProjectSchema.findOne({
+      _id: projectId,
+      customerId: customerId
+    });
+
+    if (!project) {
+      return res.status(404).json({ error: "Project not found or you don't have permission" });
+    }
+
+    if (project.completionPercentage !== 100) {
+      return res.status(400).json({ error: "Project must be 100% complete to submit a review" });
+    }
+
+    if (project.customerReview && project.customerReview.rating) {
+      return res.status(400).json({ error: "Review already submitted for this project" });
+    }
+
+    project.customerReview = {
+      rating: parseInt(rating),
+      reviewText: reviewText || '',
+      reviewDate: new Date()
+    };
+
+    await project.save();
+
+    res.status(200).json({ 
+      success: true, 
+      message: "Review submitted successfully",
+      review: project.customerReview
+    });
+  } catch (error) {
+    console.error("Error submitting review:", error);
+    res.status(500).json({ error: "Server error" });
+  }
+};
+
+// Get projects with unviewed customer messages
+const getProjectsWithUnviewedCustomerMessages = async (req, res) => {
+  try {
+    const projects = await ConstructionProjectSchema.find({
+      'milestones.conversation': { $exists: true, $ne: [] }
+    });
+    
+    const projectsWithUnviewed = [];
+    
+    projects.forEach(project => {
+      let hasUnviewedMessages = false;
+      
+      project.milestones.forEach(milestone => {
+        if (milestone.conversation && milestone.conversation.length > 0) {
+          // Check for customer messages that haven't been viewed
+          const unviewedCustomerMessages = milestone.conversation.filter(
+            msg => msg.sender === 'customer' && !msg.viewedByCompany
+          );
+          
+          if (unviewedCustomerMessages.length > 0) {
+            hasUnviewedMessages = true;
+          }
+        }
+      });
+      
+      if (hasUnviewedMessages) {
+        projectsWithUnviewed.push({
+          _id: project._id,
+          count: 1 // Just indicate there are unviewed messages
+        });
+      }
+    });
+    
+    res.json({ success: true, unviewedByProject: projectsWithUnviewed });
+  } catch (err) {
+    console.error('Error getting unviewed messages:', err);
+    res.status(500).json({ error: 'Failed to get unviewed messages' });
+  }
+};
+
+// Mark customer messages as viewed
+const markCustomerMessagesViewed = async (req, res) => {
+  try {
+    const { projectId } = req.params;
+    
+    const project = await ConstructionProjectSchema.findById(projectId);
+    if (!project) {
+      return res.status(404).json({ error: 'Project not found' });
+    }
+    
+    // Mark all customer messages in all milestones as viewed
+    project.milestones.forEach(milestone => {
+      if (milestone.conversation && milestone.conversation.length > 0) {
+        milestone.conversation.forEach(msg => {
+          if (msg.sender === 'customer') {
+            msg.viewedByCompany = true;
+          }
+        });
+      }
+    });
+    
+    await project.save();
+    res.json({ success: true });
+  } catch (err) {
+    console.error('Error marking messages as viewed:', err);
+    res.status(500).json({ error: 'Failed to mark messages as viewed' });
+  }
+};
+
+// Get projects with unviewed company messages (for customer)
+const getProjectsWithUnviewedCompanyMessages = async (req, res) => {
+  try {
+    const projects = await ConstructionProjectSchema.find({
+      'milestones.conversation': { $exists: true, $ne: [] }
+    });
+    
+    const projectsWithUnviewed = [];
+    
+    projects.forEach(project => {
+      let hasUnviewedMessages = false;
+      
+      project.milestones.forEach(milestone => {
+        if (milestone.conversation && milestone.conversation.length > 0) {
+          // Check for company messages that haven't been viewed
+          const unviewedCompanyMessages = milestone.conversation.filter(
+            msg => msg.sender === 'company' && !msg.viewedByCustomer
+          );
+          
+          if (unviewedCompanyMessages.length > 0) {
+            hasUnviewedMessages = true;
+          }
+        }
+      });
+      
+      if (hasUnviewedMessages) {
+        projectsWithUnviewed.push({
+          _id: project._id,
+          count: 1
+        });
+      }
+    });
+    
+    res.json({ success: true, unviewedByProject: projectsWithUnviewed });
+  } catch (err) {
+    console.error('Error getting unviewed company messages:', err);
+    res.status(500).json({ error: 'Failed to get unviewed messages' });
+  }
+};
+
+// Mark company messages as viewed (for customer)
+const markCompanyMessagesViewed = async (req, res) => {
+  try {
+    const { projectId } = req.params;
+    
+    const project = await ConstructionProjectSchema.findById(projectId);
+    if (!project) {
+      return res.status(404).json({ error: 'Project not found' });
+    }
+    
+    // Mark all company messages in all milestones as viewed
+    project.milestones.forEach(milestone => {
+      if (milestone.conversation && milestone.conversation.length > 0) {
+        milestone.conversation.forEach(msg => {
+          if (msg.sender === 'company') {
+            msg.viewedByCustomer = true;
+          }
+        });
+      }
+    });
+    
+    await project.save();
+    res.json({ success: true });
+  } catch (err) {
+    console.error('Error marking company messages as viewed:', err);
+    res.status(500).json({ error: 'Failed to mark messages as viewed' });
+  }
+};
+
 module.exports = {
   submitArchitect,
   submitDesignRequest,
@@ -658,9 +989,11 @@ module.exports = {
   declineBid,
   acceptWorkerRequest,
   rejectWorkerRequest,
-<<<<<<< Updated upstream
-=======
   approveMilestone,
   requestMilestoneRevision,
->>>>>>> Stashed changes
+  submitProjectReview,
+  getProjectsWithUnviewedCustomerMessages,
+  markCustomerMessagesViewed,
+  getProjectsWithUnviewedCompanyMessages,
+  markCompanyMessagesViewed,
 };

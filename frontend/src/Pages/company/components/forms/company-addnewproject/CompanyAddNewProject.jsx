@@ -19,6 +19,7 @@ const CompanyAddNewProject = () => {
   const [currentPhase, setCurrentPhase] = useState("");
   const [mainImage, setMainImage] = useState(null);
   const [additionalImages, setAdditionalImages] = useState([]);
+  const [completionImages, setCompletionImages] = useState([]);
   const [updateText, setUpdateText] = useState("");
   const [updateImage, setUpdateImage] = useState(null);
   const [existingMilestones, setExistingMilestones] = useState([]);
@@ -26,6 +27,7 @@ const CompanyAddNewProject = () => {
   const [nextCheckpoint, setNextCheckpoint] = useState(25);
   const [revisionMode, setRevisionMode] = useState(false);
   const [customerFeedback, setCustomerFeedback] = useState("");
+  const [conversationHistory, setConversationHistory] = useState([]);
 
   const [errors, setErrors] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -67,6 +69,7 @@ const CompanyAddNewProject = () => {
               setSelectedMilestone(checkpointNum.toString());
               setMilestoneMessage(milestone.companyMessage || "");
               setCustomerFeedback(milestone.customerFeedback || "");
+              setConversationHistory(milestone.conversation || []);
               setShowMilestoneInput(true);
             }
           }
@@ -191,6 +194,7 @@ const CompanyAddNewProject = () => {
       formData.append("currentPhase", currentPhase);
       if (mainImage) formData.append("mainImage", mainImage);
       additionalImages.forEach((file) => formData.append("additionalImages", file));
+      completionImages.forEach((file) => formData.append("completionImages", file));
       if (updateText) formData.append("updates[]", updateText);
       if (updateImage) formData.append("updateImages", updateImage);
 
@@ -228,8 +232,56 @@ const CompanyAddNewProject = () => {
           marginBottom: "20px"
         }}>
           <h3 style={{ marginTop: 0, color: "#856404" }}>⚠ Customer Revision Request</h3>
+          
+          {/* Show conversation history if available */}
+          {conversationHistory && conversationHistory.length > 0 && (
+            <div style={{
+              backgroundColor: "#f8f9fa",
+              padding: "15px",
+              borderRadius: "6px",
+              marginBottom: "15px",
+              border: "1px solid #dee2e6"
+            }}>
+              <strong style={{ display: "block", marginBottom: "12px", color: "#555" }}>
+                💬 Conversation History ({conversationHistory.length} {conversationHistory.length === 1 ? 'message' : 'messages'})
+              </strong>
+              <div style={{ maxHeight: "250px", overflowY: "auto" }}>
+                {conversationHistory.map((msg, idx) => (
+                  <div key={idx} style={{
+                    backgroundColor: msg.sender === 'company' ? "#e3f2fd" : "#fff3e0",
+                    padding: "10px",
+                    borderRadius: "8px",
+                    marginBottom: "8px",
+                    borderLeft: `4px solid ${msg.sender === 'company' ? "#2196f3" : "#ff9800"}`
+                  }}>
+                    <div style={{ 
+                      display: "flex", 
+                      justifyContent: "space-between", 
+                      marginBottom: "6px",
+                      fontSize: "0.85em",
+                      color: "#666"
+                    }}>
+                      <strong style={{ color: msg.sender === 'company' ? "#1976d2" : "#f57c00" }}>
+                        {msg.sender === 'company' ? '🏢 Your Company' : '👤 Customer'}
+                      </strong>
+                      <span>
+                        {new Date(msg.timestamp).toLocaleString("en-IN", {
+                          day: "numeric",
+                          month: "short",
+                          hour: "2-digit",
+                          minute: "2-digit"
+                        })}
+                      </span>
+                    </div>
+                    <p style={{ margin: 0, lineHeight: "1.5", color: "#333" }}>{msg.message}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+          
           <p style={{ marginBottom: "10px" }}>
-            <strong>Customer Feedback:</strong>
+            <strong>Latest Customer Feedback:</strong>
           </p>
           <p style={{ 
             backgroundColor: "white", 
@@ -241,7 +293,7 @@ const CompanyAddNewProject = () => {
             {customerFeedback}
           </p>
           <p style={{ margin: 0, color: "#666", fontSize: "0.95em" }}>
-            Please update your message below to address the customer's concerns.
+            Please update your message below to address the customer's concerns. Your response will be added to the conversation history.
           </p>
         </div>
       )}
@@ -398,6 +450,35 @@ const CompanyAddNewProject = () => {
           <label htmlFor="additionalImages">Additional Project Files</label>
           <input type="file" id="additionalImages" name="additionalImages" accept=".pdf,.jpg,.jpeg,.png" multiple onChange={(e) => setAdditionalImages(Array.from(e.target.files || []))} />
         </div>
+
+        {/* Completion Images - Only show when project reaches 100% */}
+        {parseInt(selectedMilestone) === 100 && (
+          <div className="form-group" style={{
+            backgroundColor: "#e8f5e9",
+            padding: "15px",
+            borderRadius: "8px",
+            border: "2px solid #4caf50"
+          }}>
+            <label htmlFor="completionImages" style={{ color: "#2e7d32", fontWeight: "600" }}>
+              📸 Project Completion Images (Recommended)
+            </label>
+            <p style={{ fontSize: "0.9em", color: "#555", marginBottom: "10px" }}>
+              Upload final project images to showcase the completed work to customers. These will be displayed in the customer's review section.
+            </p>
+            <input 
+              type="file" 
+              id="completionImages" 
+              name="completionImages" 
+              accept=".jpg,.jpeg,.png" 
+              multiple 
+              onChange={(e) => setCompletionImages(Array.from(e.target.files || []))}
+              style={{ width: "100%" }}
+            />
+            <small style={{ color: "#666", display: "block", marginTop: "5px" }}>
+              {completionImages.length > 0 ? `${completionImages.length} image(s) selected` : "No images selected yet"}
+            </small>
+          </div>
+        )}
 
         <div className="form-group">
           <label>Recent Updates</label>
