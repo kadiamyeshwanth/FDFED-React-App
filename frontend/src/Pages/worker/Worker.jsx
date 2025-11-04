@@ -9,6 +9,7 @@ import MyCompany from './components/MyCompany/MyCompany';
 import Settings from './components/Settings/Settings';
 import ProfileEdit from './components/ProfileEdit/ProfileEdit';
 import InteriorDesignerJobs from './components/InteriorDesignerJobs/InteriorDesignerJobs';
+import Chat from '../../components/Chat/Chat';
 import './Worker.css';
 
 const WorkerLayout = () => {
@@ -31,6 +32,7 @@ const Worker = () => (
       <Route path="settings" element={<Settings />} />
       <Route path="profile-edit" element={<ProfileEdit />} />
       <Route path="interior-jobs" element={<InteriorDesignerJobs />} />
+      <Route path="chat/:roomId" element={<Chat userRole="worker" />} />
     </Route>
   </Routes>
 );
