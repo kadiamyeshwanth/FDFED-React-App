@@ -5,6 +5,8 @@ import StatsGrid from './sub-components/StatsGrid';
 import { OffersSection, CompaniesSection, JobsSection } from './sub-components/DashboardSections';
 
 const Dashboard = () => {
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
   const [data, setData] = useState({
     workerName: '',
     stats: { pendingOffers: 0, activeApplications: 0 },
@@ -13,8 +15,7 @@ const Dashboard = () => {
     companies: [],
     jobs: []
   });
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+
 
   useEffect(() => {
     // Fetch dashboard JSON from explicit API endpoint to avoid legacy HTML route collisions
@@ -51,6 +52,7 @@ const Dashboard = () => {
       </div>
     );
   }
+  const { workerName, stats, user, offers, companies, jobs } = data;
 
   if (error) {
     return (
@@ -60,7 +62,6 @@ const Dashboard = () => {
     );
   }
 
-  const { workerName, stats, user, offers, companies, jobs } = data;
 
   return (
     <main className="wkd-dashboard">
