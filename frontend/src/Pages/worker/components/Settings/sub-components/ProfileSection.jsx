@@ -1,8 +1,12 @@
-import React from 'react';
-import { Link } from 'react-router-dom';
+import React, { useState } from 'react';
 import './ProfileSection.css';
+import ProfileEditModal from './ProfileEditModal';
 
-const ProfileSection = ({ user }) => {
+const ProfileSection = ({ user, onProfileUpdated }) => {
+  const [isEditing, setIsEditing] = useState(false);
+  const handleClose = () => setIsEditing(false);
+  const handleOpen = () => setIsEditing(true);
+
   return (
     <div className="wkst-settings-section">
       <div className="wkst-profile-header">
@@ -29,6 +33,12 @@ const ProfileSection = ({ user }) => {
             ? user.specialties.join(', ')
             : 'None specified'}
         </p>
+        {user.languages && user.languages.length > 0 && (
+          <p><strong>Languages:</strong> {user.languages.join(', ')}</p>
+        )}
+        {user.expectedPrice && (
+          <p><strong>Expected Price:</strong> {user.expectedPrice}</p>
+        )}
       </div>
 
       <div className="wkst-profile-section-divider">
@@ -37,7 +47,7 @@ const ProfileSection = ({ user }) => {
           user.projects.map((project, index) => (
             <div key={index} className="wkst-project">
               <h4>
-                {project.name} ({project.year})
+                {project.name} {project.year ? `(${project.year})` : project.yearRange ? `(${project.yearRange})` : ''}
               </h4>
               <p>
                 <strong>Location:</strong> {project.location}
@@ -50,6 +60,13 @@ const ProfileSection = ({ user }) => {
                   className="wkst-project-image"
                 />
               )}
+              {project.images && project.images.length > 0 && (
+                <div className="wkst-project-gallery">
+                  {project.images.map((img, idx) => (
+                    <img key={idx} src={img} alt={`${project.name}-${idx}`} className="wkst-project-image" />
+                  ))}
+                </div>
+              )}
             </div>
           ))
         ) : (
@@ -58,10 +75,21 @@ const ProfileSection = ({ user }) => {
       </div>
 
       <div className="wkst-button-container">
-        <Link to="/workerdashboard/profile-edit" className="wkst-btn wkst-btn-primary">
+        <button onClick={handleOpen} className="wkst-btn wkst-btn-primary">
           <i className="fas fa-edit"></i> Edit Profile
-        </Link>
+        </button>
       </div>
+
+      {isEditing && (
+        <ProfileEditModal
+          user={user}
+          onClose={handleClose}
+          onSaved={() => {
+            handleClose();
+            if (typeof onProfileUpdated === 'function') onProfileUpdated();
+          }}
+        />
+      )}
     </div>
   );
 };

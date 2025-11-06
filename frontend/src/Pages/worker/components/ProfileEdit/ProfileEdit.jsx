@@ -224,6 +224,13 @@ const ProfileEdit = () => {
 
   return (
     <div className="wkpe-container">
+      <button 
+        type="button" 
+        onClick={() => navigate(-1)} 
+        className="wkpe-back-btn"
+      >
+        <i className="fas fa-arrow-left"></i> Back
+      </button>
       <h1>Architect Profile Form</h1>
 
       <form onSubmit={handleSubmit} className="wkpe-form">

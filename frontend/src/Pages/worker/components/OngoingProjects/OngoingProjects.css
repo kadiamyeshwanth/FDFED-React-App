@@ -892,3 +892,271 @@
     font-size: 0.75rem;
   }
 }
+
+/* Revision Request Box Styles */
+.wkop-revision-request-box {
+  margin-top: 1rem;
+  padding: 1.25rem;
+  background: linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%);
+  border: 2px solid #f59e0b;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(245, 158, 11, 0.15);
+}
+
+.wkop-revision-header {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 0.75rem;
+  color: #92400e;
+  font-size: 1.05rem;
+}
+
+.wkop-revision-icon {
+  font-size: 1.5rem;
+}
+
+.wkop-revision-date {
+  font-size: 0.85rem;
+  color: #78350f;
+  margin-bottom: 0.75rem;
+  font-weight: 500;
+}
+
+.wkop-revision-notes {
+  background: white;
+  padding: 1rem;
+  border-radius: 8px;
+  border-left: 3px solid #f59e0b;
+  margin-bottom: 1rem;
+}
+
+.wkop-revision-notes p {
+  margin: 0.5rem 0;
+  color: #374151;
+  line-height: 1.6;
+}
+
+.wkop-revision-notes p:first-child {
+  color: #92400e;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+}
+
+.wkop-revision-action {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: 1rem;
+  padding: 0.75rem;
+  background: white;
+  border-radius: 8px;
+  border: 1px dashed #f59e0b;
+}
+
+.wkop-revision-hint {
+  color: #92400e;
+  font-size: 0.9rem;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+/* Revision Resubmit Button */
+.wkop-revision-button-container {
+  margin-top: 1rem;
+  display: flex;
+  justify-content: center;
+}
+
+.wkop-btn-resubmit {
+  background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+  color: white;
+  border: none;
+  padding: 0.75rem 1.5rem;
+  border-radius: 10px;
+  font-weight: 600;
+  cursor: pointer;
+  font-size: 0.95rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 12px rgba(245, 158, 11, 0.3);
+}
+
+.wkop-btn-resubmit:hover {
+  background: linear-gradient(135deg, #d97706 0%, #b45309 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(245, 158, 11, 0.4);
+}
+
+.wkop-btn-resubmit:active {
+  transform: translateY(0);
+}
+
+/* Admin Review Box Styles */
+.wkop-admin-review-box {
+  margin-top: 1rem;
+  padding: 1.25rem;
+  background: linear-gradient(135deg, #fef2f2 0%, #fee2e2 100%);
+  border: 2px solid #ef4444;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(239, 68, 68, 0.15);
+}
+
+.wkop-review-header {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 0.75rem;
+  color: #991b1b;
+  font-size: 1.05rem;
+}
+
+.wkop-review-icon {
+  font-size: 1.5rem;
+}
+
+.wkop-admin-review-box p {
+  margin: 0;
+  color: #7f1d1d;
+  line-height: 1.6;
+  background: white;
+  padding: 1rem;
+  border-radius: 8px;
+  border-left: 3px solid #ef4444;
+}
+
+/* Approval Box Styles */
+.wkop-approval-box {
+  margin-top: 1rem;
+  padding: 1rem;
+  background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
+  border: 1px solid #86efac;
+  border-radius: 8px;
+  color: #166534;
+  font-weight: 500;
+  font-size: 0.9rem;
+}
+
+/* Rejection Box Styles */
+.wkop-rejection-box {
+  margin-top: 1rem;
+  padding: 1rem;
+  background: linear-gradient(135deg, #fef2f2 0%, #fee2e2 100%);
+  border: 1px solid #fca5a5;
+  border-radius: 8px;
+}
+
+.wkop-rejection-box strong {
+  color: #991b1b;
+  display: block;
+  margin-bottom: 0.5rem;
+}
+
+.wkop-rejection-box p {
+  margin: 0;
+  color: #7f1d1d;
+  line-height: 1.6;
+}
+
+/* Status badges for new statuses */
+.wkop-status-revision-requested {
+  background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+  color: #92400e;
+  border: 1px solid #fbbf24;
+}
+
+.wkop-status-under-review {
+  background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%);
+  color: #991b1b;
+  border: 1px solid #f87171;
+}
+
+/* Milestone card borders for new statuses */
+.wkop-milestone-activity.wkop-milestone-revision-requested {
+  border-left-color: #f59e0b;
+  background: linear-gradient(135deg, #fffbeb 0%, #ffffff 100%);
+}
+
+.wkop-milestone-activity.wkop-milestone-under-review {
+  border-left-color: #ef4444;
+  background: linear-gradient(135deg, #fef2f2 0%, #ffffff 100%);
+}
+
+/* Review Prompt Section */
+.wkop-review-prompt {
+  margin-top: 32px;
+  padding: 32px;
+  background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+  border-radius: 16px;
+  border: 2px solid #fbbf24;
+  box-shadow: 0 4px 16px rgba(251, 191, 36, 0.2);
+  animation: slideIn 0.5s ease;
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.wkop-review-prompt-content {
+  text-align: center;
+}
+
+.wkop-review-prompt-content i {
+  font-size: 48px;
+  color: #f59e0b;
+  margin-bottom: 16px;
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.1);
+  }
+}
+
+.wkop-review-prompt-content h4 {
+  font-size: 24px;
+  font-weight: 700;
+  color: #92400e;
+  margin: 0 0 12px 0;
+}
+
+.wkop-review-prompt-content p {
+  font-size: 16px;
+  color: #78350f;
+  margin: 0 0 24px 0;
+  line-height: 1.6;
+}
+
+.wkop-btn-review {
+  padding: 14px 32px;
+  background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+  color: white;
+  border: none;
+  border-radius: 10px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 6px 20px rgba(245, 158, 11, 0.4);
+}
+
+.wkop-btn-review:hover {
+  background: linear-gradient(135deg, #d97706 0%, #b45309 100%);
+  transform: translateY(-3px);
+  box-shadow: 0 8px 24px rgba(245, 158, 11, 0.5);
+}
