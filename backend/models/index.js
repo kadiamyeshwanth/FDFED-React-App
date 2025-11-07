@@ -41,6 +41,20 @@ const customerSchema = new mongoose.Schema(
     phone: { type: String, required: true },
     password: { type: String, required: true },
     role: { type: String, default: "customer" },
+    rating: { type: Number, default: 0, min: 0, max: 5 },
+    totalReviews: { type: Number, default: 0 },
+    reviews: [
+      {
+        projectId: { type: mongoose.Schema.Types.ObjectId },
+        projectName: { type: String },
+        projectType: { type: String, enum: ['architect', 'interior'] },
+        workerId: { type: mongoose.Schema.Types.ObjectId, ref: 'Worker' },
+        workerName: { type: String },
+        rating: { type: Number, min: 1, max: 5 },
+        comment: { type: String },
+        reviewedAt: { type: Date, default: Date.now }
+      }
+    ],
   },
   { timestamps: true }
 );
@@ -48,6 +62,11 @@ const customerSchema = new mongoose.Schema(
 // Company Schema
 const companySchema = new mongoose.Schema(
   {
+    status: {
+      type: String,
+      enum: ["pending", "verified", "rejected"],
+      default: "pending",
+    },
     companyName: { type: String, required: true },
     contactPerson: { type: String, required: true },
     email: {
@@ -80,18 +99,16 @@ const companySchema = new mongoose.Schema(
     },
     projectsCompleted: { type: String },
     yearsInBusiness: { type: String },
-    teamMembers: [
-      {
-        name: { type: String },
-        position: { type: String },
-        image: { type: String },
-      },
-    ],
     completedProjects: [
       {
         title: { type: String },
         description: { type: String },
-        image: { type: String },
+        beforeImage: { type: String },
+        afterImage: { type: String },
+        location: { type: String },
+        tenderId: { type: String },
+        materialCertificate: { type: String },
+        gpsLink: { type: String },
       },
     ],
     didYouKnow: { type: String },
@@ -107,6 +124,11 @@ const companySchema = new mongoose.Schema(
 // Worker Schema
 const workerSchema = new mongoose.Schema(
   {
+    status: {
+      type: String,
+      enum: ["pending", "verified", "rejected"],
+      default: "pending",
+    },
     name: { type: String, required: true },
     email: {
       type: String,
@@ -134,18 +156,46 @@ const workerSchema = new mongoose.Schema(
     profileImage: { type: String },
     professionalTitle: { type: String },
     about: { type: String },
+    languages: [{ type: String, default: [] }],
     specialties: [{ type: String, default: [] }],
+    // Previously worked companies/employers with optional proofs
+    previousCompanies: [
+      {
+        companyName: { type: String, required: true },
+        location: { type: String, required: true },
+        role: { type: String, required: true },
+        duration: { type: String, required: true },
+        proofs: [{ type: String, default: [] }],
+        createdAt: { type: Date, default: Date.now }
+      }
+    ],
     projects: [
       {
         name: { type: String, required: true },
-        year: { type: Number, required: true, min: 1900, max: 2100 },
-        location: { type: String, required: true },
-        description: { type: String, required: true },
+        year: { type: Number, min: 1900, max: 2100 },
+        yearRange: { type: String },
+        location: { type: String },
+        description: { type: String },
         image: { type: String },
+        images: [{ type: String, default: [] }],
+        invoiceOrCertificate: { type: String },
         createdAt: { type: Date, default: Date.now },
       },
     ],
     rating: { type: Number, default: 0, min: 0, max: 5 },
+    totalReviews: { type: Number, default: 0 },
+    reviews: [
+      {
+        projectId: { type: mongoose.Schema.Types.ObjectId },
+        projectName: { type: String },
+        projectType: { type: String, enum: ['architect', 'interior'] },
+        customerId: { type: mongoose.Schema.Types.ObjectId, ref: 'Customer' },
+        customerName: { type: String },
+        rating: { type: Number, min: 1, max: 5 },
+        comment: { type: String },
+        reviewedAt: { type: Date, default: Date.now }
+      }
+    ],
     isArchitect: { type: Boolean, default: false },
     servicesOffered: [{ type: String, default: [] }],
     availability: {
@@ -153,6 +203,7 @@ const workerSchema = new mongoose.Schema(
       enum: ["available", "busy", "unavailable"],
       default: "available",
     },
+    expectedPrice: { type: String },
   },
   { timestamps: true }
 );
@@ -267,6 +318,43 @@ const architectHiringSchema = new mongoose.Schema({
       createdAt: { type: Date, default: Date.now }
     }
   ],
+  milestones: [
+    {
+      percentage: { type: Number, required: true, min: 0, max: 100 },
+      description: { type: String, required: true },
+      status: { type: String, enum: ["Pending", "Approved", "Rejected", "Revision Requested", "Under Review"], default: "Pending" },
+      image: { type: String },
+      submittedAt: { type: Date, default: Date.now },
+      approvedAt: { type: Date },
+      rejectedAt: { type: Date },
+      rejectionReason: { type: String },
+      revisionRequestedAt: { type: Date },
+      revisionNotes: { type: String },
+      revisionHistory: [{
+        requestedAt: { type: Date },
+        notes: { type: String },
+        resubmittedAt: { type: Date }
+      }],
+      reportedToAdminAt: { type: Date },
+      adminReport: { type: String },
+      adminReviewNotes: { type: String }
+    }
+  ],
+  
+  // Review and Rating System
+  review: {
+    customerToWorker: {
+      rating: { type: Number, min: 1, max: 5 },
+      comment: { type: String },
+      submittedAt: { type: Date }
+    },
+    workerToCustomer: {
+      rating: { type: Number, min: 1, max: 5 },
+      comment: { type: String },
+      submittedAt: { type: Date }
+    },
+    isReviewCompleted: { type: Boolean, default: false }
+  },
 
   createdAt: { type: Date, default: Date.now },
   updatedAt: { type: Date, default: Date.now },
@@ -362,8 +450,6 @@ const constructionProjectSchema = new mongoose.Schema({
   currentPhase: { type: String, enum: ["Foundation", "Structure", "Interior work", "Finishing"] },
   mainImagePath: String,
   additionalImagePaths: [String],
-<<<<<<< Updated upstream
-=======
   milestones: [
     {
       percentage: { type: Number, required: true, min: 0, max: 100 },
@@ -373,11 +459,18 @@ const constructionProjectSchema = new mongoose.Schema({
       approvedAt: { type: Date },
       isCheckpoint: { type: Boolean, default: false },
       needsRevision: { type: Boolean, default: false },
-      customerFeedback: { type: String },
-      feedbackAt: { type: Date },
+      customerFeedback: { type: String, default: '' },
+      conversation: [
+        {
+          sender: { type: String, enum: ['company', 'customer'], required: true },
+          message: { type: String, required: true },
+          timestamp: { type: Date, default: Date.now },
+          viewedByCompany: { type: Boolean, default: false },
+          viewedByCustomer: { type: Boolean, default: false }
+        }
+      ]
     },
   ],
->>>>>>> Stashed changes
   recentUpdates: [
     {
       updateText: String,
@@ -385,6 +478,12 @@ const constructionProjectSchema = new mongoose.Schema({
       createdAt: { type: Date, default: Date.now },
     },
   ],
+  completionImages: [{ type: String }],
+  customerReview: {
+    rating: { type: Number, min: 1, max: 5 },
+    reviewText: { type: String },
+    reviewDate: { type: Date }
+  },
   createdAt: { type: Date, default: Date.now },
   updatedAt: { type: Date, default: Date.now },
 });
@@ -428,6 +527,50 @@ const designRequestSchema = new mongoose.Schema({
     price: { type: Number },
     description: { type: String },
     sentAt: { type: Date }
+  },
+  projectUpdates: [
+    {
+      updateText: { type: String, required: true },
+      updateImage: { type: String },
+      createdAt: { type: Date, default: Date.now }
+    }
+  ],
+  milestones: [
+    {
+      percentage: { type: Number, required: true, min: 0, max: 100 },
+      description: { type: String, required: true },
+      status: { type: String, enum: ["Pending", "Approved", "Rejected", "Revision Requested", "Under Review"], default: "Pending" },
+      image: { type: String },
+      submittedAt: { type: Date, default: Date.now },
+      approvedAt: { type: Date },
+      rejectedAt: { type: Date },
+      rejectionReason: { type: String },
+      revisionRequestedAt: { type: Date },
+      revisionNotes: { type: String },
+      revisionHistory: [{
+        requestedAt: { type: Date },
+        notes: { type: String },
+        resubmittedAt: { type: Date }
+      }],
+      reportedToAdminAt: { type: Date },
+      adminReport: { type: String },
+      adminReviewNotes: { type: String }
+    }
+  ],
+  
+  // Review and Rating System
+  review: {
+    customerToWorker: {
+      rating: { type: Number, min: 1, max: 5 },
+      comment: { type: String },
+      submittedAt: { type: Date }
+    },
+    workerToCustomer: {
+      rating: { type: Number, min: 1, max: 5 },
+      comment: { type: String },
+      submittedAt: { type: Date }
+    },
+    isReviewCompleted: { type: Boolean, default: false }
   },
 });
 
@@ -589,6 +732,24 @@ const jobApplicationSchema = new mongoose.Schema(
   { timestamps: true }
 );
 const ChatRoom = require('./chatModel');
+// Complaint Schema
+const complaintSchema = new mongoose.Schema({
+  projectId: { type: mongoose.Schema.Types.ObjectId, ref: 'ConstructionProjectSchema', required: true },
+  milestone: { type: Number, enum: [0, 25, 50, 75, 100], required: true },
+  senderType: { type: String, enum: ['company', 'customer'], required: true },
+  senderId: { type: mongoose.Schema.Types.ObjectId, required: true },
+  message: { type: String, required: true },
+  isViewed: { type: Boolean, default: false },
+  replies: [
+    {
+      adminId: { type: mongoose.Schema.Types.ObjectId, ref: 'Admin' },
+      message: { type: String, required: true },
+      createdAt: { type: Date, default: Date.now }
+    }
+  ],
+  createdAt: { type: Date, default: Date.now }
+});
+
 // Models
 module.exports = {
   Customer: mongoose.model('Customer', customerSchema),
@@ -603,4 +764,5 @@ module.exports = {
   // EXPORT THE NEW FAVORITE DESIGN MODEL
   FavoriteDesign: mongoose.model('FavoriteDesign', favoriteDesignSchema),
   ChatRoom: ChatRoom,
+  Complaint: mongoose.model('Complaint', complaintSchema),
 };

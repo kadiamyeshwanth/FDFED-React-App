@@ -14,6 +14,7 @@ const projectRoutes = require("./routes/projectRoutes");
 const workerRoutes = require("./routes/workerRoutes");
 const adminRoutes = require("./routes/adminRoutes");
 const chatRoutes = require("./routes/chatRoutes");
+const complaintRoutes = require("./routes/complaintRoutes");
 
 const { PORT } = require("./config/constants");
 const { ChatRoom } = require("./models");
@@ -148,6 +149,7 @@ app.use('/api', workerRoutes);
 app.use('/api', projectRoutes);
 app.use('/api', adminRoutes);
 app.use('/api', chatRoutes);
+app.use("/api/complaints", complaintRoutes);
 
 server.listen(PORT, () => {
   console.log(`Server running at http://localhost:${PORT}`);
