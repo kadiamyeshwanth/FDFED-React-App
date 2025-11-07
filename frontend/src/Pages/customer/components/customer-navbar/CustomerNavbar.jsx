@@ -35,9 +35,14 @@ const CustomerNavbar = () => {
             </Link>
           </div>
 
-          <div className="customer_navbar_navItem">
+          {/* <div className="customer_navbar_navItem">
             <Link to="/design_ideas" className="customer_navbar_navLink">
               DESIGN IDEAS
+            </Link>
+          </div> */}
+          <div className="customer_navbar_navItem">
+            <Link to="/job_status" className="customer_navbar_navLink">
+              JOB STATUS
             </Link>
           </div>
         </div>

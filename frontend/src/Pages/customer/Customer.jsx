@@ -1,12 +1,12 @@
+// src/Pages/customer/Customer.jsx
 import CustomerNavbar from "./components/customer-navbar/CustomerNavbar";
+import CustomerHome from "./components/customer-home/CustomerHome";
 
 const Customer = () => {
   return (
     <>
       <CustomerNavbar />
-      <main style={{ padding: "2rem" }}>
-        <h1>Customer Dashboard</h1>
-      </main>
+      <CustomerHome />
     </>
   );
 };
