@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useHistory } from 'react-router-dom';
 import './RevenueForm.css';
 
+
 const RevenueForm = () => {
   const { id } = useParams(); // Revenue ID for editing
   const history = useHistory();

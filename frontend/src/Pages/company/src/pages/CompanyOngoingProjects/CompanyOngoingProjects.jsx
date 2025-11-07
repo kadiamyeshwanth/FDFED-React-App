@@ -19,6 +19,7 @@ const CompanyOngoingProjects = () => {
     fetchProjects();
   }, []);
 
+  
   const fetchProjects = async () => {
     setLoading(true);
     try {

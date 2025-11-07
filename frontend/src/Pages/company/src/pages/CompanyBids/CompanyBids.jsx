@@ -14,6 +14,7 @@ const CompanyBids = () => {
 
   const bidsPerPage = 10;
 
+  
   // Fetch bids
   useEffect(() => {
     fetchBids();
