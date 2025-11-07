@@ -26,6 +26,7 @@ const AdminDashboard = () => {
   const [activeTab, setActiveTab] = useState("customers");
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
+  const [unviewedComplaints, setUnviewedComplaints] = useState({});
 
   const fetchDashboard = async () => {
     setLoading(true);
@@ -36,6 +37,21 @@ const AdminDashboard = () => {
       // controller returns { counts, stats, data }
       setData(json);
       setError(null);
+      
+      // Fetch unviewed complaints count
+      try {
+        const complaintsRes = await fetch(`/api/complaints/unviewed/count`);
+        const complaintsData = await complaintsRes.json();
+        if (complaintsData.success) {
+          const complaintsMap = {};
+          complaintsData.unviewedByProject.forEach(item => {
+            complaintsMap[item._id] = item.count;
+          });
+          setUnviewedComplaints(complaintsMap);
+        }
+      } catch (err) {
+        console.error('Error fetching unviewed complaints:', err);
+      }
     } catch (err) {
       setError(err.message || "Failed to load dashboard");
     } finally {
@@ -109,6 +125,27 @@ const AdminDashboard = () => {
 
   const { counts, stats } = data;
 
+  // Helper: check if there are pending companies or workers
+  const hasPendingCompanies = (data.data.companies || []).some(c => c.status === 'pending');
+  const hasPendingWorkers = (data.data.workers || []).some(w => w.status === 'pending');
+
+  // Handler: verify/reject company/worker
+  const handleVerifyReject = async (type, id, action) => {
+    if (!window.confirm(`Are you sure you want to ${action} this ${type}?`)) return;
+    try {
+      const res = await fetch(`/api/admin/${action}-${type}/${id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+      });
+      const json = await res.json();
+      if (!res.ok) throw new Error(json.error || `${action} failed`);
+      await fetchDashboard();
+      alert(json.message || `${action.charAt(0).toUpperCase() + action.slice(1)}d`);
+    } catch (err) {
+      alert(`Error: ${err.message}`);
+    }
+  };
+
   return (
     <div className="dashboard-container">
       <header className="header">
@@ -166,8 +203,23 @@ const AdminDashboard = () => {
               setSearch("");
               setStatusFilter("all");
             }}
+            style={{ position: 'relative' }}
           >
             Companies ({data.data.companies?.length ?? 0})
+            {hasPendingCompanies && (
+              <span style={{
+                position: 'absolute',
+                top: 6,
+                right: 8,
+                backgroundColor: '#dc3545',
+                color: 'white',
+                borderRadius: '50%',
+                width: 10,
+                height: 10,
+                border: '2px solid white',
+                display: 'inline-block',
+              }} />
+            )}
           </button>
           <button
             className={`tab-btn ${activeTab === "workers" ? "active" : ""}`}
@@ -176,8 +228,23 @@ const AdminDashboard = () => {
               setSearch("");
               setStatusFilter("all");
             }}
+            style={{ position: 'relative' }}
           >
             Workers ({data.data.workers?.length ?? 0})
+            {hasPendingWorkers && (
+              <span style={{
+                position: 'absolute',
+                top: 6,
+                right: 8,
+                backgroundColor: '#dc3545',
+                color: 'white',
+                borderRadius: '50%',
+                width: 10,
+                height: 10,
+                border: '2px solid white',
+                display: 'inline-block',
+              }} />
+            )}
           </button>
           <button
             className={`tab-btn ${
@@ -200,9 +267,22 @@ const AdminDashboard = () => {
               setSearch("");
               setStatusFilter("all");
             }}
+            style={{ position: 'relative' }}
           >
-            Construction Projects ({data.data.constructionProjects?.length ?? 0}
-            )
+            Construction Projects ({data.data.constructionProjects?.length ?? 0})
+            {Object.keys(unviewedComplaints).length > 0 && (
+              <span style={{
+                position: 'absolute',
+                top: '5px',
+                right: '5px',
+                backgroundColor: '#dc3545',
+                color: 'white',
+                borderRadius: '50%',
+                width: '10px',
+                height: '10px',
+                border: '2px solid white'
+              }} />
+            )}
           </button>
           <button
             className={`tab-btn ${
@@ -340,6 +420,7 @@ const AdminDashboard = () => {
                     <th>Location</th>
                     <th>Size</th>
                     <th>Projects Completed</th>
+                    <th>Status</th>
                     <th>Actions</th>
                   </tr>
                 </thead>
@@ -354,12 +435,33 @@ const AdminDashboard = () => {
                       <td>{c.size || "N/A"}</td>
                       <td>{c.projectsCompleted || 0}</td>
                       <td>
+                        <span className={`badge ${c.status}`}>{c.status}</span>
+                      </td>
+                      <td>
                         <button
                           className="action-btn view"
                           onClick={() => navigate(`/admin/company/${c._id}`)}
                         >
                           View
                         </button>
+                        {c.status === 'pending' && (
+                          <>
+                            <button
+                              className="action-btn verify"
+                              style={{ background: '#28a745', color: 'white', marginLeft: 4 }}
+                              onClick={() => handleVerifyReject('company', c._id, 'verify')}
+                            >
+                              Verify
+                            </button>
+                            <button
+                              className="action-btn reject"
+                              style={{ background: '#dc3545', color: 'white', marginLeft: 4 }}
+                              onClick={() => handleVerifyReject('company', c._id, 'reject')}
+                            >
+                              Reject
+                            </button>
+                          </>
+                        )}
                         <button
                           className="action-btn delete"
                           onClick={() => handleDelete("company", c._id)}
@@ -389,6 +491,7 @@ const AdminDashboard = () => {
                     <th>Rating</th>
                     <th>Availability</th>
                     <th>Is Architect</th>
+                    <th>Status</th>
                     <th>Actions</th>
                   </tr>
                 </thead>
@@ -411,12 +514,33 @@ const AdminDashboard = () => {
                       </td>
                       <td>{w.isArchitect ? "Yes" : "No"}</td>
                       <td>
+                        <span className={`badge ${w.status}`}>{w.status}</span>
+                      </td>
+                      <td>
                         <button
                           className="action-btn view"
                           onClick={() => navigate(`/admin/worker/${w._id}`)}
                         >
                           View
                         </button>
+                        {w.status === 'pending' && (
+                          <>
+                            <button
+                              className="action-btn verify"
+                              style={{ background: '#28a745', color: 'white', marginLeft: 4 }}
+                              onClick={() => handleVerifyReject('worker', w._id, 'verify')}
+                            >
+                              Verify
+                            </button>
+                            <button
+                              className="action-btn reject"
+                              style={{ background: '#dc3545', color: 'white', marginLeft: 4 }}
+                              onClick={() => handleVerifyReject('worker', w._id, 'reject')}
+                            >
+                              Reject
+                            </button>
+                          </>
+                        )}
                         <button
                           className="action-btn delete"
                           onClick={() => handleDelete("worker", w._id)}
@@ -511,7 +635,27 @@ const AdminDashboard = () => {
                 <tbody>
                   {filteredData.map((p) => (
                     <tr key={p._id} data-status={p.status}>
-                      <td>{p.projectName}</td>
+                      <td>
+                        {p.projectName}
+                        {unviewedComplaints[p._id] && (
+                          <span style={{
+                            marginLeft: '8px',
+                            backgroundColor: '#dc3545',
+                            color: 'white',
+                            borderRadius: '50%',
+                            width: '20px',
+                            height: '20px',
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            fontSize: '11px',
+                            fontWeight: 'bold',
+                            verticalAlign: 'middle'
+                          }}>
+                            {unviewedComplaints[p._id]}
+                          </span>
+                        )}
+                      </td>
                       <td>{p.customerName || p.customerId?.name}</td>
                       <td>{p.buildingType}</td>
                       <td>{p.totalArea} sq ft</td>
