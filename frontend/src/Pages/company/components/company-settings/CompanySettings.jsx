@@ -2,6 +2,11 @@
 import React, { useEffect, useState, useRef } from "react";
 import axios from 'axios';
 import "./CompanySettings.css";
+import Sidebar from "./components/Sidebar";
+import WorkerProfile from "./components/WorkerProfile";
+import CustomerProfile from "./components/CustomerProfile";
+import SecuritySection from "./components/SecuritySection";
+import HelpCenter from "./components/HelpCenter";
 
 const API_GET = "http://localhost:3000/api/companysettings";
 const API_POST_UPDATE = "http://localhost:3000/api/update-company-profile";
@@ -399,31 +404,12 @@ export default function CompanySettings() {
         </header>
 
         <div className="cs-grid">
-          <aside className="cs-sidebar">
-            <nav className="cs-nav">
-              <button className={`cs-nav-link ${activeSection === "profile" ? "active" : ""}`} onClick={() => openSection("profile")}>
-                <i className="fas fa-building" /> Company Profile
-              </button>
-              <button className={`cs-nav-link ${activeSection === "security" ? "active" : ""}`} onClick={() => openSection("security")}>
-                <i className="fas fa-lock" /> Security
-              </button>
-              <button className={`cs-nav-link ${activeSection === "help" ? "active" : ""}`} onClick={() => openSection("help")}>
-                <i className="fas fa-question-circle" /> Help Center
-              </button>
-              <button
-                className="cs-nav-link cs-nav-link-logout"
-                onClick={async() => {
-                  await axios.get("/api/logout", {}, { withCredentials: true });
-                  window.location.href = "http://localhost:5173/";
-                }}
-              >
-              <i className="fas fa-sign-out-alt" /> Logout
-              </button>
-            </nav>
-          </aside>
+          <Sidebar 
+            activeSection={activeSection}
+            onSectionChange={openSection}
+          />
 
           <main className="cs-content">
-            {/* PROFILE SECTION */}
             <section className={`cs-section ${activeSection === "profile" ? "cs-active" : ""}`}>
               <div className="cs-profile-tabs">
                 <button
@@ -440,307 +426,52 @@ export default function CompanySettings() {
                 </button>
               </div>
 
-              {/* WORKER PROFILE DISPLAY */}
               <div className={`cs-profile-content ${activeProfileTab === "worker" ? "cs-visible" : ""}`}>
-                {!editingWorker ? (
-                  <div className="cs-display">
-                    <div className="cs-row">
-                      <label>Company Name</label>
-                      <p>{company.workerProfile.name}</p>
-                    </div>
-                    <div className="cs-row">
-                      <label>Location</label>
-                      <p>{company.workerProfile.location}</p>
-                    </div>
-                    <div className="cs-row">
-                      <label>Company Size</label>
-                      <p>{company.workerProfile.size}</p>
-                    </div>
-                    <div className="cs-row">
-                      <label>Specializations</label>
-                      <div className="cs-tags">
-                        {(company.workerProfile.specializations || []).map((s, i) => (
-                          <span className="cs-tag" key={i}>{s}</span>
-                        ))}
-                      </div>
-                    </div>
-                    <div className="cs-row">
-                      <label>Current Openings</label>
-                      <div>
-                        {(company.workerProfile.currentOpenings || []).map((op, i) => (
-                          <div className="cs-opening" key={i}>{op}</div>
-                        ))}
-                      </div>
-                    </div>
-                    <div className="cs-row">
-                      <label>About the Company</label>
-                      <p>{company.workerProfile.about}</p>
-                    </div>
-                    <div className="cs-row">
-                      <label>Why Join Our Team?</label>
-                      <p>{company.workerProfile.whyJoin}</p>
-                    </div>
-
-                    <div className="cs-actions">
-                      <button className="cs-btn-primary" onClick={() => setEditingWorker(true)}>Edit Worker Profile</button>
-                    </div>
-                  </div>
-                ) : (
-                  <form className="cs-form" onSubmit={submitWorkerProfile}>
-                    <div className="cs-form-row">
-                      <label>Company Name</label>
-                      <input type="text" className="cs-input" name="companyName" value={workerForm.companyName} readOnly />
-                    </div>
-                    <div className="cs-form-row">
-                      <label>Location</label>
-                      <input className="cs-input" name="companyLocation" value={workerForm.companyLocation} onChange={handleWorkerChange} required />
-                    </div>
-                    <div className="cs-form-row">
-                      <label>Company Size</label>
-                      <select name="companySize" className="cs-input" value={workerForm.companySize} onChange={handleWorkerChange} required>
-                        <option value="">Select size</option>
-                        <option value="1-10">1-10</option>
-                        <option value="11-50">11-50</option>
-                        <option value="51-200">51-200</option>
-                        <option value="201-1000">201-1000</option>
-                        <option value="1000+">1000+</option>
-                      </select>
-                    </div>
-
-                    <div className="cs-form-row">
-                      <label>Specializations (comma separated)</label>
-                      <input className="cs-input" name="specializations" value={workerForm.specializations} onChange={handleWorkerChange} />
-                    </div>
-
-                    <div className="cs-form-row">
-                      <label>Current Openings</label>
-                      <div className="cs-dynamic-list">
-                        {workerForm.currentOpenings.map((op, i) => (
-                          <div key={i} className="cs-dynamic-row">
-                            <input className="cs-input" value={op} onChange={(e) => updateOpening(i, e.target.value)} />
-                            <button type="button" className="cs-btn-danger" onClick={() => removeOpening(i)}>Remove</button>
-                          </div>
-                        ))}
-                        <button type="button" className="cs-btn-secondary" onClick={addOpening}>+ Add Opening</button>
-                      </div>
-                    </div>
-
-                    <div className="cs-form-row">
-                      <label>About the Company</label>
-                      <textarea className="cs-textarea" name="aboutCompany" value={workerForm.aboutCompany} onChange={handleWorkerChange} />
-                    </div>
-
-                    <div className="cs-form-row">
-                      <label>Why Join Our Team?</label>
-                      <textarea className="cs-textarea" name="whyJoinUs" value={workerForm.whyJoinUs} onChange={handleWorkerChange} />
-                    </div>
-
-                    <div className="cs-actions">
-                      <button type="button" className="cs-btn-secondary" onClick={() => { setEditingWorker(false); /* reset to server values */ fetchCompany(); }}>Cancel</button>
-                      <button type="submit" className="cs-btn-primary">Save Changes</button>
-                    </div>
-                  </form>
-                )}
+                <WorkerProfile
+                  isVisible={activeProfileTab === "worker"}
+                  isEditing={editingWorker}
+                  company={company}
+                  workerForm={workerForm}
+                  onEdit={() => setEditingWorker(true)}
+                  onChange={handleWorkerChange}
+                  onSubmit={submitWorkerProfile}
+                  onCancel={() => { setEditingWorker(false); fetchCompany(); }}
+                  onAddOpening={addOpening}
+                  onUpdateOpening={updateOpening}
+                  onRemoveOpening={removeOpening}
+                />
               </div>
 
-              {/* CUSTOMER PROFILE DISPLAY / EDIT */}
               <div className={`cs-profile-content ${activeProfileTab === "customer" ? "cs-visible" : ""}`}>
-                {!editingCustomer ? (
-                  <div className="cs-display">
-                    <div className="cs-row">
-                      <label>Company Name</label>
-                      <p>{company.customerProfile.name}</p>
-                    </div>
-                    <div className="cs-row">
-                      <label>Location</label>
-                      <p>{company.customerProfile.location}</p>
-                    </div>
-                    <div className="cs-row">
-                      <label>Projects Completed</label>
-                      <p>{company.customerProfile.projectsCompleted}</p>
-                    </div>
-                    <div className="cs-row">
-                      <label>Years in Business</label>
-                      <p>{company.customerProfile.yearsInBusiness}</p>
-                    </div>
-                    <div className="cs-row">
-                      <label>About Company For Customers</label>
-                      <p>{company.customerProfile.about}</p>
-                    </div>
-
-                    <div className="cs-row">
-                      <label>Team Members</label>
-                      <div>
-                        {(company.customerProfile.teamMembers || []).map((m, i) => (
-                          <div className="cs-team-item" key={i}>
-                            {m.image && <img src={m.image} alt={m.name} className="cs-team-img" />}
-                            <div className="cs-team-info">
-                              <strong>{m.name}</strong>
-                              <div className="cs-muted">{m.position}</div>
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-
-                    <div className="cs-row">
-                      <label>Completed Projects</label>
-                      <div>
-                        {(company.customerProfile.completedProjects || []).map((p, i) => (
-                          <div className="cs-project-item" key={i}>
-                            {p.image && <img src={p.image} alt={p.title} className="cs-project-img" />}
-                            <div className="cs-project-info">
-                              <strong>{p.title}</strong>
-                              <div className="cs-muted">{p.description}</div>
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-
-                    <div className="cs-row">
-                      <label>Did You Know?</label>
-                      <div className="cs-did-you-know">{company.customerProfile.didYouKnow}</div>
-                    </div>
-
-                    <div className="cs-actions">
-                      <button className="cs-btn-primary" onClick={() => setEditingCustomer(true)}>Edit Customer Profile</button>
-                    </div>
-                  </div>
-                ) : (
-                  <form className="cs-form" onSubmit={submitCustomerProfile}>
-                    <div className="cs-form-row">
-                      <label>Company Name</label>
-                      <input className="cs-input" value={customerForm.companyName} readOnly />
-                    </div>
-
-                    <div className="cs-form-row">
-                      <label>Location</label>
-                      <input className="cs-input" name="companyLocation" value={customerForm.companyLocation} onChange={handleCustomerChange} />
-                    </div>
-
-                    <div className="cs-form-row">
-                      <label>Projects Completed</label>
-                      <input type="number" className="cs-input" name="projectsCompleted" value={customerForm.projectsCompleted} onChange={(e) => setCustomerForm(prev => ({ ...prev, projectsCompleted: e.target.value }))} />
-                    </div>
-
-                    <div className="cs-form-row">
-                      <label>Years in Business</label>
-                      <input type="number" className="cs-input" name="yearsInBusiness" value={customerForm.yearsInBusiness} onChange={(e) => setCustomerForm(prev => ({ ...prev, yearsInBusiness: e.target.value }))} />
-                    </div>
-
-                    <div className="cs-form-row">
-                      <label>About the Company</label>
-                      <textarea className="cs-textarea" name="customerAboutCompany" value={customerForm.customerAboutCompany} onChange={handleCustomerChange} />
-                    </div>
-
-                    <div className="cs-form-row">
-                      <label>Team Members</label>
-                      <div className="cs-dynamic-list">
-                        {customerForm.teamMembers.map((member, idx) => (
-                          <div key={idx} className="cs-dynamic-row cs-team-edit-row">
-                            <div className="cs-team-edit-left">
-                              <img className="cs-team-img" src={member.image || "https://via.placeholder.com/60"} alt={member.name || "member"} />
-                              <input type="file" onChange={(e) => handleTeamFileChange(e, idx)} />
-                            </div>
-                            <div className="cs-team-edit-right">
-                              <input className="cs-input" placeholder="Name" value={member.name || ""} onChange={(e) => updateTeamMember(idx, "name", e.target.value)} />
-                              <input className="cs-input" placeholder="Position" value={member.position || ""} onChange={(e) => updateTeamMember(idx, "position", e.target.value)} />
-                              <div className="cs-team-row-actions">
-                                <button type="button" className="cs-btn-danger" onClick={() => removeTeamMember(idx)}>Remove</button>
-                              </div>
-                            </div>
-                          </div>
-                        ))}
-                        <div>
-                          <button type="button" className="cs-btn-secondary" onClick={addTeamMember}>+ Add Team Member</button>
-                        </div>
-                      </div>
-                    </div>
-
-                    <div className="cs-form-row">
-                      <label>Completed Projects</label>
-                      <div className="cs-dynamic-list">
-                        {customerForm.completedProjects.map((proj, idx) => (
-                          <div key={idx} className="cs-dynamic-row cs-project-edit-row">
-                            <div className="cs-project-edit-left">
-                              <img className="cs-project-img" src={proj.image || "https://via.placeholder.com/120x80"} alt={proj.title || "project"} />
-                              <input type="file" onChange={(e) => handleProjectFileChange(e, idx)} />
-                            </div>
-                            <div className="cs-project-edit-right">
-                              <input className="cs-input" placeholder="Title" value={proj.title || ""} onChange={(e) => updateProject(idx, "title", e.target.value)} />
-                              <textarea className="cs-textarea" placeholder="Description" value={proj.description || ""} onChange={(e) => updateProject(idx, "description", e.target.value)} />
-                              <div className="cs-team-row-actions">
-                                <button type="button" className="cs-btn-danger" onClick={() => removeProject(idx)}>Remove</button>
-                              </div>
-                            </div>
-                          </div>
-                        ))}
-                        <div>
-                          <button type="button" className="cs-btn-secondary" onClick={addProject}>+ Add Project</button>
-                        </div>
-                      </div>
-                    </div>
-
-                    <div className="cs-form-row">
-                      <label>Did You Know?</label>
-                      <textarea className="cs-textarea" name="didYouKnow" value={customerForm.didYouKnow} onChange={handleCustomerChange} />
-                    </div>
-
-                    <div className="cs-actions">
-                      <button type="button" className="cs-btn-secondary" onClick={() => { setEditingCustomer(false); fetchCompany(); }}>Cancel</button>
-                      <button type="submit" className="cs-btn-primary">Save Changes</button>
-                    </div>
-                  </form>
-                )}
+                <CustomerProfile
+                  isVisible={activeProfileTab === "customer"}
+                  isEditing={editingCustomer}
+                  company={company}
+                  customerForm={customerForm}
+                  onEdit={() => setEditingCustomer(true)}
+                  onChange={handleCustomerChange}
+                  onSubmit={submitCustomerProfile}
+                  onCancel={() => { setEditingCustomer(false); fetchCompany(); }}
+                  onAddTeamMember={addTeamMember}
+                  onUpdateTeamMember={updateTeamMember}
+                  onRemoveTeamMember={removeTeamMember}
+                  onAddProject={addProject}
+                  onUpdateProject={updateProject}
+                  onRemoveProject={removeProject}
+                  onTeamFileChange={handleTeamFileChange}
+                  onProjectFileChange={handleProjectFileChange}
+                />
               </div>
             </section>
 
-            {/* SECURITY SECTION */}
-            <section className={`cs-section ${activeSection === "security" ? "cs-active" : ""}`}>
-              <h2 className="cs-section-title">Security Settings</h2>
-              <form className="cs-form" onSubmit={submitSecurity}>
-                <div className="cs-form-row">
-                  <label>Current Password</label>
-                  <input type="password" name="currentPassword" className="cs-input" value={securityForm.currentPassword} onChange={handleSecurityChange} required />
-                </div>
-                <div className="cs-form-row">
-                  <label>New Password</label>
-                  <input type="password" name="newPassword" className="cs-input" value={securityForm.newPassword} onChange={handleSecurityChange} required />
-                </div>
-                <div className="cs-form-row">
-                  <label>Confirm New Password</label>
-                  <input type="password" name="confirmPassword" className="cs-input" value={securityForm.confirmPassword} onChange={handleSecurityChange} required />
-                </div>
-                <div className="cs-actions">
-                  <button type="submit" className="cs-btn-primary">Update Password</button>
-                </div>
-              </form>
-            </section>
+            <SecuritySection
+              activeSection={activeSection}
+              securityForm={securityForm}
+              onSecurityChange={handleSecurityChange}
+              onSecuritySubmit={submitSecurity}
+            />
 
-            {/* HELP CENTER */}
-            <section className={`cs-section ${activeSection === "help" ? "cs-active" : ""}`}>
-              <h2 className="cs-section-title">Help Center</h2>
-              <div className="cs-faq">
-                <div className="cs-did-you-know">
-                  <strong>How do I create a new project?</strong>
-                  <p>Go to the Dashboard and click the "New Project" button in the top right corner.</p>
-                </div>
-                <div className="cs-did-you-know">
-                  <strong>How do I invite team members?</strong>
-                  <p>Navigate to your project, click the "Team" tab, and use the "Invite Member" button.</p>
-                </div>
-                <div className="cs-did-you-know">
-                  <strong>How can I track my project's budget?</strong>
-                  <p>Use the "Finances" tab within your project to track expenses and compare with your budget.</p>
-                </div>
-                <div className="cs-actions">
-                  <button className="cs-btn-primary">Contact Support</button>
-                </div>
-              </div>
-            </section>
-
-            {/* LOGOUT is provided in sidebar as <a href="/logout"> */}
+            <HelpCenter activeSection={activeSection} />
           </main>
         </div>
       </div>
