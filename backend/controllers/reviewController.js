@@ -32,6 +32,10 @@ const submitCustomerReview = async (req, res) => {
     }
 
     // Check if all milestones are at 100%
+    if (!project.milestones || project.milestones.length === 0) {
+      return res.status(400).json({ error: 'Project has no milestones defined yet.' });
+    }
+    
     const totalProgress = project.milestones.reduce((sum, m) => m.status === 'Approved' ? sum + m.percentage : sum, 0);
     if (totalProgress < 100) {
       return res.status(400).json({ error: 'Cannot submit review until project is 100% complete.' });
@@ -94,7 +98,8 @@ const submitCustomerReview = async (req, res) => {
     });
   } catch (error) {
     console.error('Error submitting customer review:', error);
-    res.status(500).json({ error: 'Server error while submitting review.' });
+    console.error('Error stack:', error.stack);
+    res.status(500).json({ error: 'Server error while submitting review.', details: error.message });
   }
 };
 
@@ -130,6 +135,10 @@ const submitWorkerReview = async (req, res) => {
     }
 
     // Check if all milestones are at 100%
+    if (!project.milestones || project.milestones.length === 0) {
+      return res.status(400).json({ error: 'Project has no milestones defined yet.' });
+    }
+    
     const totalProgress = project.milestones.reduce((sum, m) => m.status === 'Approved' ? sum + m.percentage : sum, 0);
     if (totalProgress < 100) {
       return res.status(400).json({ error: 'Cannot submit review until project is 100% complete.' });
@@ -192,7 +201,8 @@ const submitWorkerReview = async (req, res) => {
     });
   } catch (error) {
     console.error('Error submitting worker review:', error);
-    res.status(500).json({ error: 'Server error while submitting review.' });
+    console.error('Error stack:', error.stack);
+    res.status(500).json({ error: 'Server error while submitting review.', details: error.message });
   }
 };
 

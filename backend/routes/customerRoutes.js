@@ -21,8 +21,14 @@ const {
   saveFavoriteDesign,
   removeFavoriteDesign,
   acceptProposal,
-  acceptCompanyBid,acceptCompanyProposal,updatePassword
+  acceptCompanyBid,acceptCompanyProposal,updatePassword,
+  approveMilestone,
+  rejectMilestone,
+  requestMilestoneRevision,
+  reportMilestoneToAdmin
 } = require("../controllers/customerController");
+
+const { submitCustomerReview, getProjectReviewStatus } = require('../controllers/reviewController');
 const {upload} = require('../middlewares/upload')
 const auth = require('../middlewares/auth'); // Import authentication middleware
 
@@ -64,4 +70,13 @@ router.get('/customer/accept-proposal/:type/:id', auth, acceptProposal);
 router.get('/customer/accept-bid/:bidId/:companyBidId', auth, acceptCompanyBid);
 router.get('/customer/accept-company-proposal/:projectId', auth, acceptCompanyProposal);
 router.post('/customer/password/update', auth, updatePassword);
+router.post('/customer/milestone/approve/:projectId/:milestoneId', auth, approveMilestone);
+router.post('/customer/milestone/reject/:projectId/:milestoneId', auth, rejectMilestone);
+router.post('/customer/milestone/request-revision/:projectId/:milestoneId', auth, requestMilestoneRevision);
+router.post('/customer/milestone/report-to-admin/:projectId/:milestoneId', auth, reportMilestoneToAdmin);
+
+// Review routes
+router.post('/customer/review', auth, submitCustomerReview);
+router.get('/customer/review-status/:projectType/:projectId', auth, getProjectReviewStatus);
+
 module.exports = router;

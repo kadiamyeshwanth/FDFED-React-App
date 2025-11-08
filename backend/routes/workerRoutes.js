@@ -26,6 +26,8 @@ const {
     submitMilestone
 } = require('../controllers/workerController');
 
+const { submitWorkerReview, getProjectReviewStatus } = require('../controllers/reviewController');
+
 const isAuthenticated = require('../middlewares/auth');
 const { upload } = require('../middlewares/upload');
 
@@ -69,4 +71,9 @@ router.post('/worker/submit-proposal', isAuthenticated, submitProposal);
 router.post('/worker/password/update', isAuthenticated, updatePassword);
 router.post('/worker/leave-company', isAuthenticated, leaveCompany);
 router.post('/worker/submit-milestone', isAuthenticated, upload.single('image'), submitMilestone);
+
+// Review routes
+router.post('/worker/review', isAuthenticated, submitWorkerReview);
+router.get('/worker/review-status/:projectType/:projectId', isAuthenticated, getProjectReviewStatus);
+
 module.exports = router;
