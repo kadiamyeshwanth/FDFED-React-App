@@ -1,0 +1,110 @@
+/* Dark Mode Theme Variables */
+:root {
+  --primary-accent: #2DD4BF;
+  --content-dark: #1F2937;
+  --border-dark: #374151;
+  --text-primary: #F9FAFB;
+  --text-secondary: #9CA3AF;
+}
+
+.navbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 2.5rem;
+  background-color: var(--content-dark);
+  height: 70px;
+  color: var(--text-primary);
+  position: sticky;
+  top: 0;
+  max-width: 100vw;
+  box-shadow: none;
+  border-bottom: 1px solid var(--border-dark);
+  z-index: 1000;
+  font-family: 'Poppins', sans-serif;
+}
+
+.brand {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  text-decoration: none;
+}
+
+.brand a {
+  color: inherit;
+  text-decoration: none;
+}
+
+.nav-links {
+  display: flex;
+  gap: 2.5rem;
+}
+
+.nav-links a {
+  color: var(--text-secondary);
+  text-decoration: none;
+  font-size: 1rem;
+  font-weight: 500;
+  transition: color 0.3s ease;
+  position: relative;
+  padding: 0.5rem 0;
+}
+
+.nav-links a::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 2px;
+  background-color: var(--primary-accent);
+  transform: scaleX(0);
+  transform-origin: center;
+  transition: transform 0.3s ease-out;
+}
+
+.nav-links a:hover,
+.nav-links a.active {
+  color: var(--primary-accent);
+}
+
+.nav-links a:hover::after,
+.nav-links a.active::after {
+  transform: scaleX(1);
+}
+
+.nav_settings-container {
+  display: flex;
+  align-items: center;
+}
+
+.nav_settings-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.5rem;
+  border-radius: 50%;
+  transition: background-color 0.3s ease;
+  text-decoration: none;
+}
+
+.nav_settings-btn:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+.nav_settings-icon {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background-color: var(--border-dark);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.nav_settings-svg {
+  width: 18px;
+  height: 18px;
+  fill: var(--text-secondary);
+}
