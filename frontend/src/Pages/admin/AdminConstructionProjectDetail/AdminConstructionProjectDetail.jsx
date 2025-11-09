@@ -624,4 +624,5 @@ const AdminConstructionProjectDetail = () => {
   );
 };
 
+
 export default AdminConstructionProjectDetail;
