@@ -140,13 +140,14 @@ app.get("/platformadmindashboard", (req, res) => {
   res.status(200).json({ view: "platform_admin/platform_admin_dashboard" });
 });
 
-app.use(authRoutes);
-app.use(customerRoutes);
-app.use(companyRoutes);
-app.use(projectRoutes);
-app.use(workerRoutes);
-app.use(adminRoutes);
-app.use(chatRoutes);
+// app.js
+app.use('/api', authRoutes);           // → /api/signup, /api/login
+app.use('/api', customerRoutes);
+app.use('/api', companyRoutes);
+app.use('/api', workerRoutes);
+app.use('/api', projectRoutes);
+app.use('/api', adminRoutes);
+app.use('/api', chatRoutes);
 
 server.listen(PORT, () => {
   console.log(`Server running at http://localhost:${PORT}`);

@@ -6,6 +6,7 @@ const worker = () => {
   return (
     <div>
       <WorkerNavbar />
+      In Worker
     </div>
   )
 }
