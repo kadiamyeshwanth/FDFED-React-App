@@ -37,7 +37,6 @@ const submitArchitect = async (req, res) => {
       completionDate,
     } = req.body;
 
-    // Validation...
     let parsedFloorRequirements = [];
     if (floorRequirements) {
       try {
@@ -156,14 +155,19 @@ const submitDesignRequest = async (req, res) => {
       designPreference,
       projectDescription,
       currentRoomImages,
-      customerId : customer,
+      customerId: customer,
       inspirationImages,
       workerId,
     });
     await designRequest.save();
-    res.status(201).json({ message: "Design request submitted successfully" ,success:true});
+    res
+      .status(201)
+      .json({
+        message: "Design request submitted successfully",
+        success: true,
+      });
   } catch (error) {
-    res.status(500).json({ error: "Server error" ,success:false});
+    res.status(500).json({ error: "Server error", success: false });
   }
 };
 
@@ -228,22 +232,18 @@ const submitConstructionForm = async (req, res) => {
       customerId,
     });
     await newProject.save();
-    res
-      .status(201)
-      .json({
-        success: true,
-        message: "Project submitted successfully",
-        projectId: newProject._id,
-      });
+    res.status(201).json({
+      success: true,
+      message: "Project submitted successfully",
+      projectId: newProject._id,
+    });
   } catch (error) {
     console.error("Error submitting project:", error);
-    res
-      .status(500)
-      .json({
-        success: false,
-        message: "Error submitting project",
-        error: error.message,
-      });
+    res.status(500).json({
+      success: false,
+      message: "Error submitting project",
+      error: error.message,
+    });
   }
 };
 
@@ -252,7 +252,8 @@ const getProjects = async (req, res) => {
     const projects = await ConstructionProjectSchema.find({
       status: "pending",
     }).lean();
-    res.render("projects", { projects });
+    // routed file : projects
+    res.status(200).json({ projects });
   } catch (error) {
     console.error("Error fetching projects:", error);
     res.status(500).json({ error: "Failed to fetch projects" });
@@ -275,11 +276,12 @@ const getProjectById = async (req, res) => {
 const getEditProject = async (req, res) => {
   try {
     const project = await ConstructionProjectSchema.findById(req.params.id);
-    if (!project) return res.status(404).send("Project not found");
-    res.render("company/addnewproject_form", { project });
+    if (!project) return res.status(404).json({ error: "Project not found" });
+    // routed file : company/addnewproject_form
+    res.status(200).json({ project });
   } catch (error) {
     console.error("Error fetching project:", error);
-    res.status(500).send("Server error");
+    res.status(500).json({ error: "Server error" });
   }
 };
 
@@ -335,7 +337,6 @@ const submitBid = async (req, res) => {
   try {
     const { bidPrice, bidId } = req.body;
     const companyId = req.user.user_id;
-    // Validation...
     const company = await Company.findById(companyId).session(session);
     if (!company) throw new Error("Company not found");
     const bidProject = await Bid.findById(bidId).session(session);
@@ -371,12 +372,19 @@ const submitBid = async (req, res) => {
 
     await session.commitTransaction();
     session.endSession();
-    res.redirect(`/companybids?bidId=${bidId}&success=bid_submitted`);
+    res.status(200).json({
+      success: true,
+      message: "Bid submitted successfully",
+      redirect: `/companybids?bidId=${bidId}&success=bid_submitted`,
+    });
   } catch (error) {
     await session.abortTransaction();
     session.endSession();
     console.error("Error submitting bid:", error);
-    res.redirect(`/companybids?error=server_error`);
+    res.status(500).json({
+      error: "Server error",
+      redirect: `/companybids?error=server_error`,
+    });
   }
 };
 
@@ -419,8 +427,6 @@ const declineBid = async (req, res) => {
     res.status(500).json({ error: "Server error" });
   }
 };
-
-// Add other project-related controllers like worker request accept/reject, etc.
 
 const acceptWorkerRequest = async (req, res) => {
   try {
