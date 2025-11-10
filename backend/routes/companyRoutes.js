@@ -23,7 +23,8 @@ router.get('/companybids', isAuthenticated, getBids);
 router.get('/companyrevenue', isAuthenticated, getCompanyRevenue);
 router.get('/my-employees', isAuthenticated, getEmployees);
 router.get('/revenue_form', isAuthenticated, (req, res) => {
-  res.render('company/revenue_form');
+  // routed file : company/revenue_form
+  res.status(200).json({ view: 'company/revenue_form' });
 });
 router.patch('/worker-request/:requestId', isAuthenticated, handleWorkerRequest);
 router.post('/update-company-profile', isAuthenticated, upload.any(), updateCompanyProfile);
