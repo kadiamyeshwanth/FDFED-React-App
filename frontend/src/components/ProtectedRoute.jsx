@@ -1,32 +1,18 @@
-import React, { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import React from "react";
+import { Navigate } from "react-router-dom";
 
 const ProtectedRoute = ({ role, children }) => {
-  const navigate = useNavigate();
-  const [loading, setLoading] = useState(true);
-  const [authenticated, setAuthenticated] = useState(false);
+  // FAKE AUTH — NO API CALL
+  const token = localStorage.getItem("token");
+  const userType = localStorage.getItem("userType");
 
-  useEffect(() => {
-    const checkAuth = async () => {
-      try {
-        const res = await fetch("/api/session", { credentials: "include" });
-        const data = await res.json();
-        if (data.authenticated && data.user.role === role) {
-          setAuthenticated(true);
-        } else {
-          navigate("/");
-        }
-      } catch {
-        navigate("/");
-      } finally {
-        setLoading(false);
-      }
-    };
-    checkAuth();
-  }, [role, navigate]);
+  // Allow access if fake token + correct role
+  if (token && userType === role) {
+    return children;
+  }
 
-  if (loading) return <div>Loading...</div>;
-  return authenticated ? children : null;
+  // Otherwise redirect to login
+  return <Navigate to="/" replace />;
 };
 
 export default ProtectedRoute;
