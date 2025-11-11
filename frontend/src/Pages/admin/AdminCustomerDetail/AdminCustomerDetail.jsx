@@ -26,6 +26,20 @@ const AdminCustomerDetail = () => {
     fetchCustomer();
   }, [id]);
 
+  
+  const fmtDate = (d) =>
+    d ? new Date(d).toLocaleDateString() : "Not specified";
+  const fmtDateTime = (d) =>
+    d
+      ? new Date(d).toLocaleString("en-US", {
+          year: "numeric",
+          month: "short",
+          day: "numeric",
+          hour: "2-digit",
+          minute: "2-digit",
+        })
+      : "Not specified";
+
   const handleDelete = async () => {
     if (
       !window.confirm(
@@ -50,19 +64,6 @@ const AdminCustomerDetail = () => {
   if (loading) return <div className="acc-loading">Loading customer…</div>;
   if (error) return <div className="acc-error">Error: {error}</div>;
   if (!customer) return <div className="acc-empty">Customer not found.</div>;
-
-  const fmtDate = (d) =>
-    d ? new Date(d).toLocaleDateString() : "Not specified";
-  const fmtDateTime = (d) =>
-    d
-      ? new Date(d).toLocaleString("en-US", {
-          year: "numeric",
-          month: "short",
-          day: "numeric",
-          hour: "2-digit",
-          minute: "2-digit",
-        })
-      : "Not specified";
 
   return (
     <div className="acc-container">
