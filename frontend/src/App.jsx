@@ -7,6 +7,8 @@ import Worker from "./Pages/worker/Worker";
 import Admin from "./Pages/admin/Admin"; // Assume you have Admin.jsx for admin login/dashboard
 import ProtectedRoute from "./components/ProtectedRoute";
 
+import "./App.css";
+
 const App = () => {
   return (
       <Routes>
