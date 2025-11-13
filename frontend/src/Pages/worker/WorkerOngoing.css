@@ -1,0 +1,7 @@
+.worker-ongoing-page{display:flex;gap:20px;padding:16px}
+.project-list-panel{flex:0 0 340px}
+.project-card{background:#fff;border:1px solid #eee;padding:12px;border-radius:8px;margin-bottom:12px}
+.project-card.active{border-left:4px solid #3498db}
+.project-details-panel{flex:1;background:#fff;border:1px solid #eee;padding:20px;border-radius:8px}
+.project-actions{margin-top:20px}
+.btn-complete{background:#27ae60;color:#fff;border:none;padding:10px 14px;border-radius:8px;cursor:pointer}
