@@ -1,0 +1,314 @@
+/* Worker Navbar Styles */
+
+.navbar {
+  position: sticky;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 60px;
+  background-color: #121639;
+  color: white;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 20px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.15);
+  z-index: 1000;
+  font-family: 'Poppins', sans-serif;
+}
+
+.navbar-left {
+  font-weight: bold;
+  font-size: 1.2rem;
+  color: white;
+  text-decoration: none;
+  transition: color 0.3s ease;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  cursor: pointer;
+  background: none;
+  border: none;
+  padding: 0;
+}
+
+.navbar-left:hover {
+  color: #e9c46a;
+}
+
+.navbar-left i {
+  font-size: 1.4rem;
+}
+
+/* Middle Navigation Links */
+.navbar-middle {
+  display: flex;
+  gap: 20px;
+  flex: 1;
+  justify-content: center;
+}
+
+.nav-link {
+  background: none;
+  border: none;
+  color: white;
+  text-decoration: none;
+  padding: 8px 12px;
+  border-radius: 5px;
+  transition: all 0.3s ease;
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 0.95rem;
+  font-weight: 500;
+  position: relative;
+}
+
+.nav-link:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+.nav-link.active {
+  background-color: rgba(255, 255, 255, 0.2);
+  color: #e9c46a;
+}
+
+.nav-link.active::after {
+  content: '';
+  position: absolute;
+  bottom: -8px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 80%;
+  height: 2px;
+  background-color: #e9c46a;
+  border-radius: 1px;
+}
+
+/* Profile Section */
+.navbar-right {
+  position: relative;
+}
+
+.profile-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  cursor: pointer;
+  border: 2px solid #6c5ce7;
+  overflow: hidden;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.profile-icon:hover {
+  border-color: #e9c46a;
+  box-shadow: 0 0 8px rgba(233, 196, 106, 0.3);
+}
+
+.profile-icon img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 50%;
+}
+
+/* Dropdown Menu */
+.profile-dropdown {
+  display: block;
+  position: absolute;
+  right: 0;
+  top: 100%;
+  margin-top: 8px;
+  background-color: transparent;
+  width: 220px;
+  z-index: 1001;
+  animation: slideDown 0.2s ease-out;
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.profile-dropdown-content {
+  background-color: white;
+  border-radius: 8px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+  overflow: hidden;
+}
+
+.dropdown-link {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 15px;
+  color: #333;
+  text-decoration: none;
+  font-size: 0.95rem;
+  background: none;
+  border: none;
+  width: 100%;
+  text-align: left;
+  cursor: pointer;
+  font-family: inherit;
+  transition: all 0.2s ease;
+}
+
+.dropdown-link:hover {
+  background-color: #f5f7fa;
+  padding-left: 18px;
+}
+
+.dropdown-link i {
+  width: 18px;
+  text-align: center;
+  color: #6c5ce7;
+}
+
+.dropdown-divider {
+  height: 1px;
+  background-color: #e0e0e0;
+  margin: 8px 0;
+}
+
+.logout-link {
+  color: #e74c3c;
+}
+
+.logout-link:hover {
+  background-color: #ffe5e0;
+}
+
+.logout-link i {
+  color: #e74c3c;
+}
+
+/* Navbar Backdrop */
+.navbar-backdrop {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 999;
+  background: transparent;
+}
+
+/* Responsive Design */
+@media (max-width: 1024px) {
+  .navbar-middle {
+    gap: 15px;
+  }
+
+  .nav-link {
+    padding: 6px 10px;
+    font-size: 0.9rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .navbar {
+    height: auto;
+    padding: 10px 15px;
+    flex-wrap: wrap;
+  }
+
+  .navbar-left {
+    font-size: 1rem;
+    order: 1;
+    flex-basis: 100%;
+    margin-bottom: 10px;
+  }
+
+  .navbar-middle {
+    order: 2;
+    flex-basis: 100%;
+    gap: 10px;
+    margin-bottom: 10px;
+    flex-wrap: wrap;
+  }
+
+  .nav-link {
+    padding: 6px 8px;
+    font-size: 0.85rem;
+  }
+
+  .navbar-right {
+    order: 3;
+  }
+
+  .profile-dropdown {
+    right: -15px;
+    width: 200px;
+  }
+}
+
+@media (max-width: 480px) {
+  .navbar {
+    padding: 8px 10px;
+  }
+
+  .navbar-left {
+    font-size: 0.95rem;
+  }
+
+  .navbar-left i {
+    display: none;
+  }
+
+  .navbar-middle {
+    gap: 5px;
+  }
+
+  .nav-link {
+    padding: 5px 6px;
+    font-size: 0.75rem;
+  }
+
+  .nav-link.active::after {
+    bottom: -6px;
+  }
+
+  .profile-icon {
+    width: 35px;
+    height: 35px;
+    border-width: 1px;
+  }
+
+  .profile-dropdown {
+    right: -20px;
+    width: 180px;
+  }
+
+  .dropdown-link {
+    padding: 10px 12px;
+    font-size: 0.9rem;
+  }
+
+  .dropdown-link i {
+    font-size: 0.9rem;
+  }
+}
+
+/* Sticky behavior improvements */
+@media (prefers-reduced-motion: reduce) {
+  .profile-dropdown {
+    animation: none;
+  }
+
+  .profile-icon {
+    transition: none;
+  }
+
+  .nav-link {
+    transition: none;
+  }
+}
