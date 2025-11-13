@@ -1,0 +1,495 @@
+/* src/Pages/customer/components/customer-construction/CustomerConstruction.css */
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: "Inter", sans-serif;
+  scrollbar-width: none;
+}
+
+body {
+  background-color: #f8fafc;
+  color: #1e293b;
+  line-height: 1.6;
+}
+
+/* Page Title */
+.page-title {
+  text-align: center;
+  padding: 10px 0;
+  font-size: larger;
+  font-weight: 700;
+  color: #1e293b;
+  position: relative;
+}
+
+.page-title .underline {
+  width: 120px;
+  height: 4px;
+  background: linear-gradient(to right, #facc15, #1e293b);
+  margin: 15px auto 0;
+}
+
+/* Sort Dropdown */
+.sort-container {
+  max-width: 1280px;
+  margin: 0 auto 20px;
+  padding: 0 20px;
+  text-align: right;
+}
+
+.sort-select {
+  padding: 10px 15px;
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: #1e293b;
+  background: #fff;
+  border-radius: 8px;
+  outline: none;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.sort-select:hover {
+  color: #1e293b;
+}
+
+.sort-select:focus {
+  box-shadow: 0 0 8px rgba(250, 204, 21, 0.3);
+}
+
+/* Company Container */
+.company-container {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 0 20px;
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  gap: 60px;
+  background: white;
+  border-radius: 16px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.05);
+  padding: 40px 20px;
+}
+
+/* Company Card */
+.company-card {
+  background: #fff;
+  border-radius: 12px;
+  padding: 20px;
+  text-align: center;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  border: 1px solid transparent;
+  position: relative;
+  overflow: hidden;
+  max-width: 22vw;
+  flex: 1 1 250px;
+}
+
+.company-card:hover {
+  border-color: #facc15;
+}
+
+.company-name {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #1e293b;
+  margin-bottom: 15px;
+}
+
+.company-stats {
+  display: flex;
+  justify-content: space-around;
+  margin: 15px 0;
+  background: #f8fafc;
+  border-radius: 8px;
+  padding: 10px;
+}
+
+.stat {
+  flex: 1;
+  text-align: center;
+}
+
+.stat-number {
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: #1e293b;
+  display: block;
+}
+
+.stat-label {
+  font-size: 0.8rem;
+  color: #64748b;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.company-details {
+  font-size: 0.9rem;
+  color: #64748b;
+  line-height: 1.6;
+  margin-bottom: 15px;
+  height: 70px;
+  overflow: hidden;
+  text-align: justify;
+}
+
+.location {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.9rem;
+  color: #64748b;
+  margin-bottom: 15px;
+}
+
+.location i {
+  color: #facc15;
+  margin-right: 8px;
+  font-size: 1rem;
+}
+
+.buttons {
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+}
+
+.view-details-btn,
+.book-now-btn {
+  flex: 1;
+  max-width: 140px;
+  padding: 10px 0;
+  font-size: 0.9rem;
+  font-weight: 600;
+  border-radius: 50px;
+  text-decoration: none;
+  transition: all 0.3s ease;
+  text-align: center;
+  border: none;
+  cursor: pointer;
+}
+
+.view-details-btn {
+  background: #facc15;
+  color: #1e293b;
+}
+
+.view-details-btn:hover {
+  background: #eab308;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.book-now-btn {
+  background: #facc15;
+  color: #1e293b;
+}
+
+.book-now-btn:hover {
+  background: #eab308;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* Details Overlay */
+.details-overlay {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.9);
+  z-index: 1000;
+  align-items: center;
+  justify-content: center;
+}
+
+.details-overlay.active {
+  display: flex;
+}
+
+.details-content {
+  background: white;
+  border-radius: 12px;
+  width: 90%;
+  max-width: 700px;
+  max-height: 90vh;
+  overflow-y: auto;
+  padding: 30px;
+  position: relative;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+  scrollbar-width: thin;
+}
+
+.close-details {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  background: none;
+  border: none;
+  font-size: 2rem;
+  cursor: pointer;
+  color: #64748b;
+  transition: color 0.3s;
+}
+
+.close-details:hover {
+  color: #facc15;
+}
+
+.detail-company-name {
+  font-size: 1.8rem;
+  font-weight: 700;
+  color: #1e293b;
+  margin-bottom: 10px;
+  text-align: center;
+}
+
+.detail-company-subtitle {
+  font-size: 1rem;
+  color: #64748b;
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+.detail-section {
+  margin-bottom: 30px;
+}
+
+.detail-section-title {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #1e293b;
+  margin-bottom: 15px;
+  position: relative;
+  padding-bottom: 8px;
+}
+
+.detail-section-title::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 60px;
+  height: 4px;
+  background: #facc15;
+  border-radius: 2px;
+}
+
+.detail-stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  gap: 15px;
+  margin-bottom: 20px;
+}
+
+.detail-stat {
+  background: #f8fafc;
+  padding: 15px;
+  border-radius: 8px;
+  text-align: center;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+}
+
+.detail-stat-number {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #1e293b;
+}
+
+.detail-stat-label {
+  font-size: 0.9rem;
+  color: #64748b;
+  margin-top: 5px;
+}
+
+.detail-description {
+  font-size: 0.9rem;
+  color: #64748b;
+  line-height: 1.6;
+}
+
+.detail-team-member {
+  display: flex;
+  align-items: center;
+  margin-bottom: 15px;
+  padding: 15px;
+  background: #f8fafc;
+  border-radius: 8px;
+  transition: all 0.3s ease;
+}
+
+.detail-team-member:hover {
+  background: #e2e8f0;
+}
+
+.member-image {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  object-fit: cover;
+  margin-right: 15px;
+}
+
+.member-info {
+  flex: 1;
+}
+
+.member-name {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #1e293b;
+  margin-bottom: 3px;
+}
+
+.member-position {
+  font-size: 0.85rem;
+  color: #64748b;
+}
+
+.detail-projects {
+  margin-top: 15px;
+}
+
+.project-item {
+  display: flex;
+  align-items: center;
+  margin-bottom: 15px;
+  padding: 15px;
+  background: #f8fafc;
+  border-radius: 8px;
+  transition: all 0.3s ease;
+}
+
+.project-item:hover {
+  background: #e2e8f0;
+}
+
+.project-image {
+  width: 120px;
+  height: 120px;
+  object-fit: cover;
+  border-radius: 8px;
+  margin-right: 15px;
+}
+
+.project-info {
+  flex: 1;
+}
+
+.project-name {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #1e293b;
+  margin-bottom: 5px;
+}
+
+.project-description {
+  font-size: 0.85rem;
+  color: #64748b;
+}
+
+.detail-book-now {
+  background: #facc15;
+  color: #1e293b;
+  padding: 12px;
+  font-size: 1rem;
+  font-weight: 600;
+  border-radius: 50px;
+  text-decoration: none;
+  display: block;
+  text-align: center;
+  transition: all 0.3s ease;
+  border: none;
+  cursor: pointer;
+}
+
+.detail-book-now:hover {
+  background: #eab308;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* Back to Top Button */
+.back-to-top {
+  position: fixed;
+  bottom: 30px;
+  right: 30px;
+  width: 50px;
+  height: 50px;
+  background-color: #facc15;
+  color: #1e293b;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
+  transition: background-color 0.3s ease, transform 0.3s ease;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  opacity: 0;
+  pointer-events: none;
+}
+
+.back-to-top.visible {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.back-to-top:hover {
+  background-color: #eab308;
+  transform: translateY(-5px);
+}
+
+/* Responsive */
+@media (max-width: 1024px) {
+  .company-container {
+    gap: 30px;
+  }
+  .company-card {
+    max-width: 45%;
+  }
+}
+
+@media (max-width: 768px) {
+  .page-title {
+    font-size: 1.8rem;
+  }
+
+  .sort-container {
+    text-align: center;
+  }
+
+  .company-container {
+    flex-direction: column;
+    padding: 20px;
+  }
+
+  .company-card {
+    max-width: 100%;
+  }
+
+  .detail-stats {
+    grid-template-columns: 1fr;
+  }
+
+  .project-item {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .project-image {
+    margin-right: 0;
+    margin-bottom: 10px;
+    width: 100%;
+    height: 150px;
+  }
+}
+
+.loading, .error, .no-companies {
+  text-align: center;
+  padding: 40px;
+  font-size: 1.1rem;
+  color: #64748b;
+}

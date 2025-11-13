@@ -11,35 +11,35 @@ import "./App.css";
 
 const App = () => {
   return (
-      <Routes>
-        <Route path="/" element={<LoginSignUp />} />
-        <Route path="/adminpage" element={<Admin />} /> {/* Admin login page */}
-        <Route
-          path="/customerdashboard"
-          element={
-            <ProtectedRoute role="customer">
-              <Customer />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/companydashboard"
-          element={
-            <ProtectedRoute role="company">
-              <Company />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/workerdashboard"
-          element={
-            <ProtectedRoute role="worker">
-              <Worker />
-            </ProtectedRoute>
-          }
-        />
-        {/* Add other routes as needed, e.g., for sub-pages */}
-      </Routes>
+    <Routes>
+      <Route path="/" element={<LoginSignUp />} />
+      <Route path="/adminpage" element={<Admin />} /> {/* Admin login page */}
+      <Route
+        path="/customerdashboard"
+        element={
+          <ProtectedRoute role="customer">
+            <Customer />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/companydashboard"
+        element={
+          <ProtectedRoute role="company">
+            <Company />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/workerdashboard"
+        element={
+          <ProtectedRoute role="worker">
+            <Worker />
+          </ProtectedRoute>
+        }
+      />
+      {/* Add other routes as needed, e.g., for sub-pages */}
+    </Routes>
   );
 };
 

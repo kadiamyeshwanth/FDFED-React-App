@@ -33,7 +33,7 @@ const CustomerHome = () => {
           times
         </span>
         <div className="modal_content">
-          <img src="" alt="Portfolio" />
+          <img src="null" alt="Portfolio" />
         </div>
       </div>
 
