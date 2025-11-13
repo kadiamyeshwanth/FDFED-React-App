@@ -5,7 +5,7 @@ const fs = require('fs');
 const { JWT_SECRET } = require('../config/constants');
 const { Customer, Company, Worker } = require('../models');
 const upload = require('../middlewares/upload').upload; // Multer upload
-
+ 
 const signup = async (req, res) => {
   try {
     const { role, password, termsAccepted, ...data } = req.body;
