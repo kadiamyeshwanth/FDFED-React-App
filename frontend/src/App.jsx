@@ -4,7 +4,6 @@ import LoginSignUp from "./Pages/login-signup/LoginSignUp";
 import Customer from "./Pages/customer/Customer";
 import Company from "./Pages/company/Company";
 import Worker from "./Pages/worker/Worker";
-import Admin from "./Pages/admin/Admin"; // Assume you have Admin.jsx for admin login/dashboard
 import ProtectedRoute from "./components/ProtectedRoute";
 
 import "./App.css";
@@ -13,9 +12,9 @@ const App = () => {
   return (
     <Routes>
       <Route path="/" element={<LoginSignUp />} />
-      <Route path="/adminpage" element={<Admin />} /> {/* Admin login page */}
+      {/* <Route path="/adminpage" element={<Admin />} /> */}
       <Route
-        path="/customerdashboard"
+        path="/customerdashboard/*"
         element={
           <ProtectedRoute role="customer">
             <Customer />
