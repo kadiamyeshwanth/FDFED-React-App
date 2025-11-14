@@ -8,8 +8,9 @@ const AdminJobApplicationDetail = () => {
   const [application, setApplication] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const apiBase = ""; // use '' or set import.meta.env.VITE_API_URL
+  const apiBase = "";
 
+  
   useEffect(() => {
     const fetchApplication = async () => {
       setLoading(true);
