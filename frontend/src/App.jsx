@@ -22,7 +22,7 @@ const App = () => {
         }
       />
       <Route
-        path="/companydashboard"
+        path="/companydashboard/*"
         element={
           <ProtectedRoute role="company">
             <Company />
@@ -30,7 +30,7 @@ const App = () => {
         }
       />
       <Route
-        path="/workerdashboard"
+        path="/workerdashboard/*"
         element={
           <ProtectedRoute role="worker">
             <Worker />
