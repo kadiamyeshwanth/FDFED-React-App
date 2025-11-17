@@ -1,31 +1,46 @@
-import React, { useEffect } from "react";
-import { Routes, Route, Navigate } from "react-router-dom";
-import CompanyDashboard from "./src/pages/CompanyDashboard/CompanyDashboard";
-import CompanySettings from "./src/pages/CompanySettings/CompanySettings";
-import CompanyRevenue from "./src/pages/CompanyRevenue/CompanyRevenue";
-import CompanyPublicProfile from "./src/pages/CompanyPublicProfile/CompanyPublicProfile";
-import CompanyBids from "./src/pages/CompanyBids/CompanyBids";
-import CompanyOngoingProjects from "./src/pages/CompanyOngoingProjects/CompanyOngoingProjects";
-import NavbarCompany from "./src/components/NavbarCompany/NavbarCompany";
+// src/Pages/company/Company.jsx
+import React from "react";
+import { Routes, Route } from "react-router-dom";
+
+// Correct relative paths based on your folder structure
+import CompanyNavbar from "./components/company-navbar/CompanyNavbar";
+
+import CompanyDashboard from "./components/company-dashboard/CompanyDashboard";
+import CompanyBids from "./components/company-bids/CompanyBids";
+import CompanyOngoing from "./components/company-ongoing/CompanyOngoing";
+import CompanyRevenue from "./components/company-revenue/CompanyRevenue";
+import CompanyHiring from "./components/company-hiring/CompanyHiring";
+import CompanyEmployees from "./components/company-employees/CompanyEmployees";
+import CompanySettings from "./components/company-settings/CompanySettings";
+import CompanyAddNewProject from "./components/forms/company-addnewproject/CompanyAddNewProject";
+
+// Placeholder for Project Requests (you can create later)
+const ProjectRequests = () => <div>Project Requests Page</div>;
 
 const Company = () => {
-  // SET FAKE TOKEN IMMEDIATELY
-  useEffect(() => {
-    localStorage.setItem("token", "fake-jwt-token");
-    localStorage.setItem("userType", "company");
-  }, []);
-
   return (
     <>
-      <NavbarCompany />
+      <CompanyNavbar />
       <Routes>
-        <Route path="/" element={<Navigate to="companydashboard" replace />} />
-        <Route path="companydashboard" element={<CompanyDashboard />} />
-        <Route path="company-settings" element={<CompanySettings />} />
-        <Route path="company-revenue" element={<CompanyRevenue />} />
-        <Route path="company-public-profile" element={<CompanyPublicProfile />} />
-        <Route path="company-bids" element={<CompanyBids />} />
-        <Route path="company-ongoing-projects" element={<CompanyOngoingProjects />} />
+        <Route
+          path="*"
+          element={
+            <Routes>
+              <Route path="companydashboard" element={<CompanyDashboard />} />
+              <Route path="companybids" element={<CompanyBids />} />
+              <Route path="companyongoing_projects" element={<CompanyOngoing />} />
+              <Route path="project_requests" element={<ProjectRequests />} />
+              <Route path="companyrevenue" element={<CompanyRevenue />} />
+              <Route path="companyhiring" element={<CompanyHiring />} />
+              <Route path="my-employees" element={<CompanyEmployees />} />
+              <Route path="companySettings" element={<CompanySettings />} />
+              <Route path="addnewproject" element={<CompanyAddNewProject />} />
+
+              {/* Fallback to dashboard */}
+              <Route path="*" element={<CompanyDashboard />} />
+            </Routes>
+          }
+        />
       </Routes>
     </>
   );
