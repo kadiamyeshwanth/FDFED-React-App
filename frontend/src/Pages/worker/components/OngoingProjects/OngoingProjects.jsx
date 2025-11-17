@@ -299,6 +299,7 @@ const OngoingProjects = () => {
                   onUpdateChange={handleUpdateChange}
                   onUpdateSubmit={handleUpdateSubmit}
                   onMarkComplete={handleMarkComplete}
+                  onRefreshProjects={fetchProjects}
                 />
               ))
             ) : (
