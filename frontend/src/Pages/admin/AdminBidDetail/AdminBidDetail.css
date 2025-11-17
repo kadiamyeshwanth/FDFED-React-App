@@ -1,0 +1,148 @@
+/* ...existing code... */
+.adb-container {
+  max-width: 1100px;
+  margin: 24px auto;
+  padding: 0 20px;
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.adb-header {
+  background: #ffffff;
+  padding: 18px 22px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  box-shadow: 0 8px 24px rgba(15, 23, 42, 0.06);
+  margin-bottom: 20px;
+}
+
+.adb-title { color: #1f2937; font-size: 20px; }
+
+.adb-actions { display: flex; gap: 8px; align-items: center; }
+
+.adb-btn {
+  padding: 8px 14px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 13px;
+  transition: transform .12s ease, box-shadow .12s ease;
+}
+
+.adb-back {
+  background: #6b7280;
+  color: #fff;
+}
+.adb-back:hover { transform: translateY(-2px); box-shadow: 0 6px 18px rgba(99,102,241,0.12); }
+
+.adb-delete {
+  background: #ef4444;
+  color: #fff;
+}
+.adb-delete:hover { transform: translateY(-2px); box-shadow: 0 6px 18px rgba(239,68,68,0.12); }
+
+.adb-card {
+  background: #ffffff;
+  padding: 28px;
+  border-radius: 12px;
+  box-shadow: 0 10px 30px rgba(2,6,23,0.04);
+}
+
+/* header section inside card */
+.adb-section-header { border-bottom: 3px solid #6366f1; padding-bottom: 16px; margin-bottom: 18px; }
+.adb-section-title { font-size: 22px; color: #111827; margin: 0 0 6px 0; }
+.adb-subtitle { color: #6b7280; font-size: 13px; }
+
+/* grid layout */
+.adb-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 18px;
+  margin-bottom: 18px;
+}
+
+.adb-item {
+  background: #f9fafb;
+  padding: 12px 14px;
+  border-radius: 10px;
+  border-left: 4px solid #6366f1;
+}
+
+.adb-full { grid-column: 1 / -1; }
+
+.adb-label {
+  display: block;
+  font-size: 11px;
+  font-weight: 700;
+  color: #6b7280;
+  text-transform: uppercase;
+  margin-bottom: 8px;
+}
+
+.adb-value { font-size: 15px; color: #111827; font-weight: 600; }
+
+/* section headings */
+.adb-section-heading {
+  font-size: 18px;
+  color: #111827;
+  margin: 22px 0 12px 0;
+  border-bottom: 1px solid transparent;
+}
+
+/* badges */
+.adb-badge {
+  padding: 6px 10px;
+  border-radius: 20px;
+  font-weight: 700;
+  font-size: 12px;
+  display: inline-block;
+}
+
+.adb-badge-open { background: #dbeafe; color: #1e40af; }
+.adb-badge-closed { background: #e5e7eb; color: #374151; }
+.adb-badge-awarded { background: #d1fae5; color: #065f46; }
+.adb-badge-cancelled { background: #fee2e2; color: #991b1b; }
+.adb-badge-pending { background: #fef3c7; color: #92400e; }
+.adb-badge-accepted { background: #d1fae5; color: #065f46; }
+.adb-badge-rejected { background: #fee2e2; color: #991b1b; }
+
+/* bid / floor cards */
+.adb-bid-card {
+  background: #f9fafb;
+  padding: 14px 16px;
+  border-radius: 10px;
+  margin-bottom: 12px;
+  border-left: 4px solid #6366f1;
+}
+
+.adb-bid-title { margin: 0 0 6px 0; color: #111827; font-size: 16px; }
+.adb-bid-line { color: #6b7280; margin: 4px 0; font-size: 14px; }
+
+.adb-floor {
+  background: #f3f4f6;
+  padding: 12px;
+  border-radius: 8px;
+  margin-bottom: 10px;
+  color: #111827;
+}
+.adb-floor-desc { color: #6b7280; margin-top: 6px; font-size: 13px; }
+
+/* misc */
+.adb-loading, .adb-error, .adb-empty {
+  text-align: center;
+  padding: 22px;
+  color: #374151;
+  background: #fff;
+  border-radius: 10px;
+  box-shadow: 0 6px 18px rgba(2,6,23,0.03);
+}
+
+.adb-empty-note { color: #6b7280; padding: 10px 0 20px 0; }
+
+@media (max-width: 600px) {
+  .adb-header { flex-direction: column; gap: 10px; align-items: flex-start; }
+  .adb-actions { width: 100%; justify-content: flex-start; }
+}
+/* ...existing code... */
