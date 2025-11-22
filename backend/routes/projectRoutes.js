@@ -1,10 +1,5 @@
 const express = require('express');
 const router = express.Router();
-
-const { submitArchitect, submitDesignRequest, submitConstructionForm, getProjects, getProjectById, getEditProject, updateProject, submitBid, acceptBid, declineBid, acceptWorkerRequest, rejectWorkerRequest } = require('../controllers/projectController');
-
-const { submitArchitect, submitDesignRequest, submitConstructionForm, getProjects, getProjectById, getEditProject, updateProject, submitBid, acceptBid, declineBid, acceptWorkerRequest, rejectWorkerRequest, approveMilestone, requestMilestoneRevision } = require('../controllers/projectController');
-
 const { submitArchitect, submitDesignRequest, submitConstructionForm, getProjects, getProjectById, getEditProject, updateProject, submitBid, acceptBid, declineBid, acceptWorkerRequest, rejectWorkerRequest, approveMilestone, requestMilestoneRevision, submitProjectReview, getProjectsWithUnviewedCustomerMessages, markCustomerMessagesViewed, getProjectsWithUnviewedCompanyMessages, markCompanyMessagesViewed } = require('../controllers/projectController');
 
 const isAuthenticated = require('../middlewares/auth');

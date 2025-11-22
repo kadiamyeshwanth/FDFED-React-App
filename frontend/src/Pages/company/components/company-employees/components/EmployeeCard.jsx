@@ -1,4 +1,5 @@
 import React from "react";
+import { Link } from "react-router-dom";
 
 const EmployeeCard = ({ employee }) => {
   const w = employee.worker;
@@ -20,9 +21,9 @@ const EmployeeCard = ({ employee }) => {
       </div>
       <div className="comEmp_footer">
         {employee.chatId ? (
-          <a href={`/chat/${employee.chatId}`} className="comEmp_btnChat">
+          <Link to={`/companydashboard/chat/${employee.chatId}`} className="comEmp_btnChat">
             <i className="fas fa-comment-dots"></i> Chat Now
-          </a>
+          </Link>
         ) : (
           <button className="comEmp_btnChat disabled">
             <i className="fas fa-comment-dots"></i> Chat Unavailable
