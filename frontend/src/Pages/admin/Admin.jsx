@@ -11,6 +11,7 @@ import AdminJobApplicationDetail from "./AdminJobApplicationDetail/AdminJobAppli
 import AdminWorkerDetail from "./AdminWorkerDetail/AdminWorkerDetail";
 import ArchitectHiringDetail from "./ArchitectHiringDetail/ArchitectHiringDetail";
 
+
 const Admin = () => {
   return (
     <AppLayout>
