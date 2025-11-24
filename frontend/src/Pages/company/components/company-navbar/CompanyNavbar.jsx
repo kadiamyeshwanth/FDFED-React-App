@@ -1,8 +1,32 @@
 // src/components/company-navbar/CompanyNavbar.jsx
 import { Link } from "react-router-dom";
+import { useState, useEffect } from "react";
 import "./CompanyNavbar.css";
 
 const CompanyNavbar = () => {
+  const [hasUnviewedComplaints, setHasUnviewedComplaints] = useState(false);
+
+  useEffect(() => {
+    const fetchUnviewedComplaints = async () => {
+      try {
+        const res = await fetch('http://localhost:3000/api/company/unviewed-customer-messages', {
+          credentials: 'include'
+        });
+        if (res.ok) {
+          const data = await res.json();
+          console.log('🔴 Navbar - Unviewed customer messages:', data);
+          setHasUnviewedComplaints(data.unviewedByProject && data.unviewedByProject.length > 0);
+        }
+      } catch (err) {
+        console.error('Error fetching unviewed customer messages:', err);
+      }
+    };
+    fetchUnviewedComplaints();
+    // Poll every 30 seconds for new messages
+    const interval = setInterval(fetchUnviewedComplaints, 30000);
+    return () => clearInterval(interval);
+  }, []);
+
   return (
     <div className="company_navbar">
       <nav className="company_navbar_navbar">
@@ -17,8 +41,20 @@ const CompanyNavbar = () => {
           <Link to="/companydashboard/companybids" className="company_navbar_navLink">
             Bids
           </Link>
-          <Link to="/companydashboard/companyongoing_projects" className="company_navbar_navLink">
+          <Link to="/companydashboard/companyongoing_projects" className="company_navbar_navLink" style={{ position: 'relative' }}>
             Ongoing Projects
+            {hasUnviewedComplaints && (
+              <span style={{
+                position: 'absolute',
+                top: '5px',
+                right: '-5px',
+                width: '10px',
+                height: '10px',
+                backgroundColor: '#dc3545',
+                borderRadius: '50%',
+                border: '2px solid white'
+              }}></span>
+            )}
           </Link>
           <Link to="/companydashboard/project_requests" className="company_navbar_navLink">
             Project Requests
