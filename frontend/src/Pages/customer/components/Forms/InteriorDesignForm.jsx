@@ -2,12 +2,16 @@
 // src/Pages/customer/components/Forms/InteriorDesignForm.jsx
 import React, { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
+import { useDispatch, useSelector } from 'react-redux';
+import { fetchCustomerProfile } from '../../../../store/slices/customerProfileSlice';
 import axios from "axios";
 import "./InteriorDesignForm.css";
 
 const InteriorDesignForm = () => {
   const navigate = useNavigate();
   const location = useLocation();
+  const dispatch = useDispatch();
+  const customerProfile = useSelector((state) => state.customerProfile);
 
   // ---------- Worker ID from URL ----------
   const [workerId, setWorkerId] = useState("");
@@ -19,9 +23,9 @@ const InteriorDesignForm = () => {
   // ---------- Form state ----------
   const [formData, setFormData] = useState({
     projectName: "",
-    fullName: "",
-    email: "",
-    phone: "",
+    fullName: customerProfile.name || "",
+    email: customerProfile.email || "",
+    phone: customerProfile.phone || "",
     address: "",
     roomType: "",
     roomLength: "",
@@ -32,6 +36,25 @@ const InteriorDesignForm = () => {
     designPreference: "",
     projectDescription: "",
   });
+
+  // Update form fields if profile changes and fields are empty
+  useEffect(() => {
+    setFormData((prev) => ({
+      ...prev,
+      fullName: prev.fullName || customerProfile.name || "",
+      email: prev.email || customerProfile.email || "",
+      phone: prev.phone || customerProfile.phone || "",
+    }));
+    // eslint-disable-next-line
+  }, [customerProfile.name, customerProfile.email, customerProfile.phone]);
+
+  // Fetch profile on mount if not loaded yet
+  useEffect(() => {
+    if (!customerProfile.name && !customerProfile.email && !customerProfile.phone && customerProfile.status !== 'loading') {
+      dispatch(fetchCustomerProfile());
+    }
+    // eslint-disable-next-line
+  }, []);
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;

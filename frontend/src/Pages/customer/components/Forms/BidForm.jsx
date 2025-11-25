@@ -1,8 +1,10 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import axios from "axios";
 import "./BidForm.css";
 import { useNavigate } from "react-router-dom";
 import { useValidation } from "../../../../context/ValidationContext";
+import { useDispatch, useSelector } from 'react-redux';
+import { fetchCustomerProfile } from '../../../../store/slices/customerProfileSlice';
 
 const MAX_FLOOR_FILES = 5;
 const ALLOWED_FILE_TYPES = ["application/pdf", "image/jpeg", "image/png"];
@@ -10,6 +12,8 @@ const MAX_FILE_MB = 5;
 
 const BidForm = () => {
   const navigate = useNavigate();
+  const dispatch = useDispatch();
+  const customerProfile = useSelector((state) => state.customerProfile);
   const {
     validateRequired,
     validateProjectName,
@@ -27,6 +31,46 @@ const BidForm = () => {
   const [errors, setErrors] = useState({});
   const [formError, setFormError] = useState("");
   const [submitting, setSubmitting] = useState(false);
+
+  // Base form state for static fields used elsewhere in component
+  const [formData, setFormData] = useState({
+    projectName: "",
+    customerName: customerProfile.name || "",
+    customerEmail: customerProfile.email || "",
+    customerPhone: customerProfile.phone || "",
+    projectLocation: "",
+    projectAddress: "",
+    estimatedBudget: "",
+  });
+
+  // Update form fields if profile changes and fields are empty
+  useEffect(() => {
+    setFormData((prev) => ({
+      ...prev,
+      customerName: prev.customerName || customerProfile.name || "",
+      customerEmail: prev.customerEmail || customerProfile.email || "",
+      customerPhone: prev.customerPhone || customerProfile.phone || "",
+    }));
+    // eslint-disable-next-line
+  }, [customerProfile.name, customerProfile.email, customerProfile.phone]);
+
+  // Fetch profile on mount if not loaded yet
+  useEffect(() => {
+    if (!customerProfile.name && !customerProfile.email && !customerProfile.phone && customerProfile.status !== 'loading') {
+      dispatch(fetchCustomerProfile());
+    }
+    // eslint-disable-next-line
+  }, []);
+
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
+    setErrors((prev) => {
+      const copy = { ...prev };
+      delete copy[name];
+      return copy;
+    });
+  };
 
   const handleFloorCountChange = (e) => {
     const val = e.target.value;
@@ -367,7 +411,13 @@ const BidForm = () => {
               <label htmlFor="customerName" className="bf-required">
                 Full Name
               </label>
-              <input type="text" id="customerName" name="customerName" />
+              <input 
+                type="text" 
+                id="customerName" 
+                name="customerName" 
+                value={formData.customerName}
+                onChange={handleInputChange}
+              />
               <div
                 className="bf-error-message"
                 style={{ display: errors.customerName ? "block" : "none" }}
@@ -379,7 +429,13 @@ const BidForm = () => {
               <label htmlFor="customerEmail" className="bf-required">
                 Email Address
               </label>
-              <input type="email" id="customerEmail" name="customerEmail" />
+              <input 
+                type="email" 
+                id="customerEmail" 
+                name="customerEmail" 
+                value={formData.customerEmail}
+                onChange={handleInputChange}
+              />
               <div
                 className="bf-error-message"
                 style={{ display: errors.customerEmail ? "block" : "none" }}
@@ -392,7 +448,13 @@ const BidForm = () => {
             <label htmlFor="customerPhone" className="bf-required">
               Phone Number
             </label>
-            <input type="tel" id="customerPhone" name="customerPhone" />
+            <input 
+              type="tel" 
+              id="customerPhone" 
+              name="customerPhone" 
+              value={formData.customerPhone}
+              onChange={handleInputChange}
+            />
             <div
               className="bf-error-message"
               style={{ display: errors.customerPhone ? "block" : "none" }}

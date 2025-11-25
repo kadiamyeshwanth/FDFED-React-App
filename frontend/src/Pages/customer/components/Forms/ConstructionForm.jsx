@@ -1,6 +1,9 @@
 // src/Pages/customer/components/Forms/ConstructionForm.jsx
+
 import React, { useState, useEffect } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
+import { useDispatch, useSelector } from 'react-redux';
+import { fetchCustomerProfile } from '../../../../store/slices/customerProfileSlice';
 import axios from "axios";
 import "./ConstructionForm.css";
 import { useValidation } from "../../../../context/ValidationContext";
@@ -12,6 +15,7 @@ const MAX_FILE_MB = 5;
 const ConstructionForm = () => {
   const location = useLocation();
   const navigate = useNavigate();
+  const dispatch = useDispatch();
 
   const {
     validateRequired,
@@ -35,12 +39,15 @@ const ConstructionForm = () => {
     setCompanyId(params.get("companyId") || "");
   }, [location.search]);
 
+  // Get customer profile from Redux
+  const customerProfile = useSelector((state) => state.customerProfile);
+
   const [formData, setFormData] = useState({
     projectName: "",
     buildingType: "",
-    customerName: "",
-    customerEmail: "",
-    customerPhone: "",
+    customerName: customerProfile.name || "",
+    customerEmail: customerProfile.email || "",
+    customerPhone: customerProfile.phone || "",
     totalArea: "",
     estimatedBudget: "",
     projectTimeline: "",
@@ -54,6 +61,25 @@ const ConstructionForm = () => {
     projectCity: "",
     projectState: "",
   });
+
+  // Update form fields if profile changes and fields are empty
+  useEffect(() => {
+    setFormData((prev) => ({
+      ...prev,
+      customerName: prev.customerName || customerProfile.name || "",
+      customerEmail: prev.customerEmail || customerProfile.email || "",
+      customerPhone: prev.customerPhone || customerProfile.phone || "",
+    }));
+    // eslint-disable-next-line
+  }, [customerProfile.name, customerProfile.email, customerProfile.phone]);
+
+  // Fetch profile on mount if not loaded yet
+  useEffect(() => {
+    if (!customerProfile.name && !customerProfile.email && !customerProfile.phone && customerProfile.status !== 'loading') {
+      dispatch(fetchCustomerProfile());
+    }
+    // eslint-disable-next-line
+  }, []);
 
   const [floors, setFloors] = useState([]);
   const [errors, setErrors] = useState({});

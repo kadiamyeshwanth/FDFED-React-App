@@ -1,3 +1,5 @@
+// API endpoint to get logged-in customer profile (robust)
+
 const express = require('express');
 const router = express.Router();
 const {
@@ -32,6 +34,18 @@ const { submitCustomerReview, getProjectReviewStatus } = require('../controllers
 const {upload} = require('../middlewares/upload')
 const auth = require('../middlewares/auth'); // Import authentication middleware
 
+router.get('/customer/profile', auth, async (req, res) => {
+  try {
+    const { Customer } = require('../models');
+    const user = await Customer.findById(req.user.user_id).lean();
+    if (!user) return res.status(404).json({ error: 'Customer not found' });
+    // Only send relevant fields
+    const { name, email, phone } = user;
+    res.json({ name, email, phone });
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to fetch profile' });
+  }
+});
 // Public routes (no authentication required)
 router.get('/home', getDashboard);
 router.get('/customerdashboard', getDashboard);

@@ -1,11 +1,15 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
+import { useDispatch, useSelector } from 'react-redux';
+import { fetchCustomerProfile } from '../../../../store/slices/customerProfileSlice';
 import axios from "axios";
 import "./ArchitectForm.css";
 
 const ArchitectForm = () => {
   const navigate = useNavigate();
   const location = useLocation();
+  const dispatch = useDispatch();
+  const customerProfile = useSelector((state) => state.customerProfile);
 
   // ---------- URL workerId ----------
   const [workerId, setWorkerId] = useState("");
@@ -19,9 +23,9 @@ const ArchitectForm = () => {
     projectName: "",
     designType: "",
     architecturalStyle: "",
-    fullName: "",
-    contactNumber: "",
-    email: "",
+    fullName: customerProfile.name || "",
+    contactNumber: customerProfile.phone || "",
+    email: customerProfile.email || "",
     streetAddress: "",
     city: "",
     state: "",
@@ -35,6 +39,25 @@ const ArchitectForm = () => {
     specialFeatures: "",
     floorRequirements: [], // array of { floorNumber, details }
   });
+
+  // Update form fields if profile changes and fields are empty
+  useEffect(() => {
+    setForm((prev) => ({
+      ...prev,
+      fullName: prev.fullName || customerProfile.name || "",
+      contactNumber: prev.contactNumber || customerProfile.phone || "",
+      email: prev.email || customerProfile.email || "",
+    }));
+    // eslint-disable-next-line
+  }, [customerProfile.name, customerProfile.email, customerProfile.phone]);
+
+  // Fetch profile on mount if not loaded yet
+  useEffect(() => {
+    if (!customerProfile.name && !customerProfile.email && !customerProfile.phone && customerProfile.status !== 'loading') {
+      dispatch(fetchCustomerProfile());
+    }
+    // eslint-disable-next-line
+  }, []);
 
   const handleChange = (e) => {
     const { name, value } = e.target;

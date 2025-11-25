@@ -1,10 +1,13 @@
 // src/Pages/login-signup/LoginSignUp.jsx
 import React, { useState, useEffect, useRef } from "react";
 import { useNavigate, Link } from "react-router-dom";
+import { useDispatch } from 'react-redux';
+import { fetchCustomerProfile } from '../../store/slices/customerProfileSlice';
 import "./LoginSignUp.css";
 
 const LoginSignUp = () => {
   const navigate = useNavigate();
+  const dispatch = useDispatch();
   const [activeTab, setActiveTab] = useState("signin");
   const [userType, setUserType] = useState("customer");
   const [signinData, setSigninData] = useState({ email: "", password: "" });
@@ -270,8 +273,11 @@ const LoginSignUp = () => {
         }),
       });
       const data = await res.json();
-      if (res.ok) navigate(data.redirect);
-      else setErrors({ general: data.message });
+      if (res.ok) {
+        // Fetch and store customer profile in Redux
+        dispatch(fetchCustomerProfile());
+        navigate(data.redirect);
+      } else setErrors({ general: data.message });
     } catch (err) {
       setErrors({ general: "Server error" });
     }
