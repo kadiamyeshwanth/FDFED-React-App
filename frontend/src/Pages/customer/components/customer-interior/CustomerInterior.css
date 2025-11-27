@@ -1,3 +1,15 @@
+:root {
+    --primary: #34495e;
+    --secondary: #D4AF37; 
+    --accent: #FF8C00; 
+    --light: #f8f9fa;
+    --light-gray: #e0e0e0;
+    --gray: #999;
+    --shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    --transition: all 0.3s ease;
+}
+ 
+
 .interior-heading {
     text-align: center;
     margin: 1rem auto 2rem;
@@ -136,7 +148,7 @@
 }
 
 .interior-designer-card.active {
-    background-color: rgba(212, 175, 55, 0.05);
+    background-color: rgba(212, 175, 55, 0.05); /* Gold tint */
     border-color: var(--secondary);
 }
 
@@ -250,7 +262,7 @@
 }
 
 .interior-specialty {
-    background-color: rgba(212, 175, 55, 0.1);
+    background-color: rgba(212, 175, 55, 0.1); /* Gold tint */
     color: var(--secondary);
     padding: 5px 15px;
     border-radius: 20px;
@@ -358,7 +370,7 @@
 }
 
 .interior-book-now-btn:hover {
-    background-color: #c99a1c;
+    background-color: #c99a1c; /* Slightly darker gold/secondary */
     transform: translateY(-3px);
     box-shadow: 0 6px 12px rgba(212, 175, 55, 0.25);
 }
@@ -370,7 +382,8 @@
 .interior-company-info {
     margin-bottom: 30px;
     padding: 25px;
-    background: linear-gradient(135deg, rgba(212, 175, 55, 0.05) 0%, rgba(52, 152, 219, 0.05) 100%);
+    /* Changed gradient to use secondary (gold) and a light orange tint */
+    background: linear-gradient(135deg, rgba(212, 175, 55, 0.05) 0%, rgba(255, 140, 0, 0.05) 100%);
     border-radius: 12px;
     border-left: 4px solid var(--secondary);
 }
@@ -420,4 +433,452 @@
 .interior-initial-message.hidden {
     opacity: 0;
     display: none;
+}
+
+/* Worker Badges and Contact Info */
+.interior-worker-badges {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-top: 12px;
+}
+
+.interior-availability-badge {
+    padding: 6px 14px;
+    border-radius: 20px;
+    font-size: 13px;
+    font-weight: 500;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.interior-availability-badge.interior-available {
+    background: #d4edda;
+    color: #155724;
+}
+
+.interior-availability-badge.interior-available i {
+    color: #28a745;
+}
+
+.interior-availability-badge.interior-busy {
+    background: #fff3cd;
+    color: #856404;
+}
+
+.interior-availability-badge.interior-busy i {
+    color: #ffc107;
+}
+
+.interior-availability-badge.interior-unavailable {
+    background: #f8d7da;
+    color: #721c24;
+}
+
+.interior-availability-badge.interior-unavailable i {
+    color: #dc3545;
+}
+
+.interior-contact-badge {
+    padding: 6px 12px;
+    background: #f0f2f5;
+    border-radius: 6px;
+    font-size: 13px;
+    color: #555;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.interior-contact-badge i {
+    color: #ff8c00; /* Changed from blue to orange accent */
+}
+
+/* Skills Section */
+.interior-skills-section {
+    margin-top: 25px;
+    padding: 20px;
+    background: #f8f9fa;
+    border-radius: 10px;
+}
+
+.interior-skills-section h3 {
+    color: var(--primary);
+    margin-bottom: 15px;
+    font-size: 1.3rem;
+}
+
+.interior-skills-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 12px;
+}
+
+.interior-skill-badge {
+    padding: 10px 16px;
+    background: white;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    font-size: 14px;
+    color: #333;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: var(--transition);
+}
+
+.interior-skill-badge:hover {
+    border-color: #ff8c00; /* Changed accent color */
+    box-shadow: 0 2px 8px rgba(255, 140, 0, 0.15); /* Changed shadow color */
+}
+
+.interior-skill-badge i {
+    color: #28a745;
+    font-size: 14px;
+}
+
+/* Certifications Section */
+.interior-certifications-section {
+    margin-top: 25px;
+    padding: 20px;
+    background: #fff9e6;
+    border-radius: 10px;
+    border-left: 4px solid var(--secondary);
+}
+
+.interior-certifications-section h3 {
+    color: var(--primary);
+    margin-bottom: 15px;
+    font-size: 1.3rem;
+}
+
+.interior-certifications-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.interior-certification-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px;
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+}
+
+.interior-certification-item i {
+    color: var(--secondary);
+    font-size: 18px;
+}
+
+.interior-certification-item span {
+    font-size: 14px;
+    color: #333;
+    font-weight: 500;
+}
+
+/* Specialties Section */
+.interior-specialties-section {
+    margin-top: 25px;
+}
+
+.interior-specialties-section h3 {
+    color: var(--primary);
+    margin-bottom: 15px;
+    font-size: 1.3rem;
+}
+
+.interior-specialties {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.interior-specialty {
+    /* Changed gradient to orange/gold hues */
+    background: linear-gradient(135deg, #FF8C00 0%, #D4AF37 100%);
+    color: white;
+    padding: 8px 16px;
+    border-radius: 20px;
+    font-size: 13px;
+    font-weight: 500;
+}
+
+/* Reviews Section */
+.interior-reviews-section {
+    margin-top: 30px;
+    padding: 25px;
+    background: white;
+    border-radius: 10px;
+    box-shadow: var(--shadow);
+}
+
+.interior-reviews-section h3 {
+    color: var(--primary);
+    margin-bottom: 20px;
+    font-size: 1.4rem;
+}
+
+.interior-reviews-list {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.interior-review-card {
+    padding: 20px;
+    background: #f8f9fa;
+    border-radius: 10px;
+    border-left: 4px solid #ff8c00; /* Changed accent color */
+    transition: var(--transition);
+}
+
+.interior-review-card:hover {
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    transform: translateX(5px);
+}
+
+.interior-review-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+}
+
+.interior-review-author {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: var(--primary);
+    font-size: 15px;
+}
+
+.interior-review-author i {
+    color: #ff8c00; /* Changed accent color */
+    font-size: 24px;
+}
+
+.interior-review-rating {
+    display: flex;
+    gap: 3px;
+}
+
+.interior-review-rating .interior-star {
+    color: #ffc107;
+    font-size: 16px;
+}
+
+.interior-review-project {
+    font-size: 13px;
+    color: #666;
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.interior-review-project i {
+    color: var(--secondary);
+}
+
+.interior-review-comment {
+    font-size: 14px;
+    color: #333;
+    font-style: italic;
+    line-height: 1.6;
+    margin: 10px 0;
+    padding: 12px;
+    background: white;
+    border-radius: 8px;
+}
+
+.interior-review-date {
+    font-size: 12px;
+    color: #999;
+    margin-top: 8px;
+}
+
+/* Languages Section */
+.interior-languages-section {
+    margin-top: 25px;
+    padding: 20px;
+    background: #fff8e1; /* Changed background to light gold/yellow tint */
+    border-radius: 10px;
+}
+
+.interior-languages-section h3 {
+    color: var(--primary);
+    margin-bottom: 15px;
+    font-size: 1.3rem;
+}
+
+.interior-languages-section p {
+    color: #333;
+    font-size: 15px;
+    line-height: 1.6;
+}
+
+/* Price Section */
+.interior-price-section {
+    margin-top: 25px;
+    padding: 20px;
+    /* Changed gradient to use orange/gold hues */
+    background: linear-gradient(135deg, #ffe0b2 0%, #fff3cd 100%);
+    border-radius: 10px;
+}
+
+.interior-price-section h3 {
+    color: var(--primary);
+    margin-bottom: 15px;
+    font-size: 1.3rem;
+}
+
+.interior-price-tag {
+    font-size: 1.4rem;
+    font-weight: 700;
+    color: #ff8c00; /* Changed from blue to orange accent */
+    padding: 15px 20px;
+    background: white;
+    border-radius: 10px;
+    display: inline-block;
+    box-shadow: 0 3px 10px rgba(255, 140, 0, 0.2); /* Changed shadow color */
+}
+
+.interior-price-tag i {
+    margin-right: 8px;
+}
+
+/* Work Experience Section */
+.interior-experience-section {
+    margin-top: 30px;
+    padding: 25px;
+    background: white;
+    border-radius: 10px;
+    box-shadow: var(--shadow);
+}
+
+.interior-experience-section h3 {
+    color: var(--primary);
+    margin-bottom: 20px;
+    font-size: 1.4rem;
+}
+
+.interior-company-card {
+    background: #ffffff;
+    border: 1px solid #e0e0e0;
+    border-radius: 10px;
+    padding: 20px;
+    margin-bottom: 20px;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.interior-company-card:hover {
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    transform: translateY(-3px);
+}
+
+.interior-company-card h4 {
+    color: #ff8c00; /* Changed from blue/purple to orange accent */
+    font-size: 1.2rem;
+    margin-bottom: 12px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.interior-company-card h4 i {
+    color: var(--secondary); /* Used secondary (gold) as complementary color */
+    font-size: 1.1rem;
+}
+
+.interior-company-card p {
+    margin-bottom: 8px;
+    color: #555;
+    line-height: 1.6;
+}
+
+.interior-company-card p strong {
+    color: #333;
+    margin-right: 5px;
+}
+
+.interior-company-proofs {
+    margin-top: 15px;
+    padding-top: 15px;
+    border-top: 1px solid #e0e0e0;
+}
+
+.interior-company-proofs strong {
+    color: #333;
+    font-size: 14px;
+    display: block;
+    margin-bottom: 10px;
+}
+
+.interior-proof-gallery {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+    gap: 12px;
+    margin-top: 10px;
+}
+
+.interior-proof-image {
+    width: 100%;
+    height: 100px;
+    object-fit: cover;
+    border-radius: 8px;
+    border: 2px solid #e0e0e0;
+    transition: all 0.3s ease;
+    cursor: pointer;
+}
+
+.interior-proof-image:hover {
+    transform: scale(1.05);
+    border-color: #ff8c00; /* Changed to orange accent */
+    box-shadow: 0 4px 12px rgba(255, 140, 0, 0.3); /* Changed shadow color */
+}
+
+/* Project Gallery */
+.interior-project-gallery {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 15px;
+    margin-top: 15px;
+}
+
+.interior-project-gallery .interior-project-image {
+    height: 200px;
+    margin-top: 0;
+}
+
+.interior-project-document {
+    margin-top: 15px;
+    padding: 15px;
+    background: #fff3e0; /* Changed background to light orange/yellow tint */
+    border-radius: 10px;
+    text-align: center;
+}
+
+.interior-project-document a {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    color: #ff8c00; /* Changed from blue to orange accent */
+    text-decoration: none;
+    font-weight: 600;
+    font-size: 15px;
+    transition: all 0.3s ease;
+}
+
+.interior-project-document a:hover {
+    color: #D4AF37; /* Used secondary (gold) for hover */
+    transform: translateX(5px);
+}
+
+.interior-project-document a i {
+    font-size: 1.3rem;
 }
