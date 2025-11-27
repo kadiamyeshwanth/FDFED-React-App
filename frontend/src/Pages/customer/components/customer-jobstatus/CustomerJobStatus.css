@@ -1,0 +1,306 @@
+/* src/Pages/customer/CustomerJobStatus.css */
+/* All class names prefixed with 'cjs-' to prevent global CSS conflicts */
+
+.cjs-container {
+  max-width: 1280px;
+  margin: 0 auto;
+  background-color: white;
+  padding: 40px 20px;
+  border-radius: 16px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.05);
+}
+
+.cjs-tab-container {
+  display: flex;
+  margin-bottom: 20px;
+  border-bottom: 2px solid #e2e8f0;
+}
+
+.cjs-tab {
+  padding: 10px 20px;
+  cursor: pointer;
+  border-bottom: 3px solid transparent;
+  transition: all 0.3s ease;
+  font-weight: 500;
+  color: #64748b;
+}
+
+.cjs-tab:hover {
+  color: #1e293b;
+}
+
+.cjs-tab.cjs-active {
+  border-bottom: 3px solid #facc15;
+  font-weight: 600;
+  color: #1e293b;
+}
+
+.cjs-content-section {
+  display: none;
+}
+
+.cjs-content-section.cjs-active {
+  display: block;
+}
+
+.cjs-architect-heading,
+.cjs-interior-heading,
+.cjs-company-heading {
+  color: #1e293b;
+  padding-left: 10px;
+  margin-top: 30px;
+  font-weight: 700;
+}
+
+.cjs-architect-heading {
+  border-left: 4px solid #00c4b4;
+}
+
+.cjs-interior-heading {
+  border-left: 4px solid #ff6200;
+}
+
+.cjs-company-heading {
+  border-left: 4px solid #8e44ad;
+}
+
+.cjs-application {
+  background: #fff;
+  border-radius: 12px;
+  padding: 20px;
+  margin-bottom: 20px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  transition: all 0.4s ease;
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.cjs-application:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+}
+
+.cjs-application::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 6px;
+  height: 0;
+  transition: height 0.4s ease;
+}
+
+.cjs-application:hover::before {
+  height: 100%;
+}
+
+.cjs-architect-app::before {
+  background: #00c4b4;
+}
+.cjs-interior-app::before {
+  background: #ff6200;
+}
+.cjs-company-app::before {
+  background: #8e44ad;
+}
+
+.cjs-status-container {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  position: absolute;
+  top: 20px;
+  right: 20px;
+}
+
+.cjs-status {
+  padding: 5px 12px;
+  border-radius: 50px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.cjs-architect-status {
+  background-color: #e0f7fa;
+  color: #00838f;
+  border: 1px solid #00838f;
+}
+
+.cjs-interior-status {
+  background-color: #fff3e0;
+  color: #ff6200;
+  border: 1px solid #ff6200;
+}
+
+.cjs-company-status {
+  background-color: #f5eef8;
+  color: #8e44ad;
+  border: 1px solid #8e44ad;
+}
+
+.cjs-chat-button {
+  display: inline-flex;
+  align-items: center;
+  padding: 8px 15px;
+  border-radius: 6px;
+  text-decoration: none;
+  font-weight: 600;
+  margin-top: 10px;
+  transition: background-color 0.3s;
+  gap: 8px;
+}
+
+.cjs-architect-chat {
+  background: #00c4b4;
+  color: white;
+}
+.cjs-architect-chat:hover {
+  background: #00838f;
+}
+
+.cjs-interior-chat {
+  background: #ff6200;
+  color: white;
+}
+.cjs-interior-chat:hover {
+  background: #c74d00;
+}
+
+.cjs-company-chat {
+  background: #8e44ad;
+  color: white;
+}
+.cjs-company-chat:hover {
+  background: #7a3a94;
+}
+
+.cjs-project-name {
+  font-weight: 600;
+  color: #1e293b;
+}
+
+.cjs-section-title {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #1e293b;
+  margin-top: 20px;
+  margin-bottom: 10px;
+  position: relative;
+  padding-bottom: 8px;
+}
+
+.cjs-section-title::after {
+  content: "";
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 40px;
+  height: 3px;
+  background: #facc15;
+  border-radius: 2px;
+}
+
+.cjs-application p {
+  margin: 5px 0;
+  color: #64748b;
+}
+
+.cjs-date-info {
+  font-size: 12px;
+  color: #777;
+  margin-top: 5px;
+}
+
+.cjs-no-applications {
+  text-align: center;
+  padding: 20px;
+  color: #777;
+}
+
+.cjs-company-app-container {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 20px;
+}
+
+.cjs-application.cjs-company-app {
+  margin-bottom: 0;
+}
+
+.cjs-application-data-section {
+  display: flex;
+  flex-wrap: wrap;
+  flex-direction: row;
+  gap: 10px;
+  margin-top: 10px;
+}
+
+.cjs-application-data {
+  flex: 1;
+  min-width: 250px;
+  padding: 0 10px;
+}
+
+.cjs-proposal-container {
+  background-color: white;
+  border: 1px solid gray;
+  border-radius: 10px;
+  padding: 10px;
+  margin-top: 15px;
+}
+
+.cjs-room-image {
+  max-width: 200px;
+  margin: 5px;
+  border-radius: 6px;
+  display: inline-block;
+}
+
+.cjs-image-title {
+  color: #777;
+  margin: "10px 0 5px";
+  font-size: 0.95rem;
+  font-weight: 600;
+}
+
+.cjs-proposal-section {
+  background-color: #f9fafb;
+  border-radius: 8px;
+  padding: 12px;
+  margin-top: 10px;
+}
+
+.cjs-proposal-price {
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: #1e293b;
+}
+
+.cjs-proposal-description {
+  color: #64748b;
+  margin: 8px 0;
+}
+
+.cjs-btn-accept-pay {
+  background-color: green;
+  color: white;
+  text-decoration: none;
+  border-radius: 8px;
+  font-weight: 600;
+  padding: 8px 16px;
+  display: inline-block;
+  margin-top: 8px;
+}
+
+@media (max-width: 768px) {
+  .cjs-company-app-container {
+    grid-template-columns: 1fr;
+  }
+  .cjs-application-data {
+    min-width: 100%;
+  }
+}
