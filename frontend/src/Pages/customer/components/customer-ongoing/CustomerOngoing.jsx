@@ -8,6 +8,8 @@ const CustomerOngoing = () => {
   const [filter, setFilter] = useState("all");
   const [expandedDetails, setExpandedDetails] = useState({});
   const [loading, setLoading] = useState(true);
+  const [revisionFeedback, setRevisionFeedback] = useState({});
+  const [showRevisionModal, setShowRevisionModal] = useState(null);
 
   // Fetch projects from API
   useEffect(() => {
@@ -31,6 +33,63 @@ const CustomerOngoing = () => {
       ...prev,
       [id]: !prev[id],
     }));
+  };
+
+  const handleApproveMilestone = async (projectId, milestonePercentage) => {
+    if (!window.confirm(`Are you satisfied with the ${milestonePercentage}% milestone progress?`)) {
+      return;
+    }
+
+    try {
+      const res = await axios.post(
+        "/api/customer/approve-milestone",
+        { projectId, milestonePercentage },
+        { withCredentials: true }
+      );
+
+      if (res.data.success) {
+        alert(res.data.message);
+        // Refresh projects
+        const projectsRes = await axios.get("/api/ongoing_projects", {
+          withCredentials: true,
+        });
+        setProjects(projectsRes.data.projects || []);
+      }
+    } catch (err) {
+      console.error("Error approving milestone:", err);
+      alert(err.response?.data?.error || "Failed to approve milestone");
+    }
+  };
+
+  const handleRequestRevision = async (projectId, milestonePercentage) => {
+    const feedback = revisionFeedback[`${projectId}_${milestonePercentage}`];
+    
+    if (!feedback || feedback.trim() === "") {
+      alert("Please provide feedback for the revision request");
+      return;
+    }
+
+    try {
+      const res = await axios.post(
+        "/api/customer/request-milestone-revision",
+        { projectId, milestonePercentage, feedback },
+        { withCredentials: true }
+      );
+
+      if (res.data.success) {
+        alert(res.data.message);
+        setShowRevisionModal(null);
+        setRevisionFeedback({});
+        // Refresh projects
+        const projectsRes = await axios.get("/api/ongoing_projects", {
+          withCredentials: true,
+        });
+        setProjects(projectsRes.data.projects || []);
+      }
+    } catch (err) {
+      console.error("Error requesting revision:", err);
+      alert(err.response?.data?.error || "Failed to request revision");
+    }
   };
 
   const filteredProjects =
@@ -144,13 +203,164 @@ const CustomerOngoing = () => {
                     </div>
                   </div>
 
-                  {/* EXPANDABLE DETAILS */}
+                    {/* EXPANDABLE DETAILS */}
                   <div
                     className={`co-view-details ${
                       expandedDetails[project._id] ? "active" : ""
                     }`}
                     id={`details-${project._id}`}
                   >
+                    {/* Milestone Progress Section */}
+                    {project.milestones && project.milestones.length > 0 && (
+                      <>
+                        <h3>Project Milestones & Progress Reports</h3>
+                        <div className="co-milestones-list" style={{ marginBottom: "20px" }}>
+                          {project.milestones
+                            .sort((a, b) => a.percentage - b.percentage)
+                            .filter((m) => m.isCheckpoint)
+                            .map((milestone, idx) => (
+                              <div key={idx} className="co-milestone-item" style={{
+                                backgroundColor: milestone.isApprovedByCustomer ? "#d4edda" : milestone.needsRevision ? "#ffe6e6" : "#fff3cd",
+                                border: `2px solid ${milestone.isApprovedByCustomer ? "#28a745" : milestone.needsRevision ? "#dc3545" : "#ffc107"}`,
+                                borderRadius: "8px",
+                                padding: "15px",
+                                marginBottom: "15px"
+                              }}>
+                                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "10px" }}>
+                                  <div>
+                                    <h4 style={{ margin: 0, color: "#333" }}>
+                                      {milestone.percentage}% Milestone
+                                      {milestone.isApprovedByCustomer ? (
+                                        <span style={{ marginLeft: "10px", color: "#28a745", fontSize: "0.9em" }}>
+                                          ✓ Approved by You
+                                        </span>
+                                      ) : milestone.needsRevision ? (
+                                        <span style={{ marginLeft: "10px", color: "#dc3545", fontSize: "0.9em" }}>
+                                          ⚠ Revision Requested - Awaiting Company Update
+                                        </span>
+                                      ) : (
+                                        <span style={{ marginLeft: "10px", color: "#856404", fontSize: "0.9em" }}>
+                                          ⏳ Awaiting Your Approval
+                                        </span>
+                                      )}
+                                    </h4>
+                                    <div style={{ fontSize: "0.85em", color: "#666", marginTop: "5px" }}>
+                                      Submitted: {new Date(milestone.submittedAt).toLocaleDateString("en-IN", {
+                                        day: "numeric",
+                                        month: "long",
+                                        year: "numeric",
+                                        hour: "2-digit",
+                                        minute: "2-digit"
+                                      })}
+                                      {milestone.approvedAt && (
+                                        <span style={{ marginLeft: "15px" }}>
+                                          Approved: {new Date(milestone.approvedAt).toLocaleDateString("en-IN", {
+                                            day: "numeric",
+                                            month: "long",
+                                            year: "numeric"
+                                          })}
+                                        </span>
+                                      )}
+                                    </div>
+                                  </div>
+                                </div>
+                                <div style={{
+                                  backgroundColor: "white",
+                                  padding: "12px",
+                                  borderRadius: "6px",
+                                  marginTop: "10px"
+                                }}>
+                                  <strong style={{ display: "block", marginBottom: "8px", color: "#555" }}>Company Progress Report:</strong>
+                                  <p style={{ margin: 0, lineHeight: "1.6", color: "#333" }}>{milestone.companyMessage}</p>
+                                </div>
+                                {milestone.needsRevision && milestone.customerFeedback && (
+                                  <div style={{
+                                    backgroundColor: "#fff3cd",
+                                    padding: "12px",
+                                    borderRadius: "6px",
+                                    marginTop: "10px",
+                                    border: "1px solid #ffc107"
+                                  }}>
+                                    <strong style={{ display: "block", marginBottom: "8px", color: "#856404" }}>Your Feedback:</strong>
+                                    <p style={{ margin: 0, lineHeight: "1.6", color: "#333" }}>{milestone.customerFeedback}</p>
+                                  </div>
+                                )}
+                                {!milestone.isApprovedByCustomer && !milestone.needsRevision && (
+                                  <div style={{ marginTop: "15px", display: "flex", gap: "10px" }}>
+                                    <button
+                                      className="co-view-details-btn"
+                                      style={{ backgroundColor: "#28a745", color: "white", border: "none", padding: "10px 20px", borderRadius: "6px", cursor: "pointer" }}
+                                      onClick={() => handleApproveMilestone(project._id, milestone.percentage)}
+                                    >
+                                      ✓ Approve & Proceed
+                                    </button>
+                                    <button
+                                      className="co-view-details-btn"
+                                      style={{ backgroundColor: "#ffc107", color: "#333", border: "none", padding: "10px 20px", borderRadius: "6px", cursor: "pointer" }}
+                                      onClick={() => setShowRevisionModal(`${project._id}_${milestone.percentage}`)}
+                                    >
+                                      ⚠ Request Revision
+                                    </button>
+                                  </div>
+                                )}
+                                {showRevisionModal === `${project._id}_${milestone.percentage}` && (
+                                  <div style={{
+                                    marginTop: "15px",
+                                    padding: "15px",
+                                    backgroundColor: "white",
+                                    borderRadius: "6px",
+                                    border: "2px solid #ffc107"
+                                  }}>
+                                    <label style={{ display: "block", marginBottom: "8px", fontWeight: "600", color: "#333" }}>
+                                      Provide feedback for revision:
+                                    </label>
+                                    <textarea
+                                      style={{
+                                        width: "100%",
+                                        padding: "10px",
+                                        borderRadius: "4px",
+                                        border: "1px solid #ddd",
+                                        minHeight: "80px",
+                                        resize: "vertical"
+                                      }}
+                                      placeholder="Please specify what needs to be revised or improved..."
+                                      value={revisionFeedback[`${project._id}_${milestone.percentage}`] || ""}
+                                      onChange={(e) => setRevisionFeedback(prev => ({
+                                        ...prev,
+                                        [`${project._id}_${milestone.percentage}`]: e.target.value
+                                      }))}
+                                    />
+                                    <div style={{ marginTop: "10px", display: "flex", gap: "10px" }}>
+                                      <button
+                                        className="co-view-details-btn"
+                                        style={{ backgroundColor: "#ffc107", color: "#333", border: "none", padding: "8px 16px", borderRadius: "6px", cursor: "pointer" }}
+                                        onClick={() => handleRequestRevision(project._id, milestone.percentage)}
+                                      >
+                                        Submit Revision Request
+                                      </button>
+                                      <button
+                                        className="co-view-details-btn"
+                                        style={{ backgroundColor: "#6c757d", color: "white", border: "none", padding: "8px 16px", borderRadius: "6px", cursor: "pointer" }}
+                                        onClick={() => {
+                                          setShowRevisionModal(null);
+                                          setRevisionFeedback(prev => {
+                                            const newState = { ...prev };
+                                            delete newState[`${project._id}_${milestone.percentage}`];
+                                            return newState;
+                                          });
+                                        }}
+                                      >
+                                        Cancel
+                                      </button>
+                                    </div>
+                                  </div>
+                                )}
+                              </div>
+                            ))}
+                        </div>
+                      </>
+                    )}
+
                     {/* All Images */}
                     <h3>All Images</h3>
                     <div className="co-images">

@@ -80,6 +80,8 @@ const getOngoingProjects = async (req, res) => {
       projectObj.currentPhase = 'Update current ';
       projectObj.siteFilepaths = projectObj.siteFilepaths || [];
       projectObj.floors = projectObj.floors || [];
+      projectObj.milestones = projectObj.milestones || [];
+      projectObj.recentUpdates = projectObj.recentUpdates || [];
       return projectObj;
     });
 
