@@ -30,7 +30,7 @@ const App = () => {
         }
       />
       <Route
-        path="/workerdashboard"
+        path="/workerdashboard/*"
         element={
           <ProtectedRoute role="worker">
             <Worker />
