@@ -122,8 +122,29 @@ const Settings = () => {
     }
   };
 
-  const handleLogout = () => {
-    window.location.href = '/logout';
+  const handleLogout = async () => {
+    try {
+      const res = await fetch('/api/logout', {
+        method: 'GET',
+        credentials: 'include',
+        headers: { Accept: 'application/json' }
+      });
+
+      // Clear any client-side session caches
+      localStorage.removeItem('user');
+      sessionStorage.clear();
+
+      // Redirect to landing page regardless of response body
+      if (res.ok) {
+        navigate('http://localhost:5173/');
+      } else {
+        // Fallback in case API not reachable
+        window.location.href = '/';
+      }
+    } catch (e) {
+      // Network error fallback
+      window.location.href = '/';
+    }
   };
 
   if (!user) {

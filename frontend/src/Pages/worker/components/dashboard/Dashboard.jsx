@@ -46,7 +46,7 @@ const Dashboard = () => {
 
   if (loading) {
     return (
-      <div className="container">
+      <div className="wkd-container">
         <div style={{ textAlign: 'center', padding: '2rem' }}>Loading Dashboard...</div>
       </div>
     );
@@ -54,7 +54,7 @@ const Dashboard = () => {
 
   if (error) {
     return (
-      <div className="container">
+      <div className="wkd-container">
         <div style={{ textAlign: 'center', padding: '2rem', color: 'red' }}>Error: {error}</div>
       </div>
     );
@@ -64,9 +64,9 @@ const Dashboard = () => {
 
   return (
     <main className="wkd-dashboard">
-      <div className="container">
-        <div className="dashboard-header">
-          <h1 className="dashboard-title">Welcome, {workerName}</h1>
+      <div className="wkd-container">
+        <div className="wkd-dashboard-header">
+          <h1 className="wkd-dashboard-title">Welcome, {workerName}</h1>
         </div>
 
         <StatsGrid stats={stats} availability={user.availability} />

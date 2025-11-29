@@ -13,34 +13,34 @@ body {
 }
 
 /* Worker Dashboard Namespaced Styles */
-.wkd-dashboard .container {
+.wkd-dashboard .wkd-container {
   width: 95%;
   max-width: 1400px;
   margin: 0 auto;
   padding: 2rem 15px;
 }
 
-.wkd-dashboard .dashboard-header {
+.wkd-dashboard .wkd-dashboard-header {
   margin-bottom: 2rem;
   display: flex;
   justify-content: space-between;
   align-items: center;
 }
 
-.wkd-dashboard .dashboard-title {
+.wkd-dashboard .wkd-dashboard-title {
   font-size: 2rem;
   font-weight: 600;
   color: var(--primary-color);
 }
 
-.wkd-dashboard .stats-grid {
+.wkd-dashboard .wkd-stats-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
   gap: 1.5rem;
   margin-bottom: 2.5rem;
 }
 
-.wkd-dashboard .stat-card {
+.wkd-dashboard .wkd-stat-card {
   background-color: var(--card-bg);
   border-radius: 12px;
   padding: 1.5rem;
@@ -51,12 +51,12 @@ body {
   flex-direction: column;
 }
 
-.wkd-dashboard .stat-card:hover {
+.wkd-dashboard .wkd-stat-card:hover {
   transform: translateY(-5px);
   box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
 }
 
-.wkd-dashboard .stat-card h3 {
+.wkd-dashboard .wkd-stat-card h3 {
   font-size: 1rem;
   color: var(--text-light);
   margin-bottom: 0.5rem;
@@ -65,7 +65,7 @@ body {
   width: 100%;
 }
 
-.wkd-dashboard .stat-card .stat-value {
+.wkd-dashboard .wkd-stat-card .wkd-stat-value {
   font-size: 2.25rem;
   font-weight: 600;
   color: var(--primary-color);
@@ -73,36 +73,36 @@ body {
   width: 100%;
 }
 
-.wkd-dashboard .card-section {
+.wkd-dashboard .wkd-card-section {
   margin-bottom: 3rem;
 }
 
-.wkd-dashboard .section-header {
+.wkd-dashboard .wkd-section-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
   margin-bottom: 1.5rem;
 }
 
-.wkd-dashboard .section-title {
+.wkd-dashboard .wkd-section-title {
   font-size: 1.5rem;
   font-weight: 600;
   color: var(--primary-color);
 }
 
-.wkd-dashboard .view-all-link {
+.wkd-dashboard .wkd-view-all-link {
   color: var(--secondary-color);
   text-decoration: none;
   font-weight: 500;
   transition: var(--transition);
 }
 
-.wkd-dashboard .view-all-link:hover {
+.wkd-dashboard .wkd-view-all-link:hover {
   color: var(--primary-color);
   text-decoration: underline;
 }
 
-.wkd-dashboard .cards-container {
+.wkd-dashboard .wkd-cards-container {
   display: grid;
   grid-auto-flow: column;
   grid-auto-columns: minmax(320px, 1fr);
@@ -113,11 +113,11 @@ body {
   scrollbar-width: none;
 }
 
-.wkd-dashboard .cards-container::-webkit-scrollbar {
+.wkd-dashboard .wkd-cards-container::-webkit-scrollbar {
   display: none;
 }
 
-.wkd-dashboard .card {
+.wkd-dashboard .wkd-card {
   background-color: var(--card-bg);
   border-radius: 12px;
   box-shadow: var(--shadow);
@@ -127,74 +127,79 @@ body {
   flex-direction: column;
 }
 
-.wkd-dashboard .card:hover {
+.wkd-dashboard .wkd-card:hover {
   transform: translateY(-5px);
 }
 
-.wkd-dashboard .card-header {
+.wkd-dashboard .wkd-card-header {
   padding: 1rem 1.5rem;
   border-bottom: 1px solid var(--border-color);
 }
 
-.wkd-dashboard .card-company {
+.wkd-dashboard .wkd-card-company {
   font-size: 1.2rem;
   color: var(--primary-color);
   font-weight: 600;
   margin-bottom: 0.25rem;
 }
 
-.wkd-dashboard .card-location {
+.wkd-dashboard .wkd-card-location {
   font-size: 0.9rem;
   color: var(--text-light);
 }
 
-.wkd-dashboard .card-body {
+.wkd-dashboard .wkd-card-body {
   padding: 1.5rem;
   flex-grow: 1;
   display: flex;
   flex-direction: column;
 }
 
-.wkd-dashboard .card-description {
+.wkd-dashboard .wkd-card-description {
   margin-bottom: 1rem;
   font-size: 0.95rem;
   line-height: 1.5;
   flex-grow: 1;
 }
 
-.wkd-dashboard .card-details {
+.wkd-dashboard .wkd-card-details {
   display: flex;
   justify-content: space-between;
+  gap: 1rem;
   font-size: 0.9rem;
   margin-top: auto;
 }
 
-.wkd-dashboard .card-detail {
+.wkd-dashboard .wkd-card-detail {
+  display: flex;
+  flex-direction: column;
   text-align: center;
 }
 
-.wkd-dashboard .detail-label {
+.wkd-dashboard .wkd-detail-label {
   font-weight: 500;
   color: var(--text-light);
   margin-bottom: 0.25rem;
+  display: block;
 }
 
-.wkd-dashboard .detail-label::after {
+.wkd-dashboard .wkd-detail-label::after {
   content: ": ";
 }
 
-.wkd-dashboard .detail-value {
+.wkd-dashboard .wkd-detail-value {
   color: var(--text-color);
   font-weight: 600;
+  display: block;
 }
 
-.wkd-dashboard .card-actions {
+.wkd-dashboard .wkd-card-actions {
   padding: 1rem 1.5rem;
   background-color: #f5f7fa;
   text-align: right;
 }
 
-.wkd-dashboard .btn {
+.wkd-dashboard .wkd-btn {
   padding: 0.75rem 1.5rem;
   border: none;
   border-radius: 8px;
@@ -205,61 +210,66 @@ body {
   display: inline-block;
 }
 
-.wkd-dashboard .btn:hover {
-  background-color: var(--primary-color);
+.wkd-dashboard .wkd-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
 }
 
-.wkd-dashboard .btn-primary {
+.wkd-dashboard .wkd-btn-primary {
   background-color: var(--secondary-color);
   color: #ffffff;
 }
 
-.wkd-dashboard .no-data {
+.wkd-dashboard .wkd-btn-primary:hover {
+  background-color: var(--primary-color);
+}
+
+.wkd-dashboard .wkd-no-data {
   font-size: 1rem;
   color: var(--text-light);
   text-align: center;
   padding: 2rem;
   background-color: #f9fafb;
   border-radius: 12px;
-  grid-column: 1 / -1; /* Make it span the full width of the container */
+  grid-column: 1 / -1;
 }
 
-.wkd-dashboard .no-data h4 {
+.wkd-dashboard .wkd-no-data h4 {
   color: var(--text-color);
   margin-bottom: 0.5rem;
   font-size: 1.2rem;
   font-style: normal;
 }
 
-.wkd-dashboard .no-data p {
+.wkd-dashboard .wkd-no-data p {
   font-style: normal;
 }
 
 /* Responsive adjustments */
 @media (max-width: 768px) {
-  .wkd-dashboard .container {
+  .wkd-dashboard .wkd-container {
     padding: 1rem 10px;
   }
 
-  .wkd-dashboard .dashboard-title {
+  .wkd-dashboard .wkd-dashboard-title {
     font-size: 1.5rem;
   }
 
-  .wkd-dashboard .stats-grid {
+  .wkd-dashboard .wkd-stats-grid {
     grid-template-columns: repeat(1, 1fr);
     gap: 1rem;
   }
 
-  .wkd-dashboard .cards-container {
+  .wkd-dashboard .wkd-cards-container {
     grid-auto-columns: 100%;
     gap: 1rem;
   }
 
-  .wkd-dashboard .card {
+  .wkd-dashboard .wkd-card {
     min-width: auto;
   }
 
-  .wkd-dashboard .section-header {
+  .wkd-dashboard .wkd-section-header {
     flex-direction: column;
     align-items: flex-start;
     gap: 0.5rem;
