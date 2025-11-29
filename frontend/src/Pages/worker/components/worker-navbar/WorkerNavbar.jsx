@@ -2,135 +2,137 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import './WorkerNavbar.css';
 
-const WorkerNavbar = () => {
+const WorkerNavbar = ({ user }) => {
   const navigate = useNavigate();
   const location = useLocation();
-  const [user, setUser] = useState(null);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [activePage, setActivePage] = useState('');
 
-  useEffect(() => {
-    // Get user data from localStorage
-    const userData = localStorage.getItem('user');
-    if (userData) {
-      try {
-        setUser(JSON.parse(userData));
-      } catch (err) {
-        console.error('Error parsing user data:', err);
-      }
-    }
+  const currentUser = user || JSON.parse(localStorage.getItem('user') || '{}');
 
+  useEffect(() => {
     // Determine active page based on current route
     const path = location.pathname;
-    if (path.includes('dashboard')) {
+    if (path === '/workerdashboard' || path === '/workerdashboard/' || path === '/worker/dashboard') {
       setActivePage('dashboard');
-    } else if (path.includes('jobs')) {
+    } else if (path.includes('/jobs')) {
       setActivePage('jobs');
-    } else if (path.includes('join-company')) {
+    } else if (path.includes('/join_company')) {
       setActivePage('join');
-    } else if (path.includes('ongoing')) {
+    } else if (path.includes('/ongoing-projects')) {
       setActivePage('ongoing');
-    } else if (path.includes('my-company')) {
+    } else if (path.includes('/my-company')) {
       setActivePage('my-company');
+    } else {
+      setActivePage('');
     }
   }, [location]);
 
   const handleLogout = () => {
-    localStorage.removeItem('token');
-    localStorage.removeItem('user');
-    navigate('/login');
-  };
-
-  const handleNavigation = (path) => {
-    navigate(path);
+    localStorage.removeItem('user'); // Clear localStorage
+    navigate('/'); // Or window.location.href = '/logout' for server-side
     setIsDropdownOpen(false);
   };
 
-  const profileImage = user?.profileImage || 'https://t4.ftcdn.net/jpg/03/64/21/11/360_F_364211147_1qgLVxv1Tcq0Ohz3FawUfrtONzz8nq3e.jpg';
+  const handleNavigation = (path, hash = '') => {
+    navigate(path + hash);
+    setIsDropdownOpen(false);
+  };
+
+  const toggleDropdown = (e) => {
+    e.stopPropagation();
+    setIsDropdownOpen(!isDropdownOpen);
+  };
+
+  const closeDropdown = () => setIsDropdownOpen(false);
+
+  const placeholderImg = 'https://t4.ftcdn.net/jpg/03/64/21/11/360_F_364211147_1qgLVxv1Tcq0Ohz3FawUfrtONzz8nq3e.jpg';
+  const profileImage = currentUser.profileImage || placeholderImg;
 
   return (
-    <nav className="navbar">
-      <a href="/worker/dashboard" className="navbar-left">
-        <i className="fas fa-building"></i> Build & Beyond
+    <nav className="wkb-navbar" onMouseLeave={closeDropdown}>
+      <a
+        href="/workerdashboard"
+        className="wkb-navbar-left"
+        onClick={(e) => {
+          e.preventDefault();
+          handleNavigation('/workerdashboard');
+        }}
+      >
+        Build & Beyond
       </a>
 
-      <div className="navbar-middle">
+      <div className="wkb-navbar-middle">
         <button
-          className={`nav-link ${activePage === 'dashboard' ? 'active' : ''}`}
-          onClick={() => handleNavigation('/worker/dashboard')}
+          className={`wkb-nav-link ${activePage === 'dashboard' ? 'active' : ''}`}
+          onClick={() => handleNavigation('/workerdashboard')}
         >
           Dashboard
         </button>
         <button
-          className={`nav-link ${activePage === 'jobs' ? 'active' : ''}`}
-          onClick={() => handleNavigation('/worker/jobs')}
+          className={`wkb-nav-link ${activePage === 'jobs' ? 'active' : ''}`}
+          onClick={() => handleNavigation('/workerdashboard/jobs')}
         >
           New Jobs
         </button>
         <button
-          className={`nav-link ${activePage === 'join' ? 'active' : ''}`}
-          onClick={() => handleNavigation('/worker/join-company')}
+          className={`wkb-nav-link ${activePage === 'join' ? 'active' : ''}`}
+          onClick={() => handleNavigation('/workerdashboard/join_company')}
         >
           Join a Company
         </button>
         <button
-          className={`nav-link ${activePage === 'ongoing' ? 'active' : ''}`}
-          onClick={() => handleNavigation('/worker/ongoing-projects')}
+          className={`wkb-nav-link ${activePage === 'ongoing' ? 'active' : ''}`}
+          onClick={() => handleNavigation('/workerdashboard/ongoing-projects')}
         >
           Ongoing Projects
         </button>
         <button
-          className={`nav-link ${activePage === 'my-company' ? 'active' : ''}`}
-          onClick={() => handleNavigation('/worker/my-company')}
+          className={`wkb-nav-link ${activePage === 'my-company' ? 'active' : ''}`}
+          onClick={() => handleNavigation('/workerdashboard/my-company')}
         >
           My Company
         </button>
       </div>
 
-      <div className="navbar-right">
-        <div
-          className="profile-icon"
-          onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-        >
-          <img src={profileImage} alt="Profile" title={user?.name || 'User'} />
+      <div
+        className="wkb-navbar-right"
+        onMouseEnter={() => setIsDropdownOpen(true)}
+        onMouseLeave={() => setIsDropdownOpen(false)}
+      >
+        <div className="wkb-profile-icon" onClick={() => handleNavigation('/workerdashboard/settings')}>
+          <img
+            src={profileImage}
+            alt="Profile"
+            onError={(e) => { e.currentTarget.src = placeholderImg; }}
+          />
         </div>
-
-        {isDropdownOpen && (
-          <div className="profile-dropdown">
-            <div className="profile-dropdown-content">
-              <button
-                className="dropdown-link"
-                onClick={() => handleNavigation('/worker/settings')}
-              >
-                <i className="fas fa-user-circle"></i> Profile
-              </button>
-              <button
-                className="dropdown-link"
-                onClick={() => handleNavigation('/worker/settings')}
-              >
-                <i className="fas fa-calendar-check"></i> Availability
-              </button>
-              <button
-                className="dropdown-link"
-                onClick={() => handleNavigation('/worker/settings')}
-              >
-                <i className="fas fa-lock"></i> Security
-              </button>
-              <div className="dropdown-divider"></div>
-              <button className="dropdown-link logout-link" onClick={handleLogout}>
-                <i className="fas fa-sign-out-alt"></i> Logout
-              </button>
-            </div>
+        <div className={`wkb-profile-dropdown ${isDropdownOpen ? 'show' : ''}`}>
+          <div className="wkb-profile-dropdown-content">
+            <button
+              className="wkb-dropdown-link"
+              onClick={() => handleNavigation('/workerdashboard/settings', '#profile')}
+            >
+              <i className="fas fa-user-circle"></i> Profile
+            </button>
+            <button
+              className="wkb-dropdown-link"
+              onClick={() => handleNavigation('/workerdashboard/settings', '#availability')}
+            >
+              <i className="fas fa-calendar-check"></i> Availability
+            </button>
+            <button
+              className="wkb-dropdown-link"
+              onClick={() => handleNavigation('/workerdashboard/settings', '#security')}
+            >
+              <i className="fas fa-lock"></i> Security
+            </button>
+            <button className="wkb-dropdown-link wkb-logout-link" onClick={handleLogout}>
+              <i className="fas fa-sign-out-alt"></i> Logout
+            </button>
           </div>
-        )}
+        </div>
       </div>
-
-      {isDropdownOpen && (
-        <div
-          className="navbar-backdrop"
-          onClick={() => setIsDropdownOpen(false)}
-        />
-      )}
     </nav>
   );
 };
