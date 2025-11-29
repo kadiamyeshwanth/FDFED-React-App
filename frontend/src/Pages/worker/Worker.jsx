@@ -9,6 +9,7 @@ import MyCompany from './components/MyCompany/MyCompany';
 import Settings from './components/Settings/Settings';
 import ProfileEdit from './components/ProfileEdit/ProfileEdit';
 import InteriorDesignerJobs from './components/InteriorDesignerJobs/InteriorDesignerJobs';
+import './Worker.css';
 
 const WorkerLayout = () => {
   return (
