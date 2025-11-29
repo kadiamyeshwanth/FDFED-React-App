@@ -301,9 +301,23 @@ const updateProject = async (req, res) => {
     const project = await ConstructionProjectSchema.findById(projectId);
     if (!project) return res.status(404).json({ message: "Project not found" });
 
+<<<<<<< Updated upstream
     // Handle milestone updates with validation
     if (milestonePercentage) {
       const milestonePercent = parseInt(milestonePercentage);
+=======
+    // Determine incoming progress value (support legacy completionPercentage field)
+    const incomingProgressRaw = milestonePercentage ?? completionPercentage;
+    if (incomingProgressRaw !== undefined && incomingProgressRaw !== null && incomingProgressRaw !== '') {
+      const progressValue = parseInt(incomingProgressRaw, 10);
+      if (Number.isNaN(progressValue)) {
+        return res.status(400).json({ message: "Progress value must be a number." });
+      }
+      if (progressValue < 0 || progressValue > 100) {
+        return res.status(400).json({ message: "Progress must be between 0 and 100." });
+      }
+
+>>>>>>> Stashed changes
       const checkpoints = [25, 50, 75, 100];
       const isCheckpoint = checkpoints.includes(milestonePercent);
       
@@ -595,6 +609,58 @@ const approveMilestone = async (req, res) => {
   }
 };
 
+<<<<<<< Updated upstream
+=======
+const requestMilestoneRevision = async (req, res) => {
+  try {
+    const { projectId, milestonePercentage, feedback } = req.body;
+    const customerId = req.user.user_id;
+
+    if (!projectId || !milestonePercentage) {
+      return res.status(400).json({ error: "Project ID and milestone percentage are required" });
+    }
+
+    if (!feedback || feedback.trim() === "") {
+      return res.status(400).json({ error: "Please provide feedback for the revision request" });
+    }
+
+    const project = await ConstructionProjectSchema.findOne({
+      _id: projectId,
+      customerId: customerId
+    });
+
+    if (!project) {
+      return res.status(404).json({ error: "Project not found or you don't have permission" });
+    }
+
+    const milestone = project.milestones.find(m => m.percentage === parseInt(milestonePercentage) && m.isCheckpoint);
+    
+    if (!milestone) {
+      return res.status(404).json({ error: `Checkpoint ${milestonePercentage}% not found` });
+    }
+
+    if (milestone.isApprovedByCustomer) {
+      return res.status(400).json({ error: "Cannot request revision for already approved milestone" });
+    }
+
+    milestone.needsRevision = true;
+    milestone.customerFeedback = feedback;
+    milestone.feedbackAt = new Date();
+
+    await project.save();
+
+    res.status(200).json({ 
+      success: true, 
+      message: `Revision requested for ${milestonePercentage}% milestone. Company can now update their message.`,
+      milestone 
+    });
+  } catch (error) {
+    console.error("Error requesting milestone revision:", error);
+    res.status(500).json({ error: "Server error" });
+  }
+};
+
+>>>>>>> Stashed changes
 module.exports = {
   submitArchitect,
   submitDesignRequest,
@@ -609,4 +675,8 @@ module.exports = {
   acceptWorkerRequest,
   rejectWorkerRequest,
   approveMilestone,
+<<<<<<< Updated upstream
+=======
+  requestMilestoneRevision,
+>>>>>>> Stashed changes
 };
