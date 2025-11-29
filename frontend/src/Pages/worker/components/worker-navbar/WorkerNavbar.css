@@ -1,6 +1,5 @@
-/* Worker Navbar Styles */
-
-.navbar {
+/* Worker worker-navbar (namespaced wkb-* only for isolation) */
+.wkb-navbar {
   position: sticky;
   top: 0;
   left: 0;
@@ -12,140 +11,103 @@
   justify-content: space-between;
   align-items: center;
   padding: 0 20px;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
   z-index: 1000;
-  font-family: 'Poppins', sans-serif;
+  font-family: 'Arial', sans-serif; /* Or import Poppins via index.html */
 }
 
-.navbar-left {
+.wkb-navbar-left {
   font-weight: bold;
   font-size: 1.2rem;
   color: white;
   text-decoration: none;
-  transition: color 0.3s ease;
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
+  transition: color 0.3s;
   cursor: pointer;
   background: none;
   border: none;
   padding: 0;
 }
 
-.navbar-left:hover {
+.wkb-navbar-left:hover {
   color: #e9c46a;
 }
 
-.navbar-left i {
-  font-size: 1.4rem;
-}
-
-/* Middle Navigation Links */
-.navbar-middle {
+.wkb-navbar-middle {
   display: flex;
   gap: 20px;
-  flex: 1;
-  justify-content: center;
 }
 
-.nav-link {
-  background: none;
-  border: none;
+.wkb-nav-link {
   color: white;
   text-decoration: none;
-  padding: 8px 12px;
+  padding: 5px 10px;
   border-radius: 5px;
-  transition: all 0.3s ease;
+  transition: background-color 0.3s;
+  background: none;
+  border: none;
   cursor: pointer;
-  font-family: inherit;
   font-size: 0.95rem;
   font-weight: 500;
-  position: relative;
 }
 
-.nav-link:hover {
+.wkb-nav-link:hover {
   background-color: rgba(255, 255, 255, 0.1);
 }
 
-.nav-link.active {
+.wkb-nav-link.active {
   background-color: rgba(255, 255, 255, 0.2);
-  color: #e9c46a;
-}
-
-.nav-link.active::after {
-  content: '';
-  position: absolute;
-  bottom: -8px;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 80%;
-  height: 2px;
-  background-color: #e9c46a;
-  border-radius: 1px;
+  color: #e9c46a; /* A bright color to indicate active state */
 }
 
 /* Profile Section */
-.navbar-right {
-  position: relative;
+.wkb-navbar-right {
+  position: relative; /* This is the main container for hover */
 }
 
-.profile-icon {
+.wkb-profile-icon {
   width: 40px;
   height: 40px;
   border-radius: 50%;
   cursor: pointer;
   border: 2px solid #6c5ce7;
   overflow: hidden;
-  transition: all 0.3s ease;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  transition: border-color 0.3s ease;
 }
 
-.profile-icon:hover {
+.wkb-profile-icon:hover {
   border-color: #e9c46a;
-  box-shadow: 0 0 8px rgba(233, 196, 106, 0.3);
 }
 
-.profile-icon img {
+.wkb-profile-icon img {
   width: 100%;
   height: 100%;
   object-fit: cover;
   border-radius: 50%;
 }
 
-/* Dropdown Menu */
-.profile-dropdown {
-  display: block;
+.wkb-profile-dropdown {
+  display: none;
   position: absolute;
   right: 0;
-  top: 100%;
-  margin-top: 8px;
-  background-color: transparent;
-  width: 220px;
+  top: 100%; /* Position directly below the navbar */
+  padding-top: 10px; /* This creates space but is part of the hover area */
+  background-color: transparent; /* Make the container transparent */
+  width: 200px;
   z-index: 1001;
-  animation: slideDown 0.2s ease-out;
 }
 
-@keyframes slideDown {
-  from {
-    opacity: 0;
-    transform: translateY(-10px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+.wkb-profile-dropdown.show {
+  display: block;
 }
 
-.profile-dropdown-content {
+.wkb-profile-dropdown-content {
   background-color: white;
   border-radius: 8px;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
   overflow: hidden;
 }
 
-.dropdown-link {
+.wkb-dropdown-link {
   display: flex;
   align-items: center;
   gap: 10px;
@@ -158,77 +120,58 @@
   width: 100%;
   text-align: left;
   cursor: pointer;
-  font-family: inherit;
-  transition: all 0.2s ease;
+  transition: background-color 0.3s ease;
 }
 
-.dropdown-link:hover {
+.wkb-dropdown-link:hover {
   background-color: #f5f7fa;
-  padding-left: 18px;
 }
 
-.dropdown-link i {
+.wkb-dropdown-link i {
+  color: #6c5ce7;
   width: 18px;
   text-align: center;
-  color: #6c5ce7;
 }
 
-.dropdown-divider {
-  height: 1px;
-  background-color: #e0e0e0;
-  margin: 8px 0;
-}
-
-.logout-link {
+.wkb-logout-link {
   color: #e74c3c;
 }
 
-.logout-link:hover {
+.wkb-logout-link:hover {
   background-color: #ffe5e0;
 }
 
-.logout-link i {
+.wkb-logout-link i {
   color: #e74c3c;
-}
-
-/* Navbar Backdrop */
-.navbar-backdrop {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  z-index: 999;
-  background: transparent;
 }
 
 /* Responsive Design */
 @media (max-width: 1024px) {
-  .navbar-middle {
+  .wkb-navbar-middle {
     gap: 15px;
   }
 
-  .nav-link {
+  .wkb-nav-link {
     padding: 6px 10px;
     font-size: 0.9rem;
   }
 }
 
 @media (max-width: 768px) {
-  .navbar {
+  .wkb-navbar {
     height: auto;
     padding: 10px 15px;
     flex-wrap: wrap;
   }
 
-  .navbar-left {
+  .wkb-navbar-left {
     font-size: 1rem;
     order: 1;
     flex-basis: 100%;
     margin-bottom: 10px;
   }
 
-  .navbar-middle {
+  .wkb-navbar-middle {
     order: 2;
     flex-basis: 100%;
     gap: 10px;
@@ -236,79 +179,56 @@
     flex-wrap: wrap;
   }
 
-  .nav-link {
+  .wkb-nav-link {
     padding: 6px 8px;
     font-size: 0.85rem;
   }
 
-  .navbar-right {
+  .wkb-navbar-right {
     order: 3;
   }
 
-  .profile-dropdown {
+  .wkb-profile-dropdown {
     right: -15px;
     width: 200px;
   }
 }
 
 @media (max-width: 480px) {
-  .navbar {
+  .wkb-navbar {
     padding: 8px 10px;
   }
 
-  .navbar-left {
+  .wkb-navbar-left {
     font-size: 0.95rem;
   }
 
-  .navbar-left i {
-    display: none;
-  }
-
-  .navbar-middle {
+  .wkb-navbar-middle {
     gap: 5px;
   }
 
-  .nav-link {
+  .wkb-nav-link {
     padding: 5px 6px;
     font-size: 0.75rem;
   }
 
-  .nav-link.active::after {
-    bottom: -6px;
-  }
-
-  .profile-icon {
+  .wkb-profile-icon {
     width: 35px;
     height: 35px;
     border-width: 1px;
   }
 
-  .profile-dropdown {
+  .wkb-profile-dropdown {
     right: -20px;
     width: 180px;
   }
 
-  .dropdown-link {
+  .wkb-dropdown-link {
     padding: 10px 12px;
     font-size: 0.9rem;
   }
 
-  .dropdown-link i {
+  .wkb-dropdown-link i {
     font-size: 0.9rem;
-  }
-}
-
-/* Sticky behavior improvements */
-@media (prefers-reduced-motion: reduce) {
-  .profile-dropdown {
-    animation: none;
-  }
-
-  .profile-icon {
-    transition: none;
-  }
-
-  .nav-link {
-    transition: none;
   }
 }
