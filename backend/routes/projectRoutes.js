@@ -1,6 +1,10 @@
 const express = require('express');
 const router = express.Router();
+<<<<<<< Updated upstream
 const { submitArchitect, submitDesignRequest, submitConstructionForm, getProjects, getProjectById, getEditProject, updateProject, submitBid, acceptBid, declineBid, acceptWorkerRequest, rejectWorkerRequest } = require('../controllers/projectController');
+=======
+const { submitArchitect, submitDesignRequest, submitConstructionForm, getProjects, getProjectById, getEditProject, updateProject, submitBid, acceptBid, declineBid, acceptWorkerRequest, rejectWorkerRequest, approveMilestone, requestMilestoneRevision } = require('../controllers/projectController');
+>>>>>>> Stashed changes
 const isAuthenticated = require('../middlewares/auth');
 const { upload } = require('../middlewares/upload');
 
@@ -14,6 +18,11 @@ router.post('/projects/update', upload.fields([{ name: 'mainImage', maxCount: 1 
 router.post('/customer/submit-bid', isAuthenticated, submitBid);
 router.post('/customer/accept-bid', isAuthenticated, acceptBid);
 router.post('/customer/decline-bid', isAuthenticated, declineBid);
+<<<<<<< Updated upstream
+=======
+router.post('/customer/approve-milestone', isAuthenticated, approveMilestone);
+router.post('/customer/request-milestone-revision', isAuthenticated, requestMilestoneRevision);
+>>>>>>> Stashed changes
 router.post('/company/worker-request/accept', isAuthenticated, acceptWorkerRequest);
 router.post('/company/worker-request/reject', isAuthenticated, rejectWorkerRequest);
 

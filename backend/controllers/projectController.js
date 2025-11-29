@@ -289,18 +289,97 @@ const updateProject = async (req, res) => {
   try {
     const {
       projectId,
-      completionPercentage,
+      completionPercentage, // fallback support from older clients
       targetCompletionDate,
       currentPhase,
       updates,
     } = req.body;
-    if (!projectId || !mongoose.Types.ObjectId.isValid(projectId))
-      return res.status(400).json({ message: "Invalid project ID" });
-    const project = await ConstructionProjectSchema.findById(projectId);
-    if (!project) return res.status(404).json({ message: "Project not found" });
 
+    if (!projectId || !mongoose.Types.ObjectId.isValid(projectId)) {
+      return res.status(400).json({ message: "Invalid project ID" });
+    }
+    const project = await ConstructionProjectSchema.findById(projectId);
+    if (!project) {
+      return res.status(404).json({ message: "Project not found" });
+    }
+
+    // Determine incoming progress value (support legacy completionPercentage field)
+    const incomingProgressRaw = milestonePercentage ?? completionPercentage;
+    if (incomingProgressRaw !== undefined && incomingProgressRaw !== null && incomingProgressRaw !== '') {
+      const progressValue = parseInt(incomingProgressRaw, 10);
+      if (Number.isNaN(progressValue)) {
+        return res.status(400).json({ message: "Progress value must be a number." });
+      }
+      if (progressValue < 0 || progressValue > 100) {
+        return res.status(400).json({ message: "Progress must be between 0 and 100." });
+      }
+
+<<<<<<< Updated upstream
     if (completionPercentage)
       project.completionPercentage = parseInt(completionPercentage);
+=======
+      const checkpoints = [25, 50, 75, 100];
+      const isCheckpoint = checkpoints.includes(progressValue);
+
+      // Floor = highest checkpoint reached (approved or not)
+      const reachedCheckpoints = project.milestones.filter(m => m.isCheckpoint).map(m => m.percentage);
+      const floor = reachedCheckpoints.length ? Math.max(...reachedCheckpoints) : 0;
+      const nextCheckpoint = checkpoints.find(c => c > floor) || 100;
+
+      // Cannot go below floor
+      if (progressValue < floor) {
+        return res.status(400).json({ message: `Progress cannot go below ${floor}% (last checkpoint).` });
+      }
+      // Cannot exceed next checkpoint band
+      if (progressValue > nextCheckpoint) {
+        return res.status(400).json({ message: `You may adjust only between ${floor}% and ${nextCheckpoint}%. Reach ${nextCheckpoint}% to create the checkpoint.` });
+      }
+
+      // Require message at checkpoint
+      if (isCheckpoint && !milestoneMessage) {
+        return res.status(400).json({ message: `Please include a message for the ${progressValue}% checkpoint.` });
+      }
+
+      if (isCheckpoint) {
+        const existingCheckpoint = project.milestones.find(m => m.isCheckpoint && m.percentage === progressValue);
+        if (!existingCheckpoint) {
+          // Create new checkpoint
+            project.milestones.push({
+              percentage: progressValue,
+              companyMessage: milestoneMessage,
+              isApprovedByCustomer: false,
+              submittedAt: new Date(),
+              isCheckpoint: true,
+              needsRevision: false
+            });
+        } else {
+          // Allow re-submission if customer requested revision
+          if (existingCheckpoint.needsRevision) {
+            existingCheckpoint.companyMessage = milestoneMessage;
+            existingCheckpoint.submittedAt = new Date();
+            existingCheckpoint.needsRevision = false;
+            existingCheckpoint.customerFeedback = undefined;
+            existingCheckpoint.feedbackAt = undefined;
+          } else if (project.completionPercentage !== progressValue) {
+            // Duplicate checkpoint attempt that differs from stored completion -> block
+            return res.status(400).json({ message: `Checkpoint ${progressValue}% already recorded and waiting for customer review.` });
+          }
+          // else allow silent re-save without duplicating milestone
+        }
+      } else if (milestoneMessage) {
+        // Non-checkpoint progress update with an optional message recorded as recent update
+        project.recentUpdates.push({
+          updateText: milestoneMessage,
+          updateImagePath: null,
+          createdAt: new Date()
+        });
+      }
+
+      // Set current completion
+      project.completionPercentage = progressValue;
+    }
+
+>>>>>>> Stashed changes
     if (targetCompletionDate)
       project.targetCompletionDate = new Date(targetCompletionDate);
     if (currentPhase) project.currentPhase = currentPhase;
@@ -468,6 +547,104 @@ const rejectWorkerRequest = async (req, res) => {
   }
 };
 
+<<<<<<< Updated upstream
+=======
+const approveMilestone = async (req, res) => {
+  try {
+    const { projectId, milestonePercentage } = req.body;
+    const customerId = req.user.user_id;
+
+    if (!projectId || !milestonePercentage) {
+      return res.status(400).json({ error: "Project ID and milestone percentage are required" });
+    }
+
+    const project = await ConstructionProjectSchema.findOne({
+      _id: projectId,
+      customerId: customerId
+    });
+
+    if (!project) {
+      return res.status(404).json({ error: "Project not found or you don't have permission to approve" });
+    }
+
+    const milestone = project.milestones.find(m => m.percentage === parseInt(milestonePercentage));
+    
+    if (!milestone) {
+      return res.status(404).json({ error: `Milestone ${milestonePercentage}% not found` });
+    }
+
+    if (milestone.isApprovedByCustomer) {
+      return res.status(400).json({ error: "Milestone already approved" });
+    }
+
+    milestone.isApprovedByCustomer = true;
+    milestone.approvedAt = new Date();
+    milestone.needsRevision = false;
+    milestone.customerFeedback = undefined;
+
+    await project.save();
+
+    res.status(200).json({ 
+      success: true, 
+      message: `Milestone ${milestonePercentage}% approved successfully`,
+      milestone 
+    });
+  } catch (error) {
+    console.error("Error approving milestone:", error);
+    res.status(500).json({ error: "Server error" });
+  }
+};
+
+const requestMilestoneRevision = async (req, res) => {
+  try {
+    const { projectId, milestonePercentage, feedback } = req.body;
+    const customerId = req.user.user_id;
+
+    if (!projectId || !milestonePercentage) {
+      return res.status(400).json({ error: "Project ID and milestone percentage are required" });
+    }
+
+    if (!feedback || feedback.trim() === "") {
+      return res.status(400).json({ error: "Please provide feedback for the revision request" });
+    }
+
+    const project = await ConstructionProjectSchema.findOne({
+      _id: projectId,
+      customerId: customerId
+    });
+
+    if (!project) {
+      return res.status(404).json({ error: "Project not found or you don't have permission" });
+    }
+
+    const milestone = project.milestones.find(m => m.percentage === parseInt(milestonePercentage) && m.isCheckpoint);
+    
+    if (!milestone) {
+      return res.status(404).json({ error: `Checkpoint ${milestonePercentage}% not found` });
+    }
+
+    if (milestone.isApprovedByCustomer) {
+      return res.status(400).json({ error: "Cannot request revision for already approved milestone" });
+    }
+
+    milestone.needsRevision = true;
+    milestone.customerFeedback = feedback;
+    milestone.feedbackAt = new Date();
+
+    await project.save();
+
+    res.status(200).json({ 
+      success: true, 
+      message: `Revision requested for ${milestonePercentage}% milestone. Company can now update their message.`,
+      milestone 
+    });
+  } catch (error) {
+    console.error("Error requesting milestone revision:", error);
+    res.status(500).json({ error: "Server error" });
+  }
+};
+
+>>>>>>> Stashed changes
 module.exports = {
   submitArchitect,
   submitDesignRequest,
@@ -481,4 +658,9 @@ module.exports = {
   declineBid,
   acceptWorkerRequest,
   rejectWorkerRequest,
+<<<<<<< Updated upstream
+=======
+  approveMilestone,
+  requestMilestoneRevision,
+>>>>>>> Stashed changes
 };

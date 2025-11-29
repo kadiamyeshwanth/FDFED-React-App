@@ -362,6 +362,22 @@ const constructionProjectSchema = new mongoose.Schema({
   currentPhase: { type: String, enum: ["Foundation", "Structure", "Interior work", "Finishing"] },
   mainImagePath: String,
   additionalImagePaths: [String],
+<<<<<<< Updated upstream
+=======
+  milestones: [
+    {
+      percentage: { type: Number, required: true, min: 0, max: 100 },
+      companyMessage: { type: String, required: true },
+      isApprovedByCustomer: { type: Boolean, default: false },
+      submittedAt: { type: Date, default: Date.now },
+      approvedAt: { type: Date },
+      isCheckpoint: { type: Boolean, default: false },
+      needsRevision: { type: Boolean, default: false },
+      customerFeedback: { type: String },
+      feedbackAt: { type: Date },
+    },
+  ],
+>>>>>>> Stashed changes
   recentUpdates: [
     {
       updateText: String,
