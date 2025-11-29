@@ -350,6 +350,128 @@
   line-height: 1.4;
 }
 
+/* ==== PROJECT DISPLAY ==== */
+.cs-project-item {
+  background: #f8f9fa;
+  border: 1px solid #e0e0e0;
+  border-radius: 10px;
+  padding: 16px;
+  margin-bottom: 16px;
+}
+
+.cs-project-images {
+  display: flex;
+  gap: 16px;
+  margin-bottom: 12px;
+  flex-wrap: wrap;
+}
+
+.cs-project-image-container {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  align-items: center;
+}
+
+.cs-project-image-container .cs-project-img {
+  width: 200px;
+  height: 150px;
+  border-radius: 8px;
+  border: 2px solid #004d7a;
+  object-fit: cover;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+
+.cs-image-label {
+  font-weight: 600;
+  font-size: 13px;
+  color: #004d7a;
+  background: #e6f0f8;
+  padding: 6px 12px;
+  border-radius: 20px;
+  text-align: center;
+}
+
+.cs-project-info {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.cs-project-info strong {
+  font-size: 18px;
+  color: #212529;
+  margin-bottom: 4px;
+}
+
+.cs-project-info .cs-muted {
+  color: #6c757d;
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+.cs-project-info .cs-muted i {
+  margin-right: 6px;
+  color: #004d7a;
+}
+
+.cs-project-info .cs-muted a {
+  color: #004d7a;
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.cs-project-info .cs-muted a:hover {
+  text-decoration: underline;
+}
+
+/* ==== FILE INPUT GROUPS ==== */
+.cs-file-input-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 10px;
+  background: #f8f9fa;
+  border-radius: 6px;
+  border: 1px solid #e0e0e0;
+}
+
+.cs-file-input-group label {
+  font-weight: 600;
+  font-size: 13px;
+  color: #004d7a;
+  margin-bottom: 4px;
+}
+
+.cs-file-input-group input[type="file"] {
+  font-size: 13px;
+  padding: 8px;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  background: white;
+}
+
+.cs-file-input-group small {
+  color: #10b981;
+  font-weight: 600;
+  font-size: 12px;
+}
+
+.cs-project-edit-left {
+  min-width: 200px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.cs-project-edit-left .cs-project-img {
+  width: 100%;
+  height: 100px;
+  border-radius: 6px;
+  border: 1px solid #d1d5db;
+  object-fit: cover;
+}
+
 /* ==== RESPONSIVE ==== */
 @media (max-width: 992px) {
   .cs-grid {

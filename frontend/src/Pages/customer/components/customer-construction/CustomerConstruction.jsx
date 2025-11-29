@@ -248,32 +248,6 @@ const CustomerConstruction = () => {
               </p>
             </div>
 
-            {selectedCompany.teamMembers &&
-              selectedCompany.teamMembers.length > 0 && (
-                <div className="construction-detail-section">
-                  <h3 className="construction-detail-section-title">
-                    Key Team Members
-                  </h3>
-                  {selectedCompany.teamMembers.map((member, idx) => (
-                    <div key={idx} className="construction-detail-team-member">
-                      <img
-                        src={member.image || "/api/placeholder/120/120"}
-                        alt={member.name}
-                        className="construction-member-image"
-                      />
-                      <div className="construction-member-info">
-                        <h4 className="construction-member-name">
-                          {member.name}
-                        </h4>
-                        <p className="construction-member-position">
-                          {member.position}
-                        </p>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              )}
-
             {selectedCompany.completedProjects &&
               selectedCompany.completedProjects.length > 0 && (
                 <div className="construction-detail-section">
@@ -283,11 +257,28 @@ const CustomerConstruction = () => {
                   <div className="construction-detail-projects">
                     {selectedCompany.completedProjects.map((project, idx) => (
                       <div key={idx} className="construction-project-item">
-                        <img
-                          src={project.image || "/api/placeholder/120/120"}
-                          alt={project.title}
-                          className="construction-project-image"
-                        />
+                        <div className="construction-project-images">
+                          {project.beforeImage && (
+                            <div className="construction-project-image-container">
+                              <img
+                                src={project.beforeImage}
+                                alt={`${project.title} - Before`}
+                                className="construction-project-image"
+                              />
+                              <span className="construction-image-label">Before Construction</span>
+                            </div>
+                          )}
+                          {project.afterImage && (
+                            <div className="construction-project-image-container">
+                              <img
+                                src={project.afterImage}
+                                alt={`${project.title} - After`}
+                                className="construction-project-image"
+                              />
+                              <span className="construction-image-label">After Construction</span>
+                            </div>
+                          )}
+                        </div>
                         <div className="construction-project-info">
                           <h4 className="construction-project-name">
                             {project.title}
@@ -295,6 +286,34 @@ const CustomerConstruction = () => {
                           <p className="construction-project-description">
                             {project.description}
                           </p>
+                          {project.location && (
+                            <p className="construction-project-location">
+                              <i className="fas fa-map-marker-alt"></i> {project.location}
+                            </p>
+                          )}
+                          {project.tenderId && (
+                            <p className="construction-project-tender">
+                              <strong>Tender ID:</strong> {project.tenderId}
+                            </p>
+                          )}
+                          {project.gpsLink && project.gpsLink.trim() !== "" && (
+                            <p className="construction-project-link">
+                              <a href={project.gpsLink} target="_blank" rel="noopener noreferrer">
+                                <i className="fas fa-map"></i> View on Map
+                              </a>
+                            </p>
+                          )}
+                          {project.materialCertificate && project.materialCertificate.trim() !== "" && (project.materialCertificate.startsWith('http') || project.materialCertificate.startsWith('https')) ? (
+                            <p className="construction-project-link">
+                              <a href={project.materialCertificate} target="_blank" rel="noopener noreferrer">
+                                <i className="fas fa-certificate"></i> Material Certificate
+                              </a>
+                            </p>
+                          ) : project.materialCertificate && project.materialCertificate.trim() !== "" ? (
+                            <p className="construction-project-certificate-pending">
+                              <i className="fas fa-certificate"></i> Certificate uploaded (pending processing)
+                            </p>
+                          ) : null}
                         </div>
                       </div>
                     ))}

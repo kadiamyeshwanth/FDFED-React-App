@@ -80,18 +80,16 @@ const companySchema = new mongoose.Schema(
     },
     projectsCompleted: { type: String },
     yearsInBusiness: { type: String },
-    teamMembers: [
-      {
-        name: { type: String },
-        position: { type: String },
-        image: { type: String },
-      },
-    ],
     completedProjects: [
       {
         title: { type: String },
         description: { type: String },
-        image: { type: String },
+        beforeImage: { type: String },
+        afterImage: { type: String },
+        location: { type: String },
+        tenderId: { type: String },
+        materialCertificate: { type: String },
+        gpsLink: { type: String },
       },
     ],
     didYouKnow: { type: String },

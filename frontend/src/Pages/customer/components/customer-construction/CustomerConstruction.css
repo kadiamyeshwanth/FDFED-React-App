@@ -356,16 +356,51 @@ body {
 
 .construction-project-item {
   display: flex;
-  align-items: center;
-  margin-bottom: 15px;
-  padding: 15px;
+  flex-direction: column;
+  margin-bottom: 20px;
+  padding: 20px;
   background: #f8fafc;
-  border-radius: 8px;
+  border-radius: 12px;
+  border: 1px solid #e2e8f0;
   transition: all 0.3s ease;
 }
 
 .construction-project-item:hover {
   background: #e2e8f0;
+  border-color: #facc15;
+}
+
+.construction-project-images {
+  display: flex;
+  gap: 16px;
+  margin-bottom: 16px;
+  flex-wrap: wrap;
+}
+
+.construction-project-image-container {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  align-items: center;
+}
+
+.construction-project-image-container .construction-project-image {
+  width: 220px;
+  height: 160px;
+  object-fit: cover;
+  border-radius: 10px;
+  border: 2px solid #facc15;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.construction-image-label {
+  font-weight: 600;
+  font-size: 13px;
+  color: #1e293b;
+  background: #facc15;
+  padding: 6px 14px;
+  border-radius: 20px;
+  text-align: center;
 }
 
 .construction-project-image {
@@ -373,23 +408,62 @@ body {
   height: 120px;
   object-fit: cover;
   border-radius: 8px;
-  margin-right: 15px;
 }
 
 .construction-project-info {
   flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
 }
 
 .construction-project-name {
-  font-size: 1rem;
+  font-size: 1.1rem;
   font-weight: 600;
   color: #1e293b;
-  margin-bottom: 5px;
+  margin-bottom: 8px;
 }
 
 .construction-project-description {
-  font-size: 0.85rem;
+  font-size: 0.9rem;
   color: #64748b;
+  line-height: 1.6;
+}
+
+.construction-project-location,
+.construction-project-tender,
+.construction-project-link,
+.construction-project-certificate-pending {
+  font-size: 0.9rem;
+  color: #475569;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.construction-project-location i,
+.construction-project-tender strong,
+.construction-project-link i {
+  color: #facc15;
+}
+
+.construction-project-link a {
+  color: #1e293b;
+  text-decoration: none;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.construction-project-link a:hover {
+  color: #facc15;
+  text-decoration: underline;
+}
+
+.construction-project-certificate-pending {
+  color: #94a3b8;
+  font-style: italic;
 }
 
 .construction-detail-book-now {
