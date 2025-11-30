@@ -267,6 +267,15 @@ const architectHiringSchema = new mongoose.Schema({
       createdAt: { type: Date, default: Date.now }
     }
   ],
+  milestones: [
+    {
+      percentage: { type: Number, required: true, min: 0, max: 100 },
+      description: { type: String, required: true },
+      status: { type: String, enum: ["Pending", "Approved", "Rejected"], default: "Pending" },
+      image: { type: String },
+      submittedAt: { type: Date, default: Date.now }
+    }
+  ],
 
   createdAt: { type: Date, default: Date.now },
   updatedAt: { type: Date, default: Date.now },
@@ -423,6 +432,22 @@ const designRequestSchema = new mongoose.Schema({
     description: { type: String },
     sentAt: { type: Date }
   },
+  projectUpdates: [
+    {
+      updateText: { type: String, required: true },
+      updateImage: { type: String },
+      createdAt: { type: Date, default: Date.now }
+    }
+  ],
+  milestones: [
+    {
+      percentage: { type: Number, required: true, min: 0, max: 100 },
+      description: { type: String, required: true },
+      status: { type: String, enum: ["Pending", "Approved", "Rejected"], default: "Pending" },
+      image: { type: String },
+      submittedAt: { type: Date, default: Date.now }
+    }
+  ],
 });
 
 // Floor Schema for Bid

@@ -22,7 +22,8 @@ const {
     submitProposal,
     updatePassword,
     getMyCompany,
-    leaveCompany
+    leaveCompany,
+    submitMilestone
 } = require('../controllers/workerController');
 
 const isAuthenticated = require('../middlewares/auth');
@@ -67,4 +68,5 @@ router.post('/worker/project-complete', isAuthenticated, markProjectAsCompleted)
 router.post('/worker/submit-proposal', isAuthenticated, submitProposal);
 router.post('/worker/password/update', isAuthenticated, updatePassword);
 router.post('/worker/leave-company', isAuthenticated, leaveCompany);
+router.post('/worker/submit-milestone', isAuthenticated, upload.single('image'), submitMilestone);
 module.exports = router;
