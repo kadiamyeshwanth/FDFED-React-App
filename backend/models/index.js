@@ -377,6 +377,15 @@ const constructionProjectSchema = new mongoose.Schema({
       submittedAt: { type: Date, default: Date.now },
       approvedAt: { type: Date },
       isCheckpoint: { type: Boolean, default: false },
+      needsRevision: { type: Boolean, default: false },
+      customerFeedback: { type: String, default: '' },
+      conversation: [
+        {
+          sender: { type: String, enum: ['company', 'customer'], required: true },
+          message: { type: String, required: true },
+          timestamp: { type: Date, default: Date.now }
+        }
+      ]
     },
   ],
   recentUpdates: [
@@ -386,6 +395,12 @@ const constructionProjectSchema = new mongoose.Schema({
       createdAt: { type: Date, default: Date.now },
     },
   ],
+  completionImages: [{ type: String }],
+  customerReview: {
+    rating: { type: Number, min: 1, max: 5 },
+    reviewText: { type: String },
+    reviewDate: { type: Date }
+  },
   createdAt: { type: Date, default: Date.now },
   updatedAt: { type: Date, default: Date.now },
 });
