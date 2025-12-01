@@ -1,3 +1,64 @@
+// Verify/Reject Company
+const verifyCompany = async (req, res) => {
+  try {
+    const company = await Company.findByIdAndUpdate(
+      req.params.id,
+      { status: 'verified' },
+      { new: true }
+    );
+    if (!company) return res.status(404).json({ success: false, error: 'Company not found' });
+    res.json({ success: true, message: 'Company verified successfully', company });
+  } catch (error) {
+    console.error('Error verifying company:', error);
+    res.status(500).json({ success: false, error: error.message });
+  }
+};
+
+const rejectCompany = async (req, res) => {
+  try {
+    const company = await Company.findByIdAndUpdate(
+      req.params.id,
+      { status: 'rejected' },
+      { new: true }
+    );
+    if (!company) return res.status(404).json({ success: false, error: 'Company not found' });
+    res.json({ success: true, message: 'Company rejected', company });
+  } catch (error) {
+    console.error('Error rejecting company:', error);
+    res.status(500).json({ success: false, error: error.message });
+  }
+};
+
+// Verify/Reject Worker
+const verifyWorker = async (req, res) => {
+  try {
+    const worker = await Worker.findByIdAndUpdate(
+      req.params.id,
+      { status: 'verified' },
+      { new: true }
+    );
+    if (!worker) return res.status(404).json({ success: false, error: 'Worker not found' });
+    res.json({ success: true, message: 'Worker verified successfully', worker });
+  } catch (error) {
+    console.error('Error verifying worker:', error);
+    res.status(500).json({ success: false, error: error.message });
+  }
+};
+
+const rejectWorker = async (req, res) => {
+  try {
+    const worker = await Worker.findByIdAndUpdate(
+      req.params.id,
+      { status: 'rejected' },
+      { new: true }
+    );
+    if (!worker) return res.status(404).json({ success: false, error: 'Worker not found' });
+    res.json({ success: true, message: 'Worker rejected', worker });
+  } catch (error) {
+    console.error('Error rejecting worker:', error);
+    res.status(500).json({ success: false, error: error.message });
+  }
+};
 const {
   Customer,
   Company,
@@ -348,4 +409,8 @@ module.exports = {
   getDesignRequestDetail,
   getBidDetail,
   getJobApplicationDetail,
+  verifyCompany,
+  rejectCompany,
+  verifyWorker,
+  rejectWorker,
 };

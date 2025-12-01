@@ -83,67 +83,173 @@ const LoginSignUp = () => {
     }
   };
 
-  const handleFileChange = (e) => setFiles(Array.from(e.target.files));
+  // file handlers with validation
+  const MAX_FILES = 5;
+  const MAX_FILE_MB = 5;
+  const ALLOWED_FILE_TYPES = ["application/pdf", "image/jpeg", "image/png"];
 
-  // Validation
-  const validateEmail = (email) => /\S+@\S+\.\S+/.test(email);
-  const validatePhone = (phone) => /^\d{10}$/.test(phone);
-  const validatePassword = (pw) =>
-    /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_+=\-{}[\]|\\:;"'<,>.?/]).{8,}$/.test(
-      pw
-    );
-  const validateAadhar = (aadhar) => /^\d{12}$/.test(aadhar);
+  const validateFilesList = (list) => {
+    if (!list || !list.length) return null;
+    if (list.length > MAX_FILES) return `Maximum ${MAX_FILES} files allowed`;
+    for (const f of list) {
+      if (!ALLOWED_FILE_TYPES.includes(f.type))
+        return `${f.name}: unsupported file type`;
+      if (f.size > MAX_FILE_MB * 1024 * 1024)
+        return `${f.name}: exceeds ${MAX_FILE_MB}MB`;
+    }
+    return null;
+  };
+
+  const handleFileChange = (e) => {
+    const incoming = Array.from(e.target.files || []);
+    const combined = [...files, ...incoming];
+    const fileErr = validateFilesList(combined);
+    if (fileErr) {
+      setErrors((p) => ({ ...p, files: fileErr }));
+      return;
+    }
+    setFiles(combined);
+    setErrors((p) => ({ ...p, files: undefined }));
+  };
+
+  // Strict validators (trim inputs before validating)
+  const validateName = (name) => {
+    if (!name || String(name).trim().length === 0) return "Name required";
+    const s = String(name).trim();
+    if (s.length < 2 || s.length > 100)
+      return "Name must be between 2 and 100 characters";
+    if (!/\s+/.test(s))
+      return "Please provide full name (first and last name)";
+    if (!/^[A-Za-z][A-Za-z.'\-\s]+$/.test(s))
+      return "Name contains invalid characters";
+    return "";
+  };
+
+  const validateEmail = (email) => {
+    if (!email || String(email).trim().length === 0) return "Email required";
+    const s = String(email).trim();
+    const re = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/i;
+    return re.test(s) ? "" : "Invalid email address";
+  };
+
+  const validatePhone = (phone) => {
+    if (!phone || String(phone).trim().length === 0) return "Phone required";
+    const s = String(phone).replace(/\D/g, "");
+    return /^\d{10}$/.test(s) ? "" : "Enter a valid 10-digit phone number";
+  };
+
+  const validatePassword = (pw) => {
+    if (!pw) return "Password required";
+    // min 8 chars, one upper, one lower, one number, one special
+    const re = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_+=\-{}[\]|\\:;"'<,>.?/]).{8,}$/;
+    return re.test(pw)
+      ? ""
+      : "Password must have min 8 chars, upper/lower/number/special";
+  };
+
+  const validateAadhar = (aadhar) => {
+    if (!aadhar) return "Aadhar required";
+    return /^\d{12}$/.test(String(aadhar).trim())
+      ? ""
+      : "Aadhar must be 12 digits";
+  };
+
   const validateDOB = (dob) => {
-    if (!dob) return false;
+    if (!dob) return "Date of birth required";
     const dobDate = new Date(dob);
+    if (Number.isNaN(dobDate.getTime())) return "Invalid date";
     const minAge = new Date();
     minAge.setFullYear(minAge.getFullYear() - 18);
-    return dobDate <= minAge;
+    return dobDate <= minAge ? "" : "You must be at least 18 years old";
   };
-  const validateExperience = (exp) =>
-    !exp || (/^\d+$/.test(exp) && parseInt(exp) >= 0);
 
+  const validateExperience = (exp) => {
+    if (exp === "" || exp === null || exp === undefined) return "";
+    return /^\d+$/.test(String(exp)) && parseInt(exp, 10) >= 0
+      ? ""
+      : "Invalid experience years";
+  };
+
+  const resetFieldErrors = (fields) => {
+    setErrors((prev) => {
+      const copy = { ...prev };
+      fields.forEach((f) => delete copy[f]);
+      return copy;
+    });
+  };
+
+  // Validation for signin
   const validateSignin = () => {
     const newErrors = {};
-    if (!validateEmail(signinData.email))
-      newErrors["signin-email"] = "Invalid email.";
-    if (!signinData.password)
-      newErrors["signin-password"] = "Password required.";
+    const email = String(signinData.email || "").trim();
+    const pw = signinData.password || "";
+
+    const e = validateEmail(email);
+    if (e) newErrors["signin-email"] = e;
+    const p = pw ? "" : "Password required";
+    if (p) newErrors["signin-password"] = p;
+
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
 
+  // Validation for signup (strict)
   const validateSignup = () => {
     const newErrors = {};
-    if (!validateEmail(signupData.email)) newErrors.email = "Invalid email.";
-    if (!validatePhone(signupData.phone))
-      newErrors.phone = "10-digit phone required.";
-    if (!validatePassword(signupData.password))
-      newErrors.password =
-        "Min 8 chars: 1 uppercase, 1 lowercase, 1 number, 1 special.";
-    if (signupData.password !== signupData.confirmPassword)
-      newErrors.confirmPassword = "Passwords do not match.";
-    if (!signupData.termsAccepted) newErrors.terms = "Accept terms.";
+    const name = String(signupData.name || "").trim();
+    const email = String(signupData.email || "").trim();
+    const phone = String(signupData.phone || "").trim();
+    const password = signupData.password || "";
+    const confirmPassword = signupData.confirmPassword || "";
 
+    // common checks
+    const emailErr = validateEmail(email);
+    if (emailErr) newErrors.email = emailErr;
+
+    const phoneErr = validatePhone(phone);
+    if (phoneErr) newErrors.phone = phoneErr;
+
+    const pwErr = validatePassword(password);
+    if (pwErr) newErrors.password = pwErr;
+
+    if (password !== confirmPassword)
+      newErrors.confirmPassword = "Passwords do not match";
+
+    if (!signupData.termsAccepted)
+      newErrors.terms = "Accept terms and conditions";
+
+    // user-type specific
     if (userType === "customer" || userType === "worker") {
-      if (!signupData.name) newErrors.name = "Name required.";
-      if (!validateDOB(signupData.dob)) newErrors.dob = "Must be 18+.";
+      const nameErr = validateName(name);
+      if (nameErr) newErrors.name = nameErr;
+
+      const dobErr = validateDOB(signupData.dob);
+      if (dobErr) newErrors.dob = dobErr;
     }
 
     if (userType === "company") {
-      if (!signupData.companyName)
-        newErrors.companyName = "Company name required.";
-      if (!signupData.contactPerson)
-        newErrors.contactPerson = "Contact person required.";
+      if (!signupData.companyName || String(signupData.companyName).trim().length < 2)
+        newErrors.companyName = "Company name required";
+      const cp = String(signupData.contactPerson || "").trim();
+      const cpErr = validateName(cp);
+      if (cpErr) newErrors.contactPerson = cpErr;
     }
 
     if (userType === "worker") {
-      if (!validateAadhar(signupData.aadharNumber))
-        newErrors.aadharNumber = "12-digit Aadhar required.";
+      const aErr = validateAadhar(signupData.aadharNumber || "");
+      if (aErr) newErrors.aadharNumber = aErr;
+
       if (!signupData.specialization)
-        newErrors.specialization = "Select specialization.";
-      if (!validateExperience(signupData.experience))
-        newErrors.experience = "Valid experience required.";
+        newErrors.specialization = "Select specialization";
+
+      const expErr = validateExperience(signupData.experience);
+      if (expErr) newErrors.experience = expErr;
+    }
+
+    // files validation for company/worker
+    if ((userType === "company" || userType === "worker") && files.length > 0) {
+      const fErr = validateFilesList(files);
+      if (fErr) newErrors.files = fErr;
     }
 
     setErrors(newErrors);
@@ -158,7 +264,10 @@ const LoginSignUp = () => {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         credentials: "include",
-        body: JSON.stringify(signinData),
+        body: JSON.stringify({
+          email: String(signinData.email || "").trim(),
+          password: signinData.password,
+        }),
       });
       const data = await res.json();
       if (res.ok) navigate(data.redirect);
@@ -210,14 +319,17 @@ const LoginSignUp = () => {
   };
 
   const handleSendOTP = () => {
-    if (!validateEmail(forgotEmail)) {
-      setForgotError("Enter valid email");
+    const e = validateEmail(String(forgotEmail || "").trim());
+    if (e) {
+      setForgotError(e);
       return;
     }
-    setGeneratedOTP(generateOTP());
-    console.log("OTP:", generatedOTP);
+    const otpCode = generateOTP();
+    setGeneratedOTP(otpCode);
+    console.log("OTP:", otpCode);
     setForgotStep("otp");
     disableResend();
+    setForgotError("");
   };
 
   const handleVerifyOTP = () => {
@@ -233,8 +345,9 @@ const LoginSignUp = () => {
   const handleResendOTP = (e) => {
     e.preventDefault();
     if (resendTimeoutId) return;
-    setGeneratedOTP(generateOTP());
-    console.log("Resent OTP:", generatedOTP);
+    const otpCode = generateOTP();
+    setGeneratedOTP(otpCode);
+    console.log("Resent OTP:", otpCode);
     disableResend();
     setOtp(["", "", "", ""]);
   };
@@ -245,11 +358,12 @@ const LoginSignUp = () => {
       setForgotError("Passwords don't match");
       return;
     }
-    if (!validatePassword(newPassword)) {
-      setForgotError("Password too weak");
+    const pErr = validatePassword(newPassword);
+    if (pErr) {
+      setForgotError(pErr);
       return;
     }
-    console.log("Password reset");
+    // Call backend API to reset password here (omitted)
     setShowForgotModal(false);
     resetForgotForm();
     setActiveTab("signin");
@@ -258,14 +372,14 @@ const LoginSignUp = () => {
   const handleOtpChange = (i, val) => {
     if (val.length > 1) return;
     const newOtp = [...otp];
-    newOtp[i] = val;
+    newOtp[i] = val.replace(/\D/g, "");
     setOtp(newOtp);
-    if (val && i < 3) otpRefs.current[i + 1].focus();
+    if (val && i < 3) otpRefs.current[i + 1]?.focus();
   };
 
   const handleOtpKeyDown = (i, e) => {
     if (e.key === "Backspace" && !otp[i] && i > 0) {
-      otpRefs.current[i - 1].focus();
+      otpRefs.current[i - 1]?.focus();
     }
   };
 
@@ -275,6 +389,7 @@ const LoginSignUp = () => {
     setNewPassword("");
     setConfirmNewPassword("");
     setGeneratedOTP("");
+    if (resendTimeoutId) clearInterval(resendTimeoutId);
     setResendTimeoutId(null);
     setForgotError("");
     setForgotStep("email");
@@ -651,6 +766,7 @@ const LoginSignUp = () => {
                           <div key={i}>{f.name}</div>
                         ))}
                       </div>
+                      <div className="ls-error-message">{errors.files}</div>
                     </div>
                   )}
 
