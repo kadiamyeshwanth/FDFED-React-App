@@ -647,8 +647,79 @@ const leaveCompany = async (req, res) => {
     }
 };
 
+const submitMilestone = async (req, res) => {
+  try {
+    const { projectId, projectType, percentage, description } = req.body;
+    const workerId = req.user.user_id;
+
+    // Validate required fields
+    if (!projectId || !projectType || !percentage || !description) {
+      return res.status(400).json({ error: 'Missing required fields: projectId, projectType, percentage, description' });
+    }
+
+    // Validate percentage
+    const milestonePercentage = parseInt(percentage);
+    if (![25, 50, 75, 100].includes(milestonePercentage)) {
+      return res.status(400).json({ error: 'Milestone percentage must be 25, 50, 75, or 100' });
+    }
+
+    let project;
+
+    // Find project based on type
+    if (projectType === 'architect') {
+      project = await ArchitectHiring.findById(projectId);
+      if (!project || (project.worker && project.worker.toString() !== workerId)) {
+        return res.status(404).json({ error: 'Project not found or you are not authorized.' });
+      }
+    } else if (projectType === 'interior') {
+      project = await DesignRequest.findById(projectId);
+      if (!project || (project.workerId && project.workerId.toString() !== workerId)) {
+        return res.status(404).json({ error: 'Project not found or you are not authorized.' });
+      }
+    } else {
+      return res.status(400).json({ error: 'Invalid project type. Must be "architect" or "interior".' });
+    }
+
+    // Check if milestone with this percentage already exists
+    const existingMilestone = project.milestones.find(m => m.percentage === milestonePercentage);
+    if (existingMilestone) {
+      return res.status(400).json({ 
+        error: `A milestone for ${milestonePercentage}% already exists. Each percentage can only be submitted once.` 
+      });
+    }
+
+    // Create new milestone object
+    const newMilestone = {
+      percentage: milestonePercentage,
+      description: description,
+      status: 'Pending',
+      submittedAt: new Date()
+    };
+
+    // Add image if uploaded
+    if (req.file) {
+      newMilestone.image = req.file.path; // Cloudinary URL
+    }
+
+    // Add milestone to project
+    project.milestones.push(newMilestone);
+    await project.save();
+
+    res.status(200).json({ 
+      success: true, 
+      message: 'Milestone submitted successfully!',
+      milestone: newMilestone
+    });
+
+  } catch (error) {
+    console.error('Error submitting milestone:', error);
+    res.status(500).json({ error: 'Server Error while submitting milestone' });
+  }
+};
+
 module.exports = { 
   getJobs, getJoinCompany, getSettings, getEditProfile, getDashboard, getWorkerById, deleteWorkerRequest,
   createWorkerRequest, updateWorkerProfile, updateAvailability, acceptOffer, declineOffer, updateJobStatus,
-  getOngoingProjects, postProjectUpdate, markProjectAsCompleted, submitProposal, updatePassword, getMyCompany, leaveCompany 
+  getOngoingProjects, postProjectUpdate, markProjectAsCompleted, submitProposal, updatePassword, getMyCompany, leaveCompany,
+  submitMilestone
 };

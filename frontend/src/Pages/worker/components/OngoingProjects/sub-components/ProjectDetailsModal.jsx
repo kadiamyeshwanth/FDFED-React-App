@@ -112,22 +112,7 @@ const ProjectDetailsModal = ({ project, onClose }) => {
             return null;
           })()}
 
-          {/* Update History */}
-          <div className="wkop-modal-section">
-            <div className="wkop-modal-section-title">Update History</div>
-            <div className="wkop-update-history">
-              {project.projectUpdates && project.projectUpdates.length > 0 ? (
-                project.projectUpdates.map((update, index) => (
-                  <div key={index} className="wkop-update-item">
-                    <p>{update.updateText}</p>
-                    <small>{new Date(update.createdAt).toLocaleString()}</small>
-                  </div>
-                ))
-              ) : (
-                <p>No updates for this project.</p>
-              )}
-            </div>
-          </div>
+
         </div>
       </div>
     </div>
