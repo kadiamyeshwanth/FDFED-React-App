@@ -25,11 +25,11 @@ const signup = async (req, res) => {
         break;
       case 'company':
         if (!data.companyName || !data.contactPerson || !data.email || !data.phone) return res.status(400).json({ message: 'All company fields are required' });
-        user = new Company({ companyName: data.companyName, contactPerson: data.contactPerson, email: data.email, phone: data.phone, companyDocuments: req.files ? req.files.map(file => file.path) : [], password, role });
+        user = new Company({ companyName: data.companyName, contactPerson: data.contactPerson, email: data.email, phone: data.phone, companyDocuments: req.files ? req.files.map(file => file.path) : [], password, role, status: 'pending' });
         break;
       case 'worker':
         if (!data.name || !data.email || !data.dob || !data.aadharNumber || !data.phone || !data.specialization) return res.status(400).json({ message: 'All worker fields are required' });
-        user = new Worker({ name: data.name, email: data.email, dob: new Date(data.dob), aadharNumber: data.aadharNumber, phone: data.phone, specialization: data.specialization, experience: data.experience || 0, certificateFiles: req.files ? req.files.map(file => file.path) : [], isArchitect: data.specialization.toLowerCase() === 'architect', password, role });
+        user = new Worker({ name: data.name, email: data.email, dob: new Date(data.dob), aadharNumber: data.aadharNumber, phone: data.phone, specialization: data.specialization, experience: data.experience || 0, certificateFiles: req.files ? req.files.map(file => file.path) : [], isArchitect: data.specialization.toLowerCase() === 'architect', password, role, status: 'pending' });
         break;
       default:
         return res.status(400).json({ message: 'Invalid user type' });
@@ -50,6 +50,16 @@ const login = async (req, res) => {
 
     let user = await Customer.findOne({ email }) || await Company.findOne({ email }) || await Worker.findOne({ email });
     if (!user) return res.status(401).json({ message: 'Invalid email or password' });
+
+    // Block login for company/worker if not verified
+    if ((user.role === 'company' || user.role === 'worker')) {
+      if (user.status === 'pending') {
+        return res.status(403).json({ message: 'Your application is yet to be accepted', status: 'pending' });
+      }
+      if (user.status === 'rejected') {
+        return res.status(403).json({ message: 'Your application has been rejected', status: 'rejected' });
+      }
+    }
 
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) return res.status(401).json({ message: 'Invalid email or password' });

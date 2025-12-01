@@ -41,6 +41,20 @@ const customerSchema = new mongoose.Schema(
     phone: { type: String, required: true },
     password: { type: String, required: true },
     role: { type: String, default: "customer" },
+    rating: { type: Number, default: 0, min: 0, max: 5 },
+    totalReviews: { type: Number, default: 0 },
+    reviews: [
+      {
+        projectId: { type: mongoose.Schema.Types.ObjectId },
+        projectName: { type: String },
+        projectType: { type: String, enum: ['architect', 'interior'] },
+        workerId: { type: mongoose.Schema.Types.ObjectId, ref: 'Worker' },
+        workerName: { type: String },
+        rating: { type: Number, min: 1, max: 5 },
+        comment: { type: String },
+        reviewedAt: { type: Date, default: Date.now }
+      }
+    ],
   },
   { timestamps: true }
 );
@@ -169,6 +183,19 @@ const workerSchema = new mongoose.Schema(
       },
     ],
     rating: { type: Number, default: 0, min: 0, max: 5 },
+    totalReviews: { type: Number, default: 0 },
+    reviews: [
+      {
+        projectId: { type: mongoose.Schema.Types.ObjectId },
+        projectName: { type: String },
+        projectType: { type: String, enum: ['architect', 'interior'] },
+        customerId: { type: mongoose.Schema.Types.ObjectId, ref: 'Customer' },
+        customerName: { type: String },
+        rating: { type: Number, min: 1, max: 5 },
+        comment: { type: String },
+        reviewedAt: { type: Date, default: Date.now }
+      }
+    ],
     isArchitect: { type: Boolean, default: false },
     servicesOffered: [{ type: String, default: [] }],
     availability: {
@@ -295,11 +322,39 @@ const architectHiringSchema = new mongoose.Schema({
     {
       percentage: { type: Number, required: true, min: 0, max: 100 },
       description: { type: String, required: true },
-      status: { type: String, enum: ["Pending", "Approved", "Rejected"], default: "Pending" },
+      status: { type: String, enum: ["Pending", "Approved", "Rejected", "Revision Requested", "Under Review"], default: "Pending" },
       image: { type: String },
-      submittedAt: { type: Date, default: Date.now }
+      submittedAt: { type: Date, default: Date.now },
+      approvedAt: { type: Date },
+      rejectedAt: { type: Date },
+      rejectionReason: { type: String },
+      revisionRequestedAt: { type: Date },
+      revisionNotes: { type: String },
+      revisionHistory: [{
+        requestedAt: { type: Date },
+        notes: { type: String },
+        resubmittedAt: { type: Date }
+      }],
+      reportedToAdminAt: { type: Date },
+      adminReport: { type: String },
+      adminReviewNotes: { type: String }
     }
   ],
+  
+  // Review and Rating System
+  review: {
+    customerToWorker: {
+      rating: { type: Number, min: 1, max: 5 },
+      comment: { type: String },
+      submittedAt: { type: Date }
+    },
+    workerToCustomer: {
+      rating: { type: Number, min: 1, max: 5 },
+      comment: { type: String },
+      submittedAt: { type: Date }
+    },
+    isReviewCompleted: { type: Boolean, default: false }
+  },
 
   createdAt: { type: Date, default: Date.now },
   updatedAt: { type: Date, default: Date.now },
@@ -484,11 +539,39 @@ const designRequestSchema = new mongoose.Schema({
     {
       percentage: { type: Number, required: true, min: 0, max: 100 },
       description: { type: String, required: true },
-      status: { type: String, enum: ["Pending", "Approved", "Rejected"], default: "Pending" },
+      status: { type: String, enum: ["Pending", "Approved", "Rejected", "Revision Requested", "Under Review"], default: "Pending" },
       image: { type: String },
-      submittedAt: { type: Date, default: Date.now }
+      submittedAt: { type: Date, default: Date.now },
+      approvedAt: { type: Date },
+      rejectedAt: { type: Date },
+      rejectionReason: { type: String },
+      revisionRequestedAt: { type: Date },
+      revisionNotes: { type: String },
+      revisionHistory: [{
+        requestedAt: { type: Date },
+        notes: { type: String },
+        resubmittedAt: { type: Date }
+      }],
+      reportedToAdminAt: { type: Date },
+      adminReport: { type: String },
+      adminReviewNotes: { type: String }
     }
   ],
+  
+  // Review and Rating System
+  review: {
+    customerToWorker: {
+      rating: { type: Number, min: 1, max: 5 },
+      comment: { type: String },
+      submittedAt: { type: Date }
+    },
+    workerToCustomer: {
+      rating: { type: Number, min: 1, max: 5 },
+      comment: { type: String },
+      submittedAt: { type: Date }
+    },
+    isReviewCompleted: { type: Boolean, default: false }
+  },
 });
 
 // Floor Schema for Bid
