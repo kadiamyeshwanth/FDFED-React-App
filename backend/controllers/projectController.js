@@ -317,10 +317,15 @@ const updateProject = async (req, res) => {
         return res.status(400).json({ message: "Invalid milestone percentage. Must be between 0 and 100." });
       }
 
-      // Check for backward progression
+      // Check if this is an update to a checkpoint that needs revision
+      const checkpointNeedingRevision = project.milestones.find(
+        m => m.percentage === milestonePercent && m.isCheckpoint && m.needsRevision
+      );
+      
+      // Check for backward progression (allow same percentage if checkpoint needs revision)
       const maxCompletedPercentage = project.completionPercentage || 0;
       
-      if (milestonePercent < maxCompletedPercentage) {
+      if (!checkpointNeedingRevision && milestonePercent < maxCompletedPercentage) {
         return res.status(400).json({ 
           message: `Cannot move backward. Current progress is at ${maxCompletedPercentage}%. Please select a higher percentage.` 
         });
@@ -357,27 +362,54 @@ const updateProject = async (req, res) => {
         });
       }
 
-      // If this is a checkpoint and already exists, don't allow duplicate
+      // If this is a checkpoint, check if it exists
       if (isCheckpoint) {
         const existingCheckpoint = project.milestones.find(
           m => m.percentage === milestonePercent && m.isCheckpoint
         );
+        
         if (existingCheckpoint) {
-          return res.status(400).json({ 
-            message: `Checkpoint ${milestonePercent}% has already been submitted. Waiting for customer approval.` 
+          // If checkpoint exists and needs revision, allow update
+          if (existingCheckpoint.needsRevision) {
+            // Update the existing checkpoint message
+            existingCheckpoint.companyMessage = milestoneMessage;
+            existingCheckpoint.needsRevision = false;
+            existingCheckpoint.customerFeedback = "";
+            existingCheckpoint.submittedAt = new Date();
+          } else if (existingCheckpoint.isApprovedByCustomer) {
+            // Already approved, cannot update
+            return res.status(400).json({ 
+              message: `Checkpoint ${milestonePercent}% has already been approved by the customer. Cannot update.` 
+            });
+          } else {
+            // Still pending approval, cannot resubmit
+            return res.status(400).json({ 
+              message: `Checkpoint ${milestonePercent}% has already been submitted and is awaiting customer approval.` 
+            });
+          }
+        } else {
+          // New checkpoint - add it
+          project.milestones.push({
+            percentage: milestonePercent,
+            companyMessage: milestoneMessage || `Progress update to ${milestonePercent}%`,
+            isApprovedByCustomer: false,
+            needsRevision: false,
+            submittedAt: new Date(),
+            isCheckpoint: isCheckpoint,
           });
         }
-      }
-
-      // Add new milestone (only create milestone entry for checkpoints or if message provided)
-      if (isCheckpoint || milestoneMessage) {
-        project.milestones.push({
-          percentage: milestonePercent,
-          companyMessage: milestoneMessage || `Progress update to ${milestonePercent}%`,
-          isApprovedByCustomer: false,
-          submittedAt: new Date(),
-          isCheckpoint: isCheckpoint,
-        });
+      } else {
+        // Non-checkpoint milestone, just add it if message provided
+        if (milestoneMessage) {
+          project.milestones.push({
+            percentage: milestonePercent,
+            companyMessage: milestoneMessage,
+            isApprovedByCustomer: false,
+            needsRevision: false,
+            submittedAt: new Date(),
+            isCheckpoint: false,
+          });
+        }
       }
 
       // Update completion percentage
@@ -580,6 +612,7 @@ const approveMilestone = async (req, res) => {
     }
 
     milestone.isApprovedByCustomer = true;
+    milestone.needsRevision = false;
     milestone.approvedAt = new Date();
 
     await project.save();
@@ -591,6 +624,50 @@ const approveMilestone = async (req, res) => {
     });
   } catch (error) {
     console.error("Error approving milestone:", error);
+    res.status(500).json({ error: "Server error" });
+  }
+};
+
+const requestMilestoneRevision = async (req, res) => {
+  try {
+    const { projectId, milestonePercentage, feedback } = req.body;
+    const customerId = req.user.user_id;
+
+    if (!projectId || !milestonePercentage || !feedback) {
+      return res.status(400).json({ error: "Project ID, milestone percentage, and feedback are required" });
+    }
+
+    const project = await ConstructionProjectSchema.findOne({
+      _id: projectId,
+      customerId: customerId
+    });
+
+    if (!project) {
+      return res.status(404).json({ error: "Project not found or you don't have permission" });
+    }
+
+    const milestone = project.milestones.find(m => m.percentage === parseInt(milestonePercentage));
+    
+    if (!milestone) {
+      return res.status(404).json({ error: `Milestone ${milestonePercentage}% not found` });
+    }
+
+    if (milestone.isApprovedByCustomer) {
+      return res.status(400).json({ error: "Milestone already approved, cannot request revision" });
+    }
+
+    milestone.needsRevision = true;
+    milestone.customerFeedback = feedback;
+
+    await project.save();
+
+    res.status(200).json({ 
+      success: true, 
+      message: `Revision requested for milestone ${milestonePercentage}%`,
+      milestone 
+    });
+  } catch (error) {
+    console.error("Error requesting milestone revision:", error);
     res.status(500).json({ error: "Server error" });
   }
 };
@@ -609,4 +686,5 @@ module.exports = {
   acceptWorkerRequest,
   rejectWorkerRequest,
   approveMilestone,
+  requestMilestoneRevision,
 };

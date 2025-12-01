@@ -70,8 +70,41 @@ const getJobRequestStatus = async (req, res) => {
 const getConstructionCompaniesList = async (req, res) => {
   try {
     const companies = await Company.find({}).lean();
+    
+    // Get completed projects with reviews for each company
+    const companiesWithReviews = await Promise.all(
+      companies.map(async (company) => {
+        const completedProjects = await ConstructionProjectSchema.find({
+          companyId: company._id,
+          status: 'accepted',
+          completionPercentage: 100,
+          'customerReview.rating': { $exists: true, $ne: null }
+        })
+        .select('projectName customerReview completionImages')
+        .lean();
+
+        // Calculate average rating
+        let averageRating = 0;
+        let totalReviews = completedProjects.length;
+        
+        if (totalReviews > 0) {
+          const sumRatings = completedProjects.reduce((sum, project) => {
+            return sum + (project.customerReview?.rating || 0);
+          }, 0);
+          averageRating = (sumRatings / totalReviews).toFixed(1);
+        }
+
+        return {
+          ...company,
+          completedProjectsWithReviews: completedProjects,
+          averageRating: parseFloat(averageRating),
+          totalReviews
+        };
+      })
+    );
+    
     // routed file : customer/construction_companies_list
-    res.status(200).json({ companies, user: req.user });
+    res.status(200).json({ companies: companiesWithReviews, user: req.user });
   } catch (error) {
     console.error("Error fetching companies:", error);
     res.status(500).json({ error: "Server error" });

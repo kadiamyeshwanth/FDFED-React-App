@@ -14,7 +14,7 @@ const AdminJobApplicationDetail = () => {
     const fetchApplication = async () => {
       setLoading(true);
       try {
-        const res = await fetch(`${apiBase}/admin/job-application/${id}`);
+        const res = await fetch(`/api/admin/job-application/${id}`);
         if (!res.ok) throw new Error(`Server responded ${res.status}`);
         const data = await res.json();
         setApplication(data.application ?? data);
@@ -28,9 +28,10 @@ const AdminJobApplicationDetail = () => {
   }, [id]);
 
   const handleDelete = async () => {
-    if (!window.confirm("Delete this job application? This cannot be undone.")) return;
+    if (!window.confirm("Delete this job application? This cannot be undone."))
+      return;
     try {
-      const res = await fetch(`${apiBase}/admin/delete-jobApplication/${id}`, {
+      const res = await fetch(`/api/admin/delete-jobApplication/${id}`, {
         method: "DELETE",
         headers: { "Content-Type": "application/json" },
       });
@@ -45,29 +46,40 @@ const AdminJobApplicationDetail = () => {
 
   if (loading) return <div className="aja-loading">Loading application…</div>;
   if (error) return <div className="aja-error">Error: {error}</div>;
-  if (!application) return <div className="aja-empty">Application not found.</div>;
+  if (!application)
+    return <div className="aja-empty">Application not found.</div>;
 
   const fmtDate = (d) => (d ? new Date(d).toLocaleDateString() : "Not set");
   const fmtDateTime = (d) => (d ? new Date(d).toLocaleString() : "Not set");
-  const fmtNumber = (n) => (typeof n === "number" ? n.toLocaleString() : n ?? "N/A");
+  const fmtNumber = (n) =>
+    typeof n === "number" ? n.toLocaleString() : n ?? "N/A";
 
   return (
     <div className="aja-container">
       <header className="aja-header">
         <h1 className="aja-title">Job Application Details</h1>
         <div className="aja-actions">
-          <button className="aja-btn aja-back" onClick={() => navigate("/admindashboard")}>← Back to Dashboard</button>
-          <button className="aja-btn aja-delete" onClick={handleDelete}>🗑️ Delete</button>
+          <button
+            className="aja-btn aja-back"
+            onClick={() => navigate("/admin/admindashboard")}
+          >
+            ← Back to Dashboard
+          </button>
+          <button className="aja-btn aja-delete" onClick={handleDelete}>
+            🗑️ Delete
+          </button>
         </div>
       </header>
 
       <main className="aja-card">
         <div className="aja-section aja-section-header">
           <h2 className="aja-section-title">
-            Application for {application.positionApplying} at {application.compName}
+            Application for {application.positionApplying} at{" "}
+            {application.compName}
           </h2>
           <p className="aja-subtitle">
-            Application ID: {application._id} | Status: {application.status} | Applied: {fmtDate(application.createdAt)}
+            Application ID: {application._id} | Status: {application.status} |
+            Applied: {fmtDate(application.createdAt)}
           </p>
         </div>
 
@@ -88,7 +100,13 @@ const AdminJobApplicationDetail = () => {
           <div className="aja-item">
             <label className="aja-label">LinkedIn</label>
             <div className="aja-value">
-              {application.linkedin ? <a href={application.linkedin} target="_blank" rel="noreferrer">{application.linkedin}</a> : "N/A"}
+              {application.linkedin ? (
+                <a href={application.linkedin} target="_blank" rel="noreferrer">
+                  {application.linkedin}
+                </a>
+              ) : (
+                "N/A"
+              )}
             </div>
           </div>
         </div>
@@ -101,7 +119,9 @@ const AdminJobApplicationDetail = () => {
           </div>
           <div className="aja-item">
             <label className="aja-label">Expected Salary</label>
-            <div className="aja-value">₹{fmtNumber(application.expectedSalary)}</div>
+            <div className="aja-value">
+              ₹{fmtNumber(application.expectedSalary)}
+            </div>
           </div>
           <div className="aja-item">
             <label className="aja-label">Position Applying For</label>
@@ -113,7 +133,9 @@ const AdminJobApplicationDetail = () => {
           </div>
           <div className="aja-item">
             <label className="aja-label">Terms Agreed</label>
-            <div className="aja-value">{application.termsAgree ? "Yes" : "No"}</div>
+            <div className="aja-value">
+              {application.termsAgree ? "Yes" : "No"}
+            </div>
           </div>
           <div className="aja-item aja-full">
             <label className="aja-label">Work Experience</label>
@@ -126,11 +148,18 @@ const AdminJobApplicationDetail = () => {
           <div className="aja-item aja-full">
             <label className="aja-label">Skills</label>
             <div className="aja-value">
-              {Array.isArray(application.primarySkills) && application.primarySkills.length > 0 ? (
+              {Array.isArray(application.primarySkills) &&
+              application.primarySkills.length > 0 ? (
                 <ul className="aja-skill-list">
-                  {application.primarySkills.map((s, i) => <li key={i} className="aja-skill-item">{s}</li>)}
+                  {application.primarySkills.map((s, i) => (
+                    <li key={i} className="aja-skill-item">
+                      {s}
+                    </li>
+                  ))}
                 </ul>
-              ) : "None"}
+              ) : (
+                "None"
+              )}
             </div>
           </div>
         </div>
@@ -140,7 +169,13 @@ const AdminJobApplicationDetail = () => {
           <div className="aja-item aja-full">
             <label className="aja-label">Resume</label>
             <div className="aja-value">
-              {application.resume ? <a href={application.resume} target="_blank" rel="noreferrer">View Resume</a> : "Not provided"}
+              {application.resume ? (
+                <a href={application.resume} target="_blank" rel="noreferrer">
+                  View Resume
+                </a>
+              ) : (
+                "Not provided"
+              )}
             </div>
           </div>
         </div>
@@ -149,11 +184,15 @@ const AdminJobApplicationDetail = () => {
         <div className="aja-grid">
           <div className="aja-item">
             <label className="aja-label">Created At</label>
-            <div className="aja-value">{fmtDateTime(application.createdAt)}</div>
+            <div className="aja-value">
+              {fmtDateTime(application.createdAt)}
+            </div>
           </div>
           <div className="aja-item">
             <label className="aja-label">Last Updated</label>
-            <div className="aja-value">{fmtDateTime(application.updatedAt)}</div>
+            <div className="aja-value">
+              {fmtDateTime(application.updatedAt)}
+            </div>
           </div>
         </div>
       </main>

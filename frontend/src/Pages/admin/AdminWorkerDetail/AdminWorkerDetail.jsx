@@ -14,7 +14,7 @@ const AdminWorkerDetail = () => {
     const fetchWorker = async () => {
       setLoading(true);
       try {
-        const res = await fetch(`${apiBase}/admin/worker/${id}`);
+        const res = await fetch(`/api/admin/worker/${id}`);
         if (!res.ok) throw new Error(`Server responded ${res.status}`);
         const data = await res.json();
         setWorker(data.worker ?? data);
@@ -28,9 +28,14 @@ const AdminWorkerDetail = () => {
   }, [id]);
 
   const handleDelete = async () => {
-    if (!window.confirm("Are you sure you want to delete this worker? This action cannot be undone.")) return;
+    if (
+      !window.confirm(
+        "Are you sure you want to delete this worker? This action cannot be undone."
+      )
+    )
+      return;
     try {
-      const res = await fetch(`${apiBase}/admin/delete-worker/${id}`, {
+      const res = await fetch(`/api/admin/delete-worker/${id}`, {
         method: "DELETE",
         headers: { "Content-Type": "application/json" },
       });
@@ -47,14 +52,18 @@ const AdminWorkerDetail = () => {
   if (error) return <div className="awd-error">Error: {error}</div>;
   if (!worker) return <div className="awd-empty">Worker not found.</div>;
 
-  const fmtDate = (d) => (d ? new Date(d).toLocaleDateString() : "Not specified");
+  const fmtDate = (d) =>
+    d ? new Date(d).toLocaleDateString() : "Not specified";
 
   return (
     <div className="awd-container">
       <header className="awd-header">
         <h1 className="awd-title">Worker Details</h1>
         <div className="awd-actions">
-          <button className="awd-btn awd-back" onClick={() => navigate("/admindashboard")}>
+          <button
+            className="awd-btn awd-back"
+            onClick={() => navigate("/admin/admindashboard")}
+          >
             ← Back to Dashboard
           </button>
           <button className="awd-btn awd-delete" onClick={handleDelete}>
@@ -67,7 +76,11 @@ const AdminWorkerDetail = () => {
         <section className="awd-section awd-section-header">
           <h2 className="awd-section-title">{worker.name || "Worker"}</h2>
           <p className="awd-subtitle">
-            Worker ID: {worker._id} {worker.role ? `| Role: ${worker.role}` : ""} {worker.availability ? `| Availability: ${worker.availability}` : ""}
+            Worker ID: {worker._id}{" "}
+            {worker.role ? `| Role: ${worker.role}` : ""}{" "}
+            {worker.availability
+              ? `| Availability: ${worker.availability}`
+              : ""}
           </p>
         </section>
 
@@ -85,18 +98,28 @@ const AdminWorkerDetail = () => {
 
           <div className="awd-item">
             <label className="awd-label">Date of Birth</label>
-            <div className="awd-value">{worker.dob ? fmtDate(worker.dob) : "—"}</div>
+            <div className="awd-value">
+              {worker.dob ? fmtDate(worker.dob) : "—"}
+            </div>
           </div>
 
           <div className="awd-item">
             <label className="awd-label">Aadhaar Number</label>
-            <div className="awd-value">{worker.aadharNumber || worker.aadhaarNumber || "—"}</div>
+            <div className="awd-value">
+              {worker.aadharNumber || worker.aadhaarNumber || "—"}
+            </div>
           </div>
 
           {worker.profileImage && (
             <div className="awd-item awd-full">
               <label className="awd-label">Profile Image</label>
-              <div className="awd-value"><img className="awd-img" src={worker.profileImage} alt="Profile" /></div>
+              <div className="awd-value">
+                <img
+                  className="awd-img"
+                  src={worker.profileImage}
+                  alt="Profile"
+                />
+              </div>
             </div>
           )}
         </div>
@@ -120,7 +143,10 @@ const AdminWorkerDetail = () => {
 
           <div className="awd-item">
             <label className="awd-label">Rating</label>
-            <div className="awd-value">{worker.rating ?? "—"}{worker.rating ? " / 5" : ""}</div>
+            <div className="awd-value">
+              {worker.rating ?? "—"}
+              {worker.rating ? " / 5" : ""}
+            </div>
           </div>
 
           <div className="awd-item">
@@ -139,22 +165,36 @@ const AdminWorkerDetail = () => {
           <div className="awd-item awd-full">
             <label className="awd-label">Specialties</label>
             <div className="awd-value">
-              {Array.isArray(worker.specialties) && worker.specialties.length > 0 ? (
+              {Array.isArray(worker.specialties) &&
+              worker.specialties.length > 0 ? (
                 <ul style={{ listStyle: "none", padding: 0, margin: 0 }}>
-                  {worker.specialties.map((s, i) => <li key={i} className="awd-list-item">• {s}</li>)}
+                  {worker.specialties.map((s, i) => (
+                    <li key={i} className="awd-list-item">
+                      • {s}
+                    </li>
+                  ))}
                 </ul>
-              ) : "None"}
+              ) : (
+                "None"
+              )}
             </div>
           </div>
 
           <div className="awd-item awd-full">
             <label className="awd-label">Services Offered</label>
             <div className="awd-value">
-              {Array.isArray(worker.servicesOffered) && worker.servicesOffered.length > 0 ? (
+              {Array.isArray(worker.servicesOffered) &&
+              worker.servicesOffered.length > 0 ? (
                 <ul style={{ listStyle: "none", padding: 0, margin: 0 }}>
-                  {worker.servicesOffered.map((s, i) => <li key={i} className="awd-list-item">• {s}</li>)}
+                  {worker.servicesOffered.map((s, i) => (
+                    <li key={i} className="awd-list-item">
+                      • {s}
+                    </li>
+                  ))}
                 </ul>
-              ) : "None"}
+              ) : (
+                "None"
+              )}
             </div>
           </div>
         </div>
@@ -183,7 +223,9 @@ const AdminWorkerDetail = () => {
                 {p.image && (
                   <div className="awd-item">
                     <label className="awd-label">Image</label>
-                    <div className="awd-value"><img className="awd-img" src={p.image} alt="Project" /></div>
+                    <div className="awd-value">
+                      <img className="awd-img" src={p.image} alt="Project" />
+                    </div>
                   </div>
                 )}
               </div>
@@ -198,13 +240,20 @@ const AdminWorkerDetail = () => {
           <div className="awd-item awd-full">
             <label className="awd-label">Certificate Files</label>
             <div className="awd-value">
-              {Array.isArray(worker.certificateFiles) && worker.certificateFiles.length > 0 ? (
+              {Array.isArray(worker.certificateFiles) &&
+              worker.certificateFiles.length > 0 ? (
                 <ul style={{ listStyle: "none", padding: 0, margin: 0 }}>
                   {worker.certificateFiles.map((f, i) => (
-                    <li key={i} className="awd-list-item"><a href={f} target="_blank" rel="noreferrer">View Certificate</a></li>
+                    <li key={i} className="awd-list-item">
+                      <a href={f} target="_blank" rel="noreferrer">
+                        View Certificate
+                      </a>
+                    </li>
                   ))}
                 </ul>
-              ) : "None"}
+              ) : (
+                "None"
+              )}
             </div>
           </div>
         </div>

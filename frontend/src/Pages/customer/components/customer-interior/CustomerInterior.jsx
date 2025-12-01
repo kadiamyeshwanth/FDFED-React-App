@@ -81,7 +81,6 @@ const CustomerInterior = () => {
       <div className="interior-container">
         <div className="interior-left-section" ref={leftSectionRef}>
           <div className="interior-search-box" style={{ position: "relative" }}>
-            <i className="fas fa-search"></i>
             <input
               type="text"
               placeholder="Search interior designers..."

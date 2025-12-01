@@ -27,7 +27,6 @@ export default function CompanySettings() {
       yearsInBusiness: 0,
       about: "",
       didYouKnow: "",
-      teamMembers: [],
       completedProjects: []
     }
   });
@@ -58,13 +57,12 @@ export default function CompanySettings() {
     yearsInBusiness: 0,
     customerAboutCompany: "",
     didYouKnow: "",
-    // teamMembers & completedProjects will be arrays of objects
-    teamMembers: [],
+    // completedProjects will be array of objects with title, description, image, location, tenderId, materialCertificate, gpsLink
     completedProjects: []
   });
   // we will store file inputs in refs so we can append them to FormData conditionally
-  const teamFileInputs = useRef([]);
   const projectFileInputs = useRef([]);
+  const certificateFileInputs = useRef([]);
 
   // Security form (local)
   const [securityForm, setSecurityForm] = useState({
@@ -115,13 +113,12 @@ export default function CompanySettings() {
         yearsInBusiness: c.yearsInBusiness || 0,
         customerAboutCompany: c.about || "",
         didYouKnow: c.didYouKnow || "",
-        teamMembers: c.teamMembers && c.teamMembers.length ? c.teamMembers.map(tm => ({ ...tm })) : [],
         completedProjects: c.completedProjects && c.completedProjects.length ? c.completedProjects.map(p => ({ ...p })) : []
       });
 
       // reset file inputs refs
-      teamFileInputs.current = [];
-      projectFileInputs.current = [];
+      projectFileInputs.current = c.completedProjects && c.completedProjects.length ? c.completedProjects.map(() => ({ before: null, after: null })) : [];
+      certificateFileInputs.current = [];
     } catch (err) {
       console.error("Fetch error", err);
       setError(err.message || "Unknown error");
@@ -205,30 +202,11 @@ export default function CompanySettings() {
     setCustomerForm(prev => ({ ...prev, [name]: value }));
   }
 
-  // team members & project items management
-  function addTeamMember() {
-    setCustomerForm(prev => ({ ...prev, teamMembers: [...prev.teamMembers, { name: "", position: "", image: "" }] }));
-    // push placeholder in files refs (kept empty)
-    teamFileInputs.current.push(null);
-  }
-  function updateTeamMember(idx, key, value) {
-    setCustomerForm(prev => {
-      const tm = prev.teamMembers.map((m, i) => (i === idx ? { ...m, [key]: value } : m));
-      return { ...prev, teamMembers: tm };
-    });
-  }
-  function removeTeamMember(idx) {
-    setCustomerForm(prev => {
-      const tm = prev.teamMembers.filter((_, i) => i !== idx);
-      // remove file ref
-      teamFileInputs.current.splice(idx, 1);
-      return { ...prev, teamMembers: tm };
-    });
-  }
-
+  // completed project items management
   function addProject() {
-    setCustomerForm(prev => ({ ...prev, completedProjects: [...prev.completedProjects, { title: "", description: "", image: "" }] }));
-    projectFileInputs.current.push(null);
+    setCustomerForm(prev => ({ ...prev, completedProjects: [...prev.completedProjects, { title: "", description: "", beforeImage: "", afterImage: "", location: "", tenderId: "", materialCertificate: "", gpsLink: "" }] }));
+    projectFileInputs.current.push({ before: null, after: null });
+    certificateFileInputs.current.push(null);
   }
   function updateProject(idx, key, value) {
     setCustomerForm(prev => {
@@ -240,31 +218,47 @@ export default function CompanySettings() {
     setCustomerForm(prev => {
       const arr = prev.completedProjects.filter((_, i) => i !== idx);
       projectFileInputs.current.splice(idx, 1);
+      certificateFileInputs.current.splice(idx, 1);
       return { ...prev, completedProjects: arr };
     });
   }
 
-  // file input handlers: preview and store file input element in refs
-  function handleTeamFileChange(e, idx) {
+  function handleBeforeImageChange(e, idx) {
     const file = e.target.files[0];
-    teamFileInputs.current[idx] = file || null;
+    if (!projectFileInputs.current[idx]) projectFileInputs.current[idx] = { before: null, after: null };
+    projectFileInputs.current[idx].before = file || null;
 
     if (file) {
       const reader = new FileReader();
       reader.onload = () => {
-        updateTeamMember(idx, "image", reader.result);
+        updateProject(idx, "beforeImage", reader.result);
       };
       reader.readAsDataURL(file);
     }
   }
-  function handleProjectFileChange(e, idx) {
+
+  function handleAfterImageChange(e, idx) {
     const file = e.target.files[0];
-    projectFileInputs.current[idx] = file || null;
+    if (!projectFileInputs.current[idx]) projectFileInputs.current[idx] = { before: null, after: null };
+    projectFileInputs.current[idx].after = file || null;
 
     if (file) {
       const reader = new FileReader();
       reader.onload = () => {
-        updateProject(idx, "image", reader.result);
+        updateProject(idx, "afterImage", reader.result);
+      };
+      reader.readAsDataURL(file);
+    }
+  }
+
+  function handleCertificateFileChange(e, idx) {
+    const file = e.target.files[0];
+    certificateFileInputs.current[idx] = file || null;
+
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = () => {
+        updateProject(idx, "materialCertificate", reader.result);
       };
       reader.readAsDataURL(file);
     }
@@ -287,33 +281,31 @@ export default function CompanySettings() {
     fd.append("customerAboutCompany", customerForm.customerAboutCompany || "");
     fd.append("didYouKnow", customerForm.didYouKnow || "");
 
-    // teamMembers - send JSON and optionally files
-    const teamMembersPayload = customerForm.teamMembers.map((m, i) => {
-      // If a file exists for this index, we'll append it separately
-      return {
-        name: m.name || "",
-        position: m.position || "",
-        image: m.image || ""
-      };
-    });
-    fd.append("teamMembers", JSON.stringify(teamMembersPayload));
-
-    teamFileInputs.current.forEach((file, idx) => {
-      if (file) {
-        fd.append("memberImages", file, `member_image_${idx}`);
-      }
-    });
-
-    // completedProjects - JSON + files
+    // completedProjects - JSON + files (images and certificates)
     const projectsPayload = customerForm.completedProjects.map((p, i) => ({
       title: p.title || "",
       description: p.description || "",
-      image: p.image || ""
+      beforeImage: p.beforeImage || "",
+      afterImage: p.afterImage || "",
+      location: p.location || "",
+      tenderId: p.tenderId || "",
+      materialCertificate: p.materialCertificate || "",
+      gpsLink: p.gpsLink || ""
     }));
     fd.append("completedProjects", JSON.stringify(projectsPayload));
-    projectFileInputs.current.forEach((file, idx) => {
+    
+    projectFileInputs.current.forEach((files, idx) => {
+      if (files && files.before) {
+        fd.append("projectBeforeImages", files.before, `project_before_${idx}.${files.before.name.split('.').pop()}`);
+      }
+      if (files && files.after) {
+        fd.append("projectAfterImages", files.after, `project_after_${idx}.${files.after.name.split('.').pop()}`);
+      }
+    });
+    
+    certificateFileInputs.current.forEach((file, idx) => {
       if (file) {
-        fd.append("projectImages", file, `project_image_${idx}`);
+        fd.append("certificateFiles", file, `certificate_${idx}.${file.name.split('.').pop()}`);
       }
     });
 
@@ -585,29 +577,41 @@ export default function CompanySettings() {
                     </div>
 
                     <div className="cs-row">
-                      <label>Team Members</label>
-                      <div>
-                        {(company.customerProfile.teamMembers || []).map((m, i) => (
-                          <div className="cs-team-item" key={i}>
-                            {m.image && <img src={m.image} alt={m.name} className="cs-team-img" />}
-                            <div className="cs-team-info">
-                              <strong>{m.name}</strong>
-                              <div className="cs-muted">{m.position}</div>
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-
-                    <div className="cs-row">
                       <label>Completed Projects</label>
                       <div>
                         {(company.customerProfile.completedProjects || []).map((p, i) => (
                           <div className="cs-project-item" key={i}>
-                            {p.image && <img src={p.image} alt={p.title} className="cs-project-img" />}
+                            <div className="cs-project-images">
+                              {p.beforeImage && (
+                                <div className="cs-project-image-container">
+                                  <img src={p.beforeImage} alt={`${p.title} - Before`} className="cs-project-img" />
+                                  <span className="cs-image-label">Before Construction</span>
+                                </div>
+                              )}
+                              {p.afterImage && (
+                                <div className="cs-project-image-container">
+                                  <img src={p.afterImage} alt={`${p.title} - After`} className="cs-project-img" />
+                                  <span className="cs-image-label">After Construction</span>
+                                </div>
+                              )}
+                            </div>
                             <div className="cs-project-info">
                               <strong>{p.title}</strong>
                               <div className="cs-muted">{p.description}</div>
+                              {p.location && <div className="cs-muted"><i className="fas fa-map-marker-alt"></i> {p.location}</div>}
+                              {p.tenderId && <div className="cs-muted"><strong>Tender ID:</strong> {p.tenderId}</div>}
+                              {p.gpsLink && p.gpsLink.trim() !== "" && <div className="cs-muted"><a href={p.gpsLink} target="_blank" rel="noopener noreferrer"><i className="fas fa-map"></i> View on Map</a></div>}
+                              {p.materialCertificate && p.materialCertificate.trim() !== "" && (p.materialCertificate.startsWith('http') || p.materialCertificate.startsWith('https')) ? (
+                                <div className="cs-muted">
+                                  <a href={p.materialCertificate} target="_blank" rel="noopener noreferrer">
+                                    <i className="fas fa-certificate"></i> Material Certificate
+                                  </a>
+                                </div>
+                              ) : p.materialCertificate && p.materialCertificate.trim() !== "" ? (
+                                <div className="cs-muted" style={{ color: '#6c757d', fontStyle: 'italic' }}>
+                                  <i className="fas fa-certificate"></i> Certificate uploaded (pending processing)
+                                </div>
+                              ) : null}
                             </div>
                           </div>
                         ))}
@@ -651,41 +655,33 @@ export default function CompanySettings() {
                     </div>
 
                     <div className="cs-form-row">
-                      <label>Team Members</label>
-                      <div className="cs-dynamic-list">
-                        {customerForm.teamMembers.map((member, idx) => (
-                          <div key={idx} className="cs-dynamic-row cs-team-edit-row">
-                            <div className="cs-team-edit-left">
-                              <img className="cs-team-img" src={member.image || "https://via.placeholder.com/60"} alt={member.name || "member"} />
-                              <input type="file" onChange={(e) => handleTeamFileChange(e, idx)} />
-                            </div>
-                            <div className="cs-team-edit-right">
-                              <input className="cs-input" placeholder="Name" value={member.name || ""} onChange={(e) => updateTeamMember(idx, "name", e.target.value)} />
-                              <input className="cs-input" placeholder="Position" value={member.position || ""} onChange={(e) => updateTeamMember(idx, "position", e.target.value)} />
-                              <div className="cs-team-row-actions">
-                                <button type="button" className="cs-btn-danger" onClick={() => removeTeamMember(idx)}>Remove</button>
-                              </div>
-                            </div>
-                          </div>
-                        ))}
-                        <div>
-                          <button type="button" className="cs-btn-secondary" onClick={addTeamMember}>+ Add Team Member</button>
-                        </div>
-                      </div>
-                    </div>
-
-                    <div className="cs-form-row">
                       <label>Completed Projects</label>
                       <div className="cs-dynamic-list">
                         {customerForm.completedProjects.map((proj, idx) => (
                           <div key={idx} className="cs-dynamic-row cs-project-edit-row">
                             <div className="cs-project-edit-left">
-                              <img className="cs-project-img" src={proj.image || "https://via.placeholder.com/120x80"} alt={proj.title || "project"} />
-                              <input type="file" onChange={(e) => handleProjectFileChange(e, idx)} />
+                              <div className="cs-file-input-group">
+                                <label>Before Construction Image</label>
+                                <img className="cs-project-img" src={proj.beforeImage || "https://via.placeholder.com/120x80"} alt="Before" />
+                                <input type="file" accept="image/*" onChange={(e) => handleBeforeImageChange(e, idx)} />
+                              </div>
+                              <div className="cs-file-input-group">
+                                <label>After Construction Image</label>
+                                <img className="cs-project-img" src={proj.afterImage || "https://via.placeholder.com/120x80"} alt="After" />
+                                <input type="file" accept="image/*" onChange={(e) => handleAfterImageChange(e, idx)} />
+                              </div>
+                              <div className="cs-file-input-group">
+                                <label>Material Certificate</label>
+                                <input type="file" accept="image/*,application/pdf" onChange={(e) => handleCertificateFileChange(e, idx)} />
+                                {proj.materialCertificate && <small>Certificate uploaded</small>}
+                              </div>
                             </div>
                             <div className="cs-project-edit-right">
-                              <input className="cs-input" placeholder="Title" value={proj.title || ""} onChange={(e) => updateProject(idx, "title", e.target.value)} />
-                              <textarea className="cs-textarea" placeholder="Description" value={proj.description || ""} onChange={(e) => updateProject(idx, "description", e.target.value)} />
+                              <input className="cs-input" placeholder="Project Title" value={proj.title || ""} onChange={(e) => updateProject(idx, "title", e.target.value)} />
+                              <textarea className="cs-textarea" placeholder="Project Description" value={proj.description || ""} onChange={(e) => updateProject(idx, "description", e.target.value)} />
+                              <input className="cs-input" placeholder="Project Location" value={proj.location || ""} onChange={(e) => updateProject(idx, "location", e.target.value)} />
+                              <input className="cs-input" placeholder="Tender ID (if applicable)" value={proj.tenderId || ""} onChange={(e) => updateProject(idx, "tenderId", e.target.value)} />
+                              <input className="cs-input" placeholder="GPS Link (Google Maps URL)" value={proj.gpsLink || ""} onChange={(e) => updateProject(idx, "gpsLink", e.target.value)} />
                               <div className="cs-team-row-actions">
                                 <button type="button" className="cs-btn-danger" onClick={() => removeProject(idx)}>Remove</button>
                               </div>

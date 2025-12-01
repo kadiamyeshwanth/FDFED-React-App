@@ -8,13 +8,12 @@ const AdminCustomerDetail = () => {
   const [customer, setCustomer] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const apiBase = ""; // leave empty to use same origin or set VITE_API_URL
 
   useEffect(() => {
     const fetchCustomer = async () => {
       setLoading(true);
       try {
-        const res = await fetch(`${apiBase}/admin/customer/${id}`);
+        const res = await fetch(`/api/admin/customer/${id}`);
         if (!res.ok) throw new Error(`Server responded ${res.status}`);
         const data = await res.json();
         setCustomer(data.customer ?? data);
@@ -28,9 +27,14 @@ const AdminCustomerDetail = () => {
   }, [id]);
 
   const handleDelete = async () => {
-    if (!window.confirm("Are you sure you want to delete this customer? This action cannot be undone.")) return;
+    if (
+      !window.confirm(
+        "Are you sure you want to delete this customer? This action cannot be undone."
+      )
+    )
+      return;
     try {
-      const res = await fetch(`${apiBase}/admin/delete-customer/${id}`, {
+      const res = await fetch(`/api/admin/delete-customer/${id}`, {
         method: "DELETE",
         headers: { "Content-Type": "application/json" },
       });
@@ -47,7 +51,8 @@ const AdminCustomerDetail = () => {
   if (error) return <div className="acc-error">Error: {error}</div>;
   if (!customer) return <div className="acc-empty">Customer not found.</div>;
 
-  const fmtDate = (d) => (d ? new Date(d).toLocaleDateString() : "Not specified");
+  const fmtDate = (d) =>
+    d ? new Date(d).toLocaleDateString() : "Not specified";
   const fmtDateTime = (d) =>
     d
       ? new Date(d).toLocaleString("en-US", {
@@ -64,7 +69,10 @@ const AdminCustomerDetail = () => {
       <header className="acc-header">
         <h1 className="acc-title">📋 Customer Details</h1>
         <div className="acc-actions">
-          <button className="acc-btn acc-back" onClick={() => navigate("/admindashboard")}>
+          <button
+            className="acc-btn acc-back"
+            onClick={() => navigate("/admin/admindashboard")}
+          >
             ← Back to Dashboard
           </button>
           <button className="acc-btn acc-delete" onClick={handleDelete}>
@@ -81,7 +89,9 @@ const AdminCustomerDetail = () => {
 
         <div className="acc-alert acc-alert-info">
           <strong>ℹ️ Account Information</strong>
-          <div className="acc-alert-sub">This customer account was created on {fmtDate(customer.createdAt)}</div>
+          <div className="acc-alert-sub">
+            This customer account was created on {fmtDate(customer.createdAt)}
+          </div>
         </div>
 
         <h3 className="acc-section-heading">Personal Information</h3>
@@ -103,7 +113,9 @@ const AdminCustomerDetail = () => {
 
           <div className="acc-item">
             <label className="acc-label">Date of Birth</label>
-            <div className="acc-value">{customer.dob ? fmtDate(customer.dob) : "—"}</div>
+            <div className="acc-value">
+              {customer.dob ? fmtDate(customer.dob) : "—"}
+            </div>
           </div>
 
           <div className="acc-item">

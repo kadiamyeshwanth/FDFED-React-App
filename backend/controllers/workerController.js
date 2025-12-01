@@ -249,39 +249,106 @@ const createWorkerRequest = async (req, res) => {
 const updateWorkerProfile = async (req, res) => {
   try {
     const workerId = req.user.user_id;
-    const { name, title, experience, about, specialties } = req.body;
+    const {
+      name,
+      email,
+      phone,
+      title,
+      experience,
+      about,
+      specialties,
+      languages,
+      expectedPrice,
+    } = req.body;
 
     const worker = await Worker.findById(workerId);
     if (!worker) {
       return res.status(404).json({ message: "Worker not found." });
     }
 
+    // Basic fields
     worker.name = name || worker.name;
+    worker.email = email || worker.email;
+    worker.phone = phone || worker.phone;
     worker.professionalTitle = title || worker.professionalTitle;
-    worker.experience = experience || worker.experience;
+    if (experience !== undefined) {
+      const expNum = isNaN(Number(experience)) ? worker.experience : Number(experience);
+      worker.experience = expNum;
+    }
     worker.about = about || worker.about;
-    worker.specialties = Array.isArray(specialties) ? specialties : (specialties ? [specialties] : []);
+    worker.expectedPrice = expectedPrice || worker.expectedPrice;
 
-    const profileImageFile = req.files.find(file => file.fieldname === 'profileImage');
+    // Arrays: specialties and languages (accept comma-separated or array)
+    const toArray = (val) => Array.isArray(val)
+      ? val.filter(Boolean)
+      : (typeof val === 'string' ? val.split(',').map(v => v.trim()).filter(Boolean) : []);
+
+    worker.specialties = toArray(specialties);
+    worker.languages = toArray(languages);
+
+    // Files
+    const allFiles = Array.isArray(req.files) ? req.files : [];
+    const firstByField = (field) => allFiles.find(f => f.fieldname === field);
+    const manyByField = (field) => allFiles.filter(f => f.fieldname === field);
+
+    // Profile image
+    const profileImageFile = firstByField('profileImage');
     if (profileImageFile) {
       worker.profileImage = profileImageFile.path;
     }
 
+    // Previously worked companies (repeatable)
+    const previousCompanies = [];
+    let c = 1;
+    while (req.body[`companyName-${c}`] || req.body[`companyLocation-${c}`]) {
+      const companyName = req.body[`companyName-${c}`];
+      const location = req.body[`companyLocation-${c}`];
+      const role = req.body[`companyRole-${c}`];
+      const duration = req.body[`companyDuration-${c}`];
+      const proofs = manyByField(`companyProof-${c}`).map(f => f.path);
+      if (companyName || location || role || duration || proofs.length) {
+        previousCompanies.push({ companyName, location, role, duration, proofs });
+      }
+      c++;
+    }
+    if (previousCompanies.length) {
+      worker.previousCompanies = previousCompanies;
+    }
+
+    // Projects (repeatable)
     const projects = [];
     let i = 1;
-    while (req.body[`projectName-${i}`]) {
-        const projectImageFile = req.files.find(file => file.fieldname === `projectImage-${i}`);
-        projects.push({
-            name: req.body[`projectName-${i}`],
-            year: req.body[`projectYear-${i}`],
-            location: req.body[`projectLocation-${i}`],
-            description: req.body[`projectDescription-${i}`],
-            image: projectImageFile ? projectImageFile.path : worker.projects[i-1]?.image
-        });
-        i++;
+    while (
+      req.body[`projectName-${i}`] ||
+      req.body[`projectYear-${i}`] ||
+      req.body[`projectYearRange-${i}`] ||
+      req.body[`projectLocation-${i}`] ||
+      req.body[`projectDescription-${i}`]
+    ) {
+      const nameVal = req.body[`projectName-${i}`];
+      const yearVal = req.body[`projectYear-${i}`];
+      const yearRangeVal = req.body[`projectYearRange-${i}`];
+      const locationVal = req.body[`projectLocation-${i}`];
+      const descriptionVal = req.body[`projectDescription-${i}`];
+      const imageSingle = firstByField(`projectImage-${i}`)?.path; // backward compatibility
+      const imagesMulti = manyByField(`projectImages-${i}`).map(f => f.path);
+      const invoice = firstByField(`projectInvoice-${i}`)?.path;
+
+      const existing = worker.projects && worker.projects[i - 1] ? worker.projects[i - 1] : {};
+      projects.push({
+        name: nameVal || existing.name,
+        year: yearVal ? Number(yearVal) : existing.year,
+        yearRange: yearRangeVal || existing.yearRange,
+        location: locationVal || existing.location,
+        description: descriptionVal || existing.description,
+        image: imageSingle || existing.image,
+        images: imagesMulti.length ? imagesMulti : (existing.images || []),
+        invoiceOrCertificate: invoice || existing.invoiceOrCertificate,
+      });
+      i++;
     }
     if (projects.length > 0) {
-        worker.projects = projects;
+      worker.projects = projects;
     }
 
     await worker.save();

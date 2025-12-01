@@ -285,6 +285,95 @@ const CompanyOngoing = () => {
                   className={`ongoing-project-updates ${expandedUpdates[project._id] ? "ongoing-active" : ""}`}
                 >
                   <h3>Project Progress & Updates</h3>
+                  
+                  {/* Milestone Progress Section (only checkpoints: 25/50/75/100) */}
+                  {project.milestones && project.milestones.length > 0 && (
+                    <>
+                      <h4 className="ongoing-updates-subtitle">Milestone Updates</h4>
+                      <div className="milestones-list" style={{ marginBottom: "20px" }}>
+                        {project.milestones
+                          .sort((a, b) => a.percentage - b.percentage)
+                          .filter((m) => m.isCheckpoint)
+                          .map((milestone, idx) => (
+                            <div key={idx} className="milestone-item" style={{
+                              backgroundColor: milestone.isApprovedByCustomer ? "#d4edda" : milestone.needsRevision ? "#ffe6e6" : "#fff3cd",
+                              border: `2px solid ${milestone.isApprovedByCustomer ? "#28a745" : milestone.needsRevision ? "#dc3545" : "#ffc107"}`,
+                              borderRadius: "8px",
+                              padding: "15px",
+                              marginBottom: "15px"
+                            }}>
+                              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "10px" }}>
+                                <div>
+                                  <h4 style={{ margin: 0, color: "#333" }}>
+                                    {milestone.percentage}% Milestone
+                                    {milestone.isApprovedByCustomer ? (
+                                      <span style={{ marginLeft: "10px", color: "#28a745", fontSize: "0.9em" }}>
+                                        ✓ Approved by Customer
+                                      </span>
+                                    ) : milestone.needsRevision ? (
+                                      <span style={{ marginLeft: "10px", color: "#dc3545", fontSize: "0.9em" }}>
+                                        ⚠ Revision Requested - Update Required
+                                      </span>
+                                    ) : (
+                                      <span style={{ marginLeft: "10px", color: "#856404", fontSize: "0.9em" }}>
+                                        ⏳ Awaiting Customer Approval
+                                      </span>
+                                    )}
+                                  </h4>
+                                  <div style={{ fontSize: "0.85em", color: "#666", marginTop: "5px" }}>
+                                    Submitted: {new Date(milestone.submittedAt).toLocaleDateString("en-IN", {
+                                      day: "numeric",
+                                      month: "long",
+                                      year: "numeric",
+                                      hour: "2-digit",
+                                      minute: "2-digit"
+                                    })}
+                                    {milestone.approvedAt && (
+                                      <span style={{ marginLeft: "15px" }}>
+                                        Approved: {new Date(milestone.approvedAt).toLocaleDateString("en-IN", {
+                                          day: "numeric",
+                                          month: "long",
+                                          year: "numeric"
+                                        })}
+                                      </span>
+                                    )}
+                                  </div>
+                                </div>
+                              </div>
+                              <div style={{
+                                backgroundColor: "white",
+                                padding: "12px",
+                                borderRadius: "6px",
+                                marginTop: "10px"
+                              }}>
+                                <strong style={{ display: "block", marginBottom: "8px", color: "#555" }}>Company Message:</strong>
+                                <p style={{ margin: 0, lineHeight: "1.6", color: "#333" }}>{milestone.companyMessage}</p>
+                              </div>
+                              {milestone.needsRevision && milestone.customerFeedback && (
+                                <div style={{
+                                  backgroundColor: "#fff3cd",
+                                  padding: "12px",
+                                  borderRadius: "6px",
+                                  marginTop: "10px",
+                                  border: "1px solid #ffc107"
+                                }}>
+                                  <strong style={{ display: "block", marginBottom: "8px", color: "#856404" }}>Customer Feedback:</strong>
+                                  <p style={{ margin: 0, lineHeight: "1.6", color: "#333" }}>{milestone.customerFeedback}</p>
+                                  <button
+                                    className="ongoing-edit-btn"
+                                    style={{ marginTop: "10px" }}
+                                    onClick={() => navigate(`../addnewproject?projectId=${project._id}&updateCheckpoint=${milestone.percentage}`)}
+                                  >
+                                    Update Message
+                                  </button>
+                                </div>
+                              )}
+                            </div>
+                          ))}
+                      </div>
+                    </>
+                  )}
+                  
                   <h4 className="ongoing-updates-subtitle">Recent Activity</h4>
                   {project.recentUpdates && project.recentUpdates.length > 0 ? (
                     project.recentUpdates.map((update, idx) => (
