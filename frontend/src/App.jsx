@@ -5,6 +5,9 @@ import Customer from "./Pages/customer/Customer";
 import Company from "./Pages/company/Company";
 import Worker from "./Pages/worker/Worker";
 import ProtectedRoute from "./components/ProtectedRoute";
+import AdminLogin from "./Pages/admin/AdminLogin";
+import AdminDashboard from "./Pages/admin/AdminDashboard/AdminDashboard";
+import Admin from "./Pages/admin/Admin";
 
 import "./App.css";
 
@@ -12,7 +15,10 @@ const App = () => {
   return (
     <Routes>
       <Route path="/" element={<LoginSignUp />} />
-      {/* <Route path="/adminpage" element={<Admin />} /> */}
+      <Route path="/admin-login" element={<AdminLogin />} />
+      {/* Admin Login Page */}
+      <Route path="/admin/*" element={<Admin />} />
+
       <Route
         path="/customerdashboard/*"
         element={

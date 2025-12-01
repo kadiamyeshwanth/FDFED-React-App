@@ -1,8 +1,8 @@
 // src/Pages/customer/components/customer-architect/CustomerArchitect.jsx
 import React, { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
-import axios from "axios"; // Assuming axios is installed for API calls
-import "./CustomerArchitect.css"; // Import the CSS file
+import axios from "axios";
+import "./CustomerArchitect.css";
 
 const CustomerArchitect = () => {
   const [architects, setArchitects] = useState([]);
@@ -13,9 +13,8 @@ const CustomerArchitect = () => {
   const rightContentRef = useRef(null);
 
   useEffect(() => {
-    // Fetch architects from backend
     axios
-      .get("/api/architect") // Adjust the endpoint as per your routes
+      .get("/api/architect")
       .then((response) => {
         setArchitects(response.data.architects || []);
       })
@@ -45,21 +44,12 @@ const CustomerArchitect = () => {
       );
     };
 
-    if (leftSectionRef.current) {
-      preventScrollChaining(leftSectionRef.current);
-    }
-    if (rightContentRef.current) {
-      preventScrollChaining(rightContentRef.current);
-    }
+    if (leftSectionRef.current) preventScrollChaining(leftSectionRef.current);
+    if (rightContentRef.current) preventScrollChaining(rightContentRef.current);
   }, []);
 
-  const handleCardClick = (id) => {
-    setSelectedArchitectId(id);
-  };
-
-  const handleSearchChange = (e) => {
-    setSearchTerm(e.target.value.toLowerCase());
-  };
+  const handleCardClick = (id) => setSelectedArchitectId(id);
+  const handleSearchChange = (e) => setSearchTerm(e.target.value.toLowerCase());
 
   const handleBookSubmit = (e) => {
     e.preventDefault();
@@ -67,7 +57,9 @@ const CustomerArchitect = () => {
       alert("Please select an architect before booking.");
       return;
     }
-    navigate(`/customerdashboard/architect_form?workerId=${selectedArchitectId}`);
+    navigate(
+      `/customerdashboard/architect_form?workerId=${selectedArchitectId}`
+    );
   };
 
   const filteredArchitects = architects.filter(
@@ -79,21 +71,15 @@ const CustomerArchitect = () => {
           .includes(searchTerm))
   );
 
-  const selectedArchitect = architects.find(
-    (arch) => arch._id === selectedArchitectId
-  );
-
   return (
     <>
-      <div className="heading">Architects</div>
-      <div className="container">
-        <div className="left-section" ref={leftSectionRef}>
-          <div className="search-box" style={{ position: "relative" }}>
-            <i className="fas fa-search"></i>
+      <div className="ca-heading">Architects</div>
+      <div className="ca-container">
+        <div className="ca-left-section" ref={leftSectionRef}>
+          <div className="ca-search-box">
             <input
               type="text"
               placeholder="Search architects..."
-              id="architectSearch"
               value={searchTerm}
               onChange={handleSearchChange}
             />
@@ -103,10 +89,9 @@ const CustomerArchitect = () => {
             filteredArchitects.map((architect) => (
               <div
                 key={architect._id}
-                className={`architect-card ${
-                  selectedArchitectId === architect._id ? "active" : ""
+                className={`ca-architect-card ${
+                  selectedArchitectId === architect._id ? "ca-active" : ""
                 }`}
-                data-id={architect._id}
                 onClick={() => handleCardClick(architect._id)}
               >
                 <img
@@ -115,46 +100,44 @@ const CustomerArchitect = () => {
                     "https://t4.ftcdn.net/jpg/03/64/21/11/360_F_364211147_1qgLVxv1Tcq0Ohz3FawUfrtONzz8nq3e.jpg"
                   }
                   alt={architect.name}
-                  className="architect-image-small"
+                  className="ca-architect-image-small"
                 />
-                <div className="architect-info">
+                <div className="ca-architect-info">
                   <h3>{architect.name}</h3>
                   <p>{architect.professionalTitle || "Architect"}</p>
                   <p>
                     <i className="fas fa-briefcase"></i> {architect.experience}{" "}
                     years experience
                   </p>
-                  <div className="rating">
+                  <div className="ca-rating">
                     {[...Array(Math.floor(architect.rating))].map((_, i) => (
-                      <span key={i} className="star">
+                      <span key={i} className="ca-star">
                         ★
                       </span>
                     ))}
                     {architect.rating % 1 >= 0.5 && (
-                      <span className="star">½</span>
+                      <span className="ca-star">½</span>
                     )}
-                    <span className="rating-count">({architect.rating})</span>
+                    <span className="ca-rating-count">
+                      ({architect.rating})
+                    </span>
                   </div>
                 </div>
               </div>
             ))
           ) : (
-            <div className="no-architects">
+            <div className="ca-no-architects">
               <p>No architects are currently available.</p>
             </div>
           )}
         </div>
 
-        <div className="a_right_section">
-          <div
-            className="right-content"
-            id="architectDetails"
-            ref={rightContentRef}
-          >
+        <div className="ca-right-section">
+          <div className="ca-right-content" ref={rightContentRef}>
             {!selectedArchitectId ? (
-              <div className="initial-message">
-                <div className="company-info">
-                  <h2 className="text-heading">
+              <div className="ca-initial-message">
+                <div className="ca-company-info">
+                  <h2 className="ca-text-heading">
                     Welcome to Build & Beyond Architects
                   </h2>
                   <p>
@@ -164,14 +147,14 @@ const CustomerArchitect = () => {
                     of experience, our team of talented architects and designers
                     has delivered award-winning projects across the globe.
                   </p>
-                  <h3 className="text-heading">Our Mission</h3>
+                  <h3 className="ca-text-heading">Our Mission</h3>
                   <p>
                     Our mission is to design spaces that enhance the quality of
                     life, promote sustainability, and reflect the unique
                     identity of our clients. We believe in the power of
                     architecture to shape the future and create lasting impact.
                   </p>
-                  <h3 className="text-heading">Our Services</h3>
+                  <h3 className="ca-text-heading">Our Services</h3>
                   <ul>
                     <li>Residential Architecture</li>
                     <li>Commercial Architecture</li>
@@ -192,19 +175,18 @@ const CustomerArchitect = () => {
                 .map((architect) => (
                   <div
                     key={architect._id}
-                    className="architect-details active"
-                    id={`architect-${architect._id}`}
+                    className="ca-architect-details ca-active"
                   >
-                    <div className="architect-header">
+                    <div className="ca-architect-header">
                       <img
                         src={
                           architect.profileImage ||
                           "https://t4.ftcdn.net/jpg/03/64/21/11/360_F_364211147_1qgLVxv1Tcq0Ohz3FawUfrtONzz8nq3e.jpg"
                         }
                         alt={architect.name}
-                        className="architect-image-large"
+                        className="ca-architect-image-large"
                       />
-                      <div className="architect-header-content">
+                      <div className="ca-architect-header-content">
                         <h2>{architect.name}</h2>
                         <p>
                           <strong>
@@ -215,32 +197,32 @@ const CustomerArchitect = () => {
                           <i className="fas fa-briefcase"></i>{" "}
                           {architect.experience} years experience
                         </p>
-                        <div className="rating">
+                        <div className="ca-rating">
                           {[...Array(Math.floor(architect.rating))].map(
                             (_, i) => (
-                              <span key={i} className="star">
+                              <span key={i} className="ca-star">
                                 ★
                               </span>
                             )
                           )}
                           {architect.rating % 1 >= 0.5 && (
-                            <span className="star">½</span>
+                            <span className="ca-star">½</span>
                           )}
-                          <span className="rating-count">
+                          <span className="ca-rating-count">
                             ({architect.rating})
                           </span>
                         </div>
                       </div>
                     </div>
 
-                    <div className="bio">
+                    <div className="ca-bio">
                       <h3>About</h3>
                       <p>{architect.about || "Information not available"}</p>
                       {architect.specialties &&
                         architect.specialties.length > 0 && (
-                          <div className="specialties">
+                          <div className="ca-specialties">
                             {architect.specialties.map((specialty, i) => (
-                              <span key={i} className="specialty">
+                              <span key={i} className="ca-specialty">
                                 {specialty}
                               </span>
                             ))}
@@ -248,13 +230,13 @@ const CustomerArchitect = () => {
                         )}
                     </div>
 
-                    <div className="projects">
+                    <div className="ca-projects">
                       <h3>Notable Projects</h3>
                       {architect.projects && architect.projects.length > 0 ? (
                         architect.projects.map((project, i) => (
-                          <div key={i} className="project">
+                          <div key={i} className="ca-project">
                             <h4>{project.name}</h4>
-                            <div className="project-meta">
+                            <div className="ca-project-meta">
                               <span>
                                 <i className="fas fa-calendar-alt"></i>{" "}
                                 {project.year}
@@ -270,7 +252,7 @@ const CustomerArchitect = () => {
                                 "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQC7-RFA1wE4wTSP0DZJSJ1AJ8TitBYtkmEYA&s"
                               }
                               alt={project.name}
-                              className="project-image"
+                              className="ca-project-image"
                             />
                             <p>{project.description}</p>
                           </div>
@@ -284,18 +266,16 @@ const CustomerArchitect = () => {
             )}
           </div>
 
-          <div className="book-now-container">
-            <form id="bookArchitectForm" onSubmit={handleBookSubmit}>
+          <div className="ca-book-now-container">
+            <form onSubmit={handleBookSubmit}>
               <input
                 type="hidden"
                 name="workerId"
-                id="selectedWorkerId"
                 value={selectedArchitectId || ""}
               />
               <button
                 type="submit"
-                className="book-now-btn"
-                id="bookNowBtn"
+                className="ca-book-now-btn"
                 disabled={!selectedArchitectId}
               >
                 Book Consultation <i className="fas fa-arrow-right"></i>

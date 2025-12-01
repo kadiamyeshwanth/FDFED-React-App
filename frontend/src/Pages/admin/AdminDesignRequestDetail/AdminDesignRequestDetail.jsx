@@ -14,7 +14,7 @@ const AdminDesignRequestDetail = () => {
     const fetchRequest = async () => {
       setLoading(true);
       try {
-        const res = await fetch(`${apiBase}/admin/design-request/${id}`);
+        const res = await fetch(`/api/admin/design-request/${id}`);
         if (!res.ok) throw new Error(`Server responded ${res.status}`);
         const data = await res.json();
         setRequest(data.request ?? data);
@@ -28,9 +28,10 @@ const AdminDesignRequestDetail = () => {
   }, [id]);
 
   const handleDelete = async () => {
-    if (!window.confirm("Are you sure you want to delete this design request?")) return;
+    if (!window.confirm("Are you sure you want to delete this design request?"))
+      return;
     try {
-      const res = await fetch(`${apiBase}/admin/delete-designRequest/${id}`, {
+      const res = await fetch(`/api/admin/delete-designRequest/${id}`, {
         method: "DELETE",
         headers: { "Content-Type": "application/json" },
       });
@@ -43,9 +44,11 @@ const AdminDesignRequestDetail = () => {
     }
   };
 
-  if (loading) return <div className="adr-loading">Loading design request…</div>;
+  if (loading)
+    return <div className="adr-loading">Loading design request…</div>;
   if (error) return <div className="adr-error">Error: {error}</div>;
-  if (!request) return <div className="adr-empty">Design request not found.</div>;
+  if (!request)
+    return <div className="adr-empty">Design request not found.</div>;
 
   const fmtDate = (d) => (d ? new Date(d).toLocaleDateString() : "Not set");
   const fmtDateTime = (d) => (d ? new Date(d).toLocaleString() : "Not set");
@@ -55,7 +58,10 @@ const AdminDesignRequestDetail = () => {
       <header className="adr-header">
         <h1 className="adr-title">🎨 Design Request Details</h1>
         <div className="adr-actions">
-          <button className="adr-btn adr-back" onClick={() => navigate("/admindashboard")}>
+          <button
+            className="adr-btn adr-back"
+            onClick={() => navigate("/admin/admindashboard")}
+          >
             ← Back to Dashboard
           </button>
           <button className="adr-btn adr-delete" onClick={handleDelete}>
@@ -66,7 +72,9 @@ const AdminDesignRequestDetail = () => {
 
       <main className="adr-card">
         <section className="adr-section adr-section-header">
-          <h2 className="adr-section-title">{request.projectName || "Design Request"}</h2>
+          <h2 className="adr-section-title">
+            {request.projectName || "Design Request"}
+          </h2>
           <p className="adr-subtitle">Request ID: {request._id}</p>
         </section>
 
@@ -75,7 +83,11 @@ const AdminDesignRequestDetail = () => {
           <div className="adr-item">
             <label className="adr-label">Status</label>
             <div className="adr-value">
-              <span className={`adr-badge adr-badge-${String(request.status ?? "").toLowerCase()}`}>
+              <span
+                className={`adr-badge adr-badge-${String(
+                  request.status ?? ""
+                ).toLowerCase()}`}
+              >
                 {request.status ?? "—"}
               </span>
             </div>
@@ -91,15 +103,21 @@ const AdminDesignRequestDetail = () => {
         <div className="adr-grid">
           <div className="adr-item">
             <label className="adr-label">Full Name</label>
-            <div className="adr-value">{request.fullName ?? request.customerId?.name ?? "—"}</div>
+            <div className="adr-value">
+              {request.fullName ?? request.customerId?.name ?? "—"}
+            </div>
           </div>
           <div className="adr-item">
             <label className="adr-label">Email</label>
-            <div className="adr-value">{request.email ?? request.customerId?.email ?? "—"}</div>
+            <div className="adr-value">
+              {request.email ?? request.customerId?.email ?? "—"}
+            </div>
           </div>
           <div className="adr-item">
             <label className="adr-label">Phone</label>
-            <div className="adr-value">{request.phone ?? request.customerId?.phone ?? "—"}</div>
+            <div className="adr-value">
+              {request.phone ?? request.customerId?.phone ?? "—"}
+            </div>
           </div>
           <div className="adr-item adr-full">
             <label className="adr-label">Address</label>
@@ -118,7 +136,9 @@ const AdminDesignRequestDetail = () => {
             <label className="adr-label">Room Size</label>
             <div className="adr-value">
               {request.roomSize
-                ? `${request.roomSize.length ?? "—"} x ${request.roomSize.width ?? "—"} ${request.roomSize.unit ?? ""}`
+                ? `${request.roomSize.length ?? "—"} x ${
+                    request.roomSize.width ?? "—"
+                  } ${request.roomSize.unit ?? ""}`
                 : "—"}
             </div>
           </div>
@@ -127,7 +147,8 @@ const AdminDesignRequestDetail = () => {
             <div className="adr-item">
               <label className="adr-label">Ceiling Height</label>
               <div className="adr-value">
-                {request.ceilingHeight.height} {request.ceilingHeight.unit ?? ""}
+                {request.ceilingHeight.height}{" "}
+                {request.ceilingHeight.unit ?? ""}
               </div>
             </div>
           )}

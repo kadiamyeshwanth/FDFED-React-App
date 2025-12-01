@@ -1,0 +1,163 @@
+/* src/Pages/admin/AdminLogin.css */
+
+.admin-login-body {
+  margin: 0;
+  padding: 0;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background: linear-gradient(135deg, #F5F5F5 0%, #A3C5BB 100%);
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.admin-login-container {
+  background-color: white;
+  border-radius: 10px;
+  box-shadow: 0 14px 28px rgba(0,0,0,0.25), 0 10px 10px rgba(0,0,0,0.22);
+  width: 400px;
+  max-width: 90%;
+  padding: 30px;
+  overflow: hidden;
+}
+
+.admin-login-header {
+  text-align: center;
+  margin-bottom: 30px;
+}
+
+.admin-login-header h1 {
+  color: #4D7A70;
+  margin-bottom: 10px;
+  font-size: 28px;
+}
+
+.admin-login-header p {
+  color: #363636;
+  font-size: 14px;
+}
+
+.admin-login-input-group {
+  margin-bottom: 20px;
+  position: relative;
+}
+
+.admin-login-input-group label {
+  display: block;
+  margin-bottom: 8px;
+  color: #363636;
+  font-weight: 500;
+  font-size: 14px;
+}
+
+.admin-login-input-group input {
+  width: 100%;
+  padding: 12px 15px;
+  border-radius: 5px;
+  border: 1px solid #000000;
+  font-size: 16px;
+  transition: border-color 0.3s;
+}
+
+.admin-login-input-group input:focus {
+  outline: none;
+  border-color: #4D7A70;
+}
+
+.admin-login-password-container {
+  position: relative;
+}
+
+.admin-login-password-container input {
+  padding-right: 40px;
+}
+
+.admin-login-toggle-password {
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  color: #363636;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.admin-login-toggle-password:hover {
+  color: #4D7A70;
+}
+
+.admin-login-error-message {
+  color: #d9534f;
+  font-size: 12px;
+  margin-top: 5px;
+  display: none;
+}
+
+.admin-login-error .admin-login-error-message {
+  display: block;
+}
+
+.admin-login-error input {
+  border-color: #d9534f;
+}
+
+.admin-login-remember-forgot {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 25px;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.admin-login-remember-me {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 14px;
+}
+
+.admin-login-forgot-password a {
+  color: #4D7A70;
+  text-decoration: none;
+  font-size: 14px;
+}
+
+.admin-login-forgot-password a:hover {
+  color: #363636;
+  text-decoration: underline;
+}
+
+.admin-login-submit-btn {
+  width: 100%;
+  padding: 14px;
+  background-color: #4D7A70;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  font-size: 16px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.admin-login-submit-btn:hover {
+  background-color: #363636;
+}
+
+.admin-login-pass-key-info {
+  color: #363636;
+  font-size: 12px;
+  margin-top: 5px;
+}
+
+@media (max-width: 480px) {
+  .admin-login-container {
+    padding: 20px;
+  }
+  .admin-login-header h1 {
+    font-size: 24px;
+  }
+}

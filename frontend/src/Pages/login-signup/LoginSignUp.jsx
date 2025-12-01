@@ -283,7 +283,7 @@ const LoginSignUp = () => {
   return (
     <div className="ls-landing-page">
       <div className="ls-admin-link">
-        <Link to="/adminpage" className="ls-admin-login-btn">
+        <Link to="/admin-login" className="ls-admin-login-btn">
           Admin Login
         </Link>
       </div>
