@@ -2,44 +2,82 @@ import React, { useState } from "react";
 import axios from "axios";
 import "./BidForm.css";
 import { useNavigate } from "react-router-dom";
+import { useValidation } from "../../../../context/ValidationContext";
+
+const MAX_FLOOR_FILES = 5;
+const ALLOWED_FILE_TYPES = ["application/pdf", "image/jpeg", "image/png"];
+const MAX_FILE_MB = 5;
 
 const BidForm = () => {
   const navigate = useNavigate();
+  const {
+    validateRequired,
+    validateProjectName,
+    validateEmail,
+    validatePhone,
+    validatePincode,
+    validateNumber,
+    validateBudget,
+    validateDescription,
+    validateFile,
+  } = useValidation();
+
   const [totalFloors, setTotalFloors] = useState("");
   const [floors, setFloors] = useState([]);
   const [errors, setErrors] = useState({});
   const [formError, setFormError] = useState("");
+  const [submitting, setSubmitting] = useState(false);
 
   const handleFloorCountChange = (e) => {
-    const count = parseInt(e.target.value);
-    setTotalFloors(e.target.value);
-    if (count > 0) {
-      const newFloors = Array.from({ length: count }, (_, i) => ({
-        id: i + 1,
-        floorType: "",
-        floorArea: "",
-        floorDescription: "",
-        floorImage: null,
-        preview: null,
-      }));
-      setFloors(newFloors);
-    } else {
+    const val = e.target.value;
+    setTotalFloors(val);
+    const count = parseInt(val, 10);
+    if (!Number.isInteger(count) || count <= 0) {
       setFloors([]);
+      return;
     }
+    const newFloors = Array.from({ length: count }, (_, i) => ({
+      id: i + 1,
+      floorType: "",
+      floorArea: "",
+      floorDescription: "",
+      floorImage: null,
+      preview: null,
+    }));
+    setFloors(newFloors);
+    setErrors((prev) => {
+      const copy = { ...prev };
+      delete copy.totalFloors;
+      return copy;
+    });
   };
 
   const updateFloor = (id, field, value) => {
     setFloors((prev) =>
       prev.map((f) => (f.id === id ? { ...f, [field]: value } : f))
     );
+    setErrors((prev) => {
+      const copy = { ...prev };
+      delete copy[`${field}-${id}`];
+      return copy;
+    });
   };
 
   const removeFloor = (id) => {
     setFloors((prev) => prev.filter((f) => f.id !== id));
+    setTotalFloors((prev) => {
+      const n = parseInt(prev, 10);
+      return Number.isNaN(n) ? "" : String(Math.max(0, n - 1));
+    });
   };
 
   const handleImageChange = (id, file) => {
     if (!file) return;
+    const fileErr = validateFile(file, ALLOWED_FILE_TYPES, MAX_FILE_MB);
+    if (fileErr) {
+      setErrors((prev) => ({ ...prev, [`floorImage-${id}`]: fileErr }));
+      return;
+    }
     const reader = new FileReader();
     reader.onloadend = () => {
       setFloors((prev) =>
@@ -47,6 +85,11 @@ const BidForm = () => {
           f.id === id ? { ...f, floorImage: file, preview: reader.result } : f
         )
       );
+      setErrors((prev) => {
+        const copy = { ...prev };
+        delete copy[`floorImage-${id}`];
+        return copy;
+      });
     };
     reader.readAsDataURL(file);
   };
@@ -54,37 +97,109 @@ const BidForm = () => {
   const validate = () => {
     const newErrors = {};
 
-    const fields = [
-      { id: "projectName", msg: "This field is required" },
-      { id: "buildingType", msg: "This field is required" },
-      { id: "customerName", msg: "This field is required" },
-      { id: "customerEmail", msg: "Please enter a valid email address", validate: (v) => /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/.test(v) },
-      { id: "customerPhone", msg: "Please enter a valid 10-digit phone number", validate: (v) => /^\d{10}$/.test(v.replace(/\D/g, "")) },
-      { id: "projectAddress", msg: "This field is required" },
-      { id: "projectLocation", msg: "Please enter a valid 6-digit pincode", validate: (v) => /^\d{6}$/.test(v) },
-      { id: "totalArea", msg: "Please enter a valid area (positive number)", validate: (v) => parseFloat(v) > 0 },
-      { id: "estimatedBudget", msg: "Please enter a budget greater than ₹1,00,00,000", validate: (v) => parseFloat(v) > 10000000 },
-      { id: "projectTimeline", msg: "Please enter a valid timeline (positive number)", validate: (v) => parseFloat(v) > 0 },
-      { id: "specialRequirements", msg: "This field is required" },
-      { id: "accessibilityNeeds", msg: "This field is required" },
-      { id: "energyEfficiency", msg: "This field is required" },
-    ];
+    const projectName =
+      document.getElementById("projectName")?.value?.trim() || "";
+    const buildingType =
+      document.getElementById("buildingType")?.value?.trim() || "";
+    const customerName =
+      document.getElementById("customerName")?.value?.trim() || "";
+    const customerEmail =
+      document.getElementById("customerEmail")?.value?.trim() || "";
+    const customerPhone =
+      document.getElementById("customerPhone")?.value?.trim() || "";
+    const projectAddress =
+      document.getElementById("projectAddress")?.value?.trim() || "";
+    const projectLocation =
+      document.getElementById("projectLocation")?.value?.trim() || "";
+    const totalArea = document.getElementById("totalArea")?.value?.trim() || "";
+    const estimatedBudget =
+      document.getElementById("estimatedBudget")?.value?.trim() || "";
+    const projectTimeline =
+      document.getElementById("projectTimeline")?.value?.trim() || "";
+    const specialRequirements =
+      document.getElementById("specialRequirements")?.value?.trim() || "";
+    const accessibilityNeeds =
+      document.getElementById("accessibilityNeeds")?.value?.trim() || "";
+    const energyEfficiency =
+      document.getElementById("energyEfficiency")?.value?.trim() || "";
 
-    fields.forEach((f) => {
-      const el = document.getElementById(f.id);
-      const val = el?.value.trim() || "";
-      if (!val) newErrors[f.id] = f.msg;
-      else if (f.validate && !f.validate(val)) newErrors[f.id] = f.msg;
-    });
+    const pnErr = validateProjectName(projectName);
+    if (pnErr) newErrors.projectName = pnErr;
 
-    if (parseInt(totalFloors) > 0 && floors.length === 0) {
+    if (validateRequired(buildingType, "Building type"))
+      newErrors.buildingType = validateRequired(buildingType, "Building type");
+
+    const cnErr = validateRequired(customerName, "Customer name");
+    if (cnErr) newErrors.customerName = cnErr;
+
+    const emailErr = validateEmail(customerEmail);
+    if (emailErr) newErrors.customerEmail = emailErr;
+
+    const phoneErr = validatePhone(customerPhone);
+    if (phoneErr) newErrors.customerPhone = phoneErr;
+
+    const addrErr = validateRequired(projectAddress, "Project address");
+    if (addrErr) newErrors.projectAddress = addrErr;
+
+    const pinErr = validatePincode(projectLocation);
+    if (pinErr) newErrors.projectLocation = pinErr;
+
+    const areaErr = validateNumber(totalArea, "Total area", 1);
+    if (areaErr) newErrors.totalArea = areaErr;
+
+    const budgetErr = validateBudget(estimatedBudget, 1000000000);
+    if (budgetErr) newErrors.estimatedBudget = budgetErr;
+
+    const timelineErr = validateNumber(projectTimeline, "Project timeline", 1);
+    if (timelineErr) newErrors.projectTimeline = timelineErr;
+
+    if (validateRequired(specialRequirements, "Special requirements"))
+      newErrors.specialRequirements = validateRequired(
+        specialRequirements,
+        "Special requirements"
+      );
+    if (validateRequired(accessibilityNeeds, "Accessibility needs"))
+      newErrors.accessibilityNeeds = validateRequired(
+        accessibilityNeeds,
+        "Accessibility needs"
+      );
+    if (validateRequired(energyEfficiency, "Energy efficiency"))
+      newErrors.energyEfficiency = validateRequired(
+        energyEfficiency,
+        "Energy efficiency"
+      );
+
+    const floorCount = parseInt(totalFloors, 10);
+    if (floorCount > 0 && floors.length === 0) {
       newErrors.totalFloors = "Please generate floor details";
     } else {
       floors.forEach((f) => {
-        if (!f.floorType) newErrors[`floorType-${f.id}`] = "This field is required";
-        if (!f.floorArea || parseFloat(f.floorArea) <= 0) newErrors[`floorArea-${f.id}`] = "Please enter a valid floor area";
-        if (!f.floorDescription.trim()) newErrors[`floorDescription-${f.id}`] = "This field is required";
+        if (!f.floorType || String(f.floorType).trim() === "")
+          newErrors[`floorType-${f.id}`] = "This field is required";
+        if (!f.floorArea || Number(f.floorArea) <= 0)
+          newErrors[`floorArea-${f.id}`] = "Please enter a valid floor area";
+        const descErr = validateDescription(f.floorDescription || "", 1, 2000);
+        if (descErr) newErrors[`floorDescription-${f.id}`] = descErr;
+        if (f.floorImage) {
+          const fileErr = validateFile(
+            f.floorImage,
+            ALLOWED_FILE_TYPES,
+            MAX_FILE_MB
+          );
+          if (fileErr) newErrors[`floorImage-${f.id}`] = fileErr;
+        }
       });
+    }
+
+    const siteFilesInput = document.getElementById("siteFiles");
+    if (siteFilesInput?.files && siteFilesInput.files.length > 0) {
+      for (let file of siteFilesInput.files) {
+        const sfErr = validateFile(file, ALLOWED_FILE_TYPES, MAX_FILE_MB);
+        if (sfErr) {
+          newErrors.siteFiles = sfErr;
+          break;
+        }
+      }
     }
 
     setErrors(newErrors);
@@ -94,46 +209,82 @@ const BidForm = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setFormError("");
+    if (submitting) return;
     if (!validate()) {
       setFormError("Please correct the errors in the form before submitting");
       return;
     }
 
+    setSubmitting(true);
     const formData = new FormData();
 
-    // Static fields
-    formData.append("projectName", document.getElementById("projectName").value);
-    formData.append("buildingType", document.getElementById("buildingType").value);
-    formData.append("customerName", document.getElementById("customerName").value);
-    formData.append("customerEmail", document.getElementById("customerEmail").value);
-    formData.append("customerPhone", document.getElementById("customerPhone").value);
-    formData.append("projectAddress", document.getElementById("projectAddress").value);
-    formData.append("projectLocation", document.getElementById("projectLocation").value);
-    formData.append("totalArea", document.getElementById("totalArea").value);
-    formData.append("estimatedBudget", document.getElementById("estimatedBudget").value);
-    formData.append("projectTimeline", document.getElementById("projectTimeline").value);
+    formData.append(
+      "projectName",
+      document.getElementById("projectName").value.trim()
+    );
+    formData.append(
+      "buildingType",
+      document.getElementById("buildingType").value.trim()
+    );
+    formData.append(
+      "customerName",
+      document.getElementById("customerName").value.trim()
+    );
+    formData.append(
+      "customerEmail",
+      document.getElementById("customerEmail").value.trim()
+    );
+    formData.append(
+      "customerPhone",
+      document.getElementById("customerPhone").value.trim()
+    );
+    formData.append(
+      "projectAddress",
+      document.getElementById("projectAddress").value.trim()
+    );
+    formData.append(
+      "projectLocation",
+      document.getElementById("projectLocation").value.trim()
+    );
+    formData.append(
+      "totalArea",
+      document.getElementById("totalArea").value.trim()
+    );
+    formData.append(
+      "estimatedBudget",
+      document.getElementById("estimatedBudget").value.trim()
+    );
+    formData.append(
+      "projectTimeline",
+      document.getElementById("projectTimeline").value.trim()
+    );
     formData.append("totalFloors", totalFloors);
-    formData.append("specialRequirements", document.getElementById("specialRequirements").value);
-    formData.append("accessibilityNeeds", document.getElementById("accessibilityNeeds").value);
-    formData.append("energyEfficiency", document.getElementById("energyEfficiency").value);
+    formData.append(
+      "specialRequirements",
+      document.getElementById("specialRequirements").value.trim()
+    );
+    formData.append(
+      "accessibilityNeeds",
+      document.getElementById("accessibilityNeeds").value.trim()
+    );
+    formData.append(
+      "energyEfficiency",
+      document.getElementById("energyEfficiency").value.trim()
+    );
 
-    // Dynamic floors as nested object
     floors.forEach((f, i) => {
       formData.append(`floors[${i}][floorNumber]`, f.id);
       formData.append(`floors[${i}][floorType]`, f.floorType);
       formData.append(`floors[${i}][floorArea]`, f.floorArea);
       formData.append(`floors[${i}][floorDescription]`, f.floorDescription);
-      if (f.floorImage) {
-        formData.append("floorImages", f.floorImage);
-      }
+      if (f.floorImage) formData.append("floorImages", f.floorImage);
     });
 
-    // Site files
-    const siteFilesInput = document.getElementById("siteFiles");
-    if (siteFilesInput.files) {
-      Array.from(siteFilesInput.files).forEach((file) => {
-        formData.append("siteFiles", file);
-      });
+    const siteFilesInput2 = document.getElementById("siteFiles");
+    if (siteFilesInput2?.files) {
+      Array.from(siteFilesInput2.files).forEach((file) =>
+        formData.append("siteFiles", file)
+      );
     }
 
     try {
@@ -142,13 +293,21 @@ const BidForm = () => {
         withCredentials: true,
       });
 
-      if (response.data.success) {
+      if (response.data && response.data.success) {
         alert("Project submitted successfully!");
         navigate(-1);
+      } else {
+        setFormError(
+          response.data?.error || "Submission failed. Please try again."
+        );
       }
     } catch (err) {
       console.error("Submission error:", err.response?.data || err);
-      setFormError(err.response?.data?.error || "Submission failed. Please try again.");
+      setFormError(
+        err.response?.data?.error || "Submission failed. Please try again."
+      );
+    } finally {
+      setSubmitting(false);
     }
   };
 
@@ -158,19 +317,31 @@ const BidForm = () => {
         <h1>Construction Project Submission</h1>
       </div>
 
-      <form id="bidForm" onSubmit={handleSubmit} encType="multipart/form-data">
+      <form
+        id="bidForm"
+        onSubmit={handleSubmit}
+        encType="multipart/form-data"
+        noValidate
+      >
         <div className="bf-form-section">
           <h2>Project Information</h2>
           <div className="bf-grid-2">
             <div className="bf-form-group">
-              <label htmlFor="projectName" className="bf-required">Project Name</label>
+              <label htmlFor="projectName" className="bf-required">
+                Project Name
+              </label>
               <input type="text" id="projectName" name="projectName" />
-              <div className="bf-error-message" style={{ display: errors.projectName ? "block" : "none" }}>
+              <div
+                className="bf-error-message"
+                style={{ display: errors.projectName ? "block" : "none" }}
+              >
                 {errors.projectName}
               </div>
             </div>
             <div className="bf-form-group">
-              <label htmlFor="buildingType" className="bf-required">Building Type</label>
+              <label htmlFor="buildingType" className="bf-required">
+                Building Type
+              </label>
               <select id="buildingType" name="buildingType">
                 <option value="">Select Building Type</option>
                 <option value="residential">Residential</option>
@@ -179,7 +350,10 @@ const BidForm = () => {
                 <option value="mixedUse">Mixed Use</option>
                 <option value="other">Other</option>
               </select>
-              <div className="bf-error-message" style={{ display: errors.buildingType ? "block" : "none" }}>
+              <div
+                className="bf-error-message"
+                style={{ display: errors.buildingType ? "block" : "none" }}
+              >
                 {errors.buildingType}
               </div>
             </div>
@@ -190,24 +364,39 @@ const BidForm = () => {
           <h2>Customer Information</h2>
           <div className="bf-grid-2">
             <div className="bf-form-group">
-              <label htmlFor="customerName" className="bf-required">Full Name</label>
+              <label htmlFor="customerName" className="bf-required">
+                Full Name
+              </label>
               <input type="text" id="customerName" name="customerName" />
-              <div className="bf-error-message" style={{ display: errors.customerName ? "block" : "none" }}>
+              <div
+                className="bf-error-message"
+                style={{ display: errors.customerName ? "block" : "none" }}
+              >
                 {errors.customerName}
               </div>
             </div>
             <div className="bf-form-group">
-              <label htmlFor="customerEmail" className="bf-required">Email Address</label>
+              <label htmlFor="customerEmail" className="bf-required">
+                Email Address
+              </label>
               <input type="email" id="customerEmail" name="customerEmail" />
-              <div className="bf-error-message" style={{ display: errors.customerEmail ? "block" : "none" }}>
+              <div
+                className="bf-error-message"
+                style={{ display: errors.customerEmail ? "block" : "none" }}
+              >
                 {errors.customerEmail}
               </div>
             </div>
           </div>
           <div className="bf-form-group">
-            <label htmlFor="customerPhone" className="bf-required">Phone Number</label>
+            <label htmlFor="customerPhone" className="bf-required">
+              Phone Number
+            </label>
             <input type="tel" id="customerPhone" name="customerPhone" />
-            <div className="bf-error-message" style={{ display: errors.customerPhone ? "block" : "none" }}>
+            <div
+              className="bf-error-message"
+              style={{ display: errors.customerPhone ? "block" : "none" }}
+            >
               {errors.customerPhone}
             </div>
           </div>
@@ -216,25 +405,51 @@ const BidForm = () => {
         <div className="bf-form-section">
           <h2>Project Details</h2>
           <div className="bf-form-group">
-            <label htmlFor="projectAddress" className="bf-required">Project Address</label>
+            <label htmlFor="projectAddress" className="bf-required">
+              Project Address
+            </label>
             <textarea id="projectAddress" name="projectAddress"></textarea>
-            <div className="bf-error-message" style={{ display: errors.projectAddress ? "block" : "none" }}>
+            <div
+              className="bf-error-message"
+              style={{ display: errors.projectAddress ? "block" : "none" }}
+            >
               {errors.projectAddress}
             </div>
           </div>
 
           <div className="bf-grid-2">
             <div className="bf-form-group">
-              <label htmlFor="projectLocation" className="bf-required">Project Location Pincode</label>
-              <input type="text" id="projectLocation" name="projectLocation" placeholder="e.g., 534260" />
-              <div className="bf-error-message" style={{ display: errors.projectLocation ? "block" : "none" }}>
+              <label htmlFor="projectLocation" className="bf-required">
+                Project Location Pincode
+              </label>
+              <input
+                type="text"
+                id="projectLocation"
+                name="projectLocation"
+                placeholder="e.g., 534260"
+              />
+              <div
+                className="bf-error-message"
+                style={{ display: errors.projectLocation ? "block" : "none" }}
+              >
                 {errors.projectLocation}
               </div>
             </div>
             <div className="bf-form-group">
-              <label htmlFor="totalArea" className="bf-required">Total Building Area (square meters)</label>
-              <input type="number" id="totalArea" name="totalArea" step="1" min="1" />
-              <div className="bf-error-message" style={{ display: errors.totalArea ? "block" : "none" }}>
+              <label htmlFor="totalArea" className="bf-required">
+                Total Building Area (square meters)
+              </label>
+              <input
+                type="number"
+                id="totalArea"
+                name="totalArea"
+                step="1"
+                min="1"
+              />
+              <div
+                className="bf-error-message"
+                style={{ display: errors.totalArea ? "block" : "none" }}
+              >
                 {errors.totalArea}
               </div>
             </div>
@@ -242,16 +457,36 @@ const BidForm = () => {
 
           <div className="bf-grid-2">
             <div className="bf-form-group">
-              <label htmlFor="estimatedBudget" className="bf-required">Max Budget ₹</label>
-              <input type="number" id="estimatedBudget" name="estimatedBudget" min="10000000" />
-              <div className="bf-error-message" style={{ display: errors.estimatedBudget ? "block" : "none" }}>
+              <label htmlFor="estimatedBudget" className="bf-required">
+                Max Budget ₹
+              </label>
+              <input
+                type="number"
+                id="estimatedBudget"
+                name="estimatedBudget"
+                min="1"
+              />
+              <div
+                className="bf-error-message"
+                style={{ display: errors.estimatedBudget ? "block" : "none" }}
+              >
                 {errors.estimatedBudget}
               </div>
             </div>
             <div className="bf-form-group">
-              <label htmlFor="projectTimeline" className="bf-required">Expected Timeline (months)</label>
-              <input type="number" id="projectTimeline" name="projectTimeline" min="1" />
-              <div className="bf-error-message" style={{ display: errors.projectTimeline ? "block" : "none" }}>
+              <label htmlFor="projectTimeline" className="bf-required">
+                Expected Timeline (months)
+              </label>
+              <input
+                type="number"
+                id="projectTimeline"
+                name="projectTimeline"
+                min="1"
+              />
+              <div
+                className="bf-error-message"
+                style={{ display: errors.projectTimeline ? "block" : "none" }}
+              >
                 {errors.projectTimeline}
               </div>
             </div>
@@ -261,9 +496,20 @@ const BidForm = () => {
         <div className="bf-form-section">
           <h2>Floor Plans</h2>
           <div className="bf-form-group">
-            <label htmlFor="totalFloors" className="bf-required">Number of Floors</label>
-            <input type="number" id="totalFloors" value={totalFloors} onChange={handleFloorCountChange} min="1" />
-            <div className="bf-error-message" style={{ display: errors.totalFloors ? "block" : "none" }}>
+            <label htmlFor="totalFloors" className="bf-required">
+              Number of Floors
+            </label>
+            <input
+              type="number"
+              id="totalFloors"
+              value={totalFloors}
+              onChange={(e) => handleFloorCountChange(e)}
+              min="1"
+            />
+            <div
+              className="bf-error-message"
+              style={{ display: errors.totalFloors ? "block" : "none" }}
+            >
               {errors.totalFloors}
             </div>
           </div>
@@ -273,17 +519,28 @@ const BidForm = () => {
               <div key={f.id} className="bf-floor-container">
                 <div className="bf-floor-header">
                   <h3>Floor {f.id}</h3>
-                  <button type="button" className="bf-btn bf-btn-remove" onClick={() => removeFloor(f.id)}>
+                  <button
+                    type="button"
+                    className="bf-btn bf-btn-remove"
+                    onClick={() => removeFloor(f.id)}
+                  >
                     Remove
                   </button>
                 </div>
                 <div className="bf-grid-2">
                   <div className="bf-form-group">
-                    <label htmlFor={`floorType-${f.id}`} className="bf-required">Floor Type</label>
+                    <label
+                      htmlFor={`floorType-${f.id}`}
+                      className="bf-required"
+                    >
+                      Floor Type
+                    </label>
                     <select
                       id={`floorType-${f.id}`}
                       value={f.floorType}
-                      onChange={(e) => updateFloor(f.id, "floorType", e.target.value)}
+                      onChange={(e) =>
+                        updateFloor(f.id, "floorType", e.target.value)
+                      }
                     >
                       <option value="">Select Floor Type</option>
                       <option value="residential">Residential</option>
@@ -292,47 +549,92 @@ const BidForm = () => {
                       <option value="mechanical">Mechanical/Utility</option>
                       <option value="other">Other</option>
                     </select>
-                    <div className="bf-error-message" style={{ display: errors[`floorType-${f.id}`] ? "block" : "none" }}>
+                    <div
+                      className="bf-error-message"
+                      style={{
+                        display: errors[`floorType-${f.id}`] ? "block" : "none",
+                      }}
+                    >
                       {errors[`floorType-${f.id}`]}
                     </div>
                   </div>
                   <div className="bf-form-group">
-                    <label htmlFor={`floorArea-${f.id}`} className="bf-required">Floor Area (sq meters)</label>
+                    <label
+                      htmlFor={`floorArea-${f.id}`}
+                      className="bf-required"
+                    >
+                      Floor Area (sq meters)
+                    </label>
                     <input
                       type="number"
                       id={`floorArea-${f.id}`}
                       value={f.floorArea}
-                      onChange={(e) => updateFloor(f.id, "floorArea", e.target.value)}
+                      onChange={(e) =>
+                        updateFloor(f.id, "floorArea", e.target.value)
+                      }
                       step="1"
                       min="1"
                     />
-                    <div className="bf-error-message" style={{ display: errors[`floorArea-${f.id}`] ? "block" : "none" }}>
+                    <div
+                      className="bf-error-message"
+                      style={{
+                        display: errors[`floorArea-${f.id}`] ? "block" : "none",
+                      }}
+                    >
                       {errors[`floorArea-${f.id}`]}
                     </div>
                   </div>
                 </div>
                 <div className="bf-form-group">
-                  <label htmlFor={`floorDescription-${f.id}`} className="bf-required">Floor Description</label>
+                  <label
+                    htmlFor={`floorDescription-${f.id}`}
+                    className="bf-required"
+                  >
+                    Floor Description
+                  </label>
                   <textarea
                     id={`floorDescription-${f.id}`}
                     value={f.floorDescription}
-                    onChange={(e) => updateFloor(f.id, "floorDescription", e.target.value)}
+                    onChange={(e) =>
+                      updateFloor(f.id, "floorDescription", e.target.value)
+                    }
                     placeholder="Describe the layout and purpose of this floor"
                   ></textarea>
-                  <div className="bf-error-message" style={{ display: errors[`floorDescription-${f.id}`] ? "block" : "none" }}>
+                  <div
+                    className="bf-error-message"
+                    style={{
+                      display: errors[`floorDescription-${f.id}`]
+                        ? "block"
+                        : "none",
+                    }}
+                  >
                     {errors[`floorDescription-${f.id}`]}
                   </div>
                 </div>
                 <div className="bf-form-group">
-                  <label htmlFor={`floorImage-${f.id}`}>Floor Plan Image (Optional)</label>
+                  <label htmlFor={`floorImage-${f.id}`}>
+                    Floor Plan Image (Optional)
+                  </label>
                   <input
                     type="file"
                     id={`floorImage-${f.id}`}
                     accept="application/pdf,image/jpeg,image/png"
                     onChange={(e) => handleImageChange(f.id, e.target.files[0])}
                   />
+                  <div
+                    className="bf-error-message"
+                    style={{
+                      display: errors[`floorImage-${f.id}`] ? "block" : "none",
+                    }}
+                  >
+                    {errors[`floorImage-${f.id}`]}
+                  </div>
                   {f.preview && (
-                    <img src={f.preview} alt="Preview" className="bf-image-preview" />
+                    <img
+                      src={f.preview}
+                      alt="Preview"
+                      className="bf-image-preview"
+                    />
                   )}
                 </div>
               </div>
@@ -351,14 +653,19 @@ const BidForm = () => {
               name="specialRequirements"
               placeholder="List any special requirements, materials, or design considerations"
             ></textarea>
-            <div className="bf-error-message" style={{ display: errors.specialRequirements ? "block" : "none" }}>
+            <div
+              className="bf-error-message"
+              style={{ display: errors.specialRequirements ? "block" : "none" }}
+            >
               {errors.specialRequirements}
             </div>
           </div>
 
           <div className="bf-grid-2">
             <div className="bf-form-group">
-              <label htmlFor="accessibilityNeeds" className="bf-required">Accessibility Needs</label>
+              <label htmlFor="accessibilityNeeds" className="bf-required">
+                Accessibility Needs
+              </label>
               <select id="accessibilityNeeds" name="accessibilityNeeds">
                 <option value="">Select Options</option>
                 <option value="wheelchair">Wheelchair Accessibility</option>
@@ -367,12 +674,19 @@ const BidForm = () => {
                 <option value="other">Other</option>
                 <option value="none">None</option>
               </select>
-              <div className="bf-error-message" style={{ display: errors.accessibilityNeeds ? "block" : "none" }}>
+              <div
+                className="bf-error-message"
+                style={{
+                  display: errors.accessibilityNeeds ? "block" : "none",
+                }}
+              >
                 {errors.accessibilityNeeds}
               </div>
             </div>
             <div className="bf-form-group">
-              <label htmlFor="energyEfficiency" className="bf-required">Energy Efficiency Goals</label>
+              <label htmlFor="energyEfficiency" className="bf-required">
+                Energy Efficiency Goals
+              </label>
               <select id="energyEfficiency" name="energyEfficiency">
                 <option value="">Select Options</option>
                 <option value="standard">Standard</option>
@@ -381,24 +695,48 @@ const BidForm = () => {
                 <option value="netZero">Net Zero</option>
                 <option value="other">Other</option>
               </select>
-              <div className="bf-error-message" style={{ display: errors.energyEfficiency ? "block" : "none" }}>
+              <div
+                className="bf-error-message"
+                style={{ display: errors.energyEfficiency ? "block" : "none" }}
+              >
                 {errors.energyEfficiency}
               </div>
             </div>
           </div>
 
           <div className="bf-form-group">
-            <label htmlFor="siteFiles">Site Plans or Additional Documents (Optional)</label>
-            <input type="file" id="siteFiles" name="siteFiles" multiple />
+            <label htmlFor="siteFiles">
+              Site Plans or Additional Documents (Optional)
+            </label>
+            <input
+              type="file"
+              id="siteFiles"
+              name="siteFiles"
+              multiple
+              accept="application/pdf,image/*"
+            />
+            <div
+              className="bf-error-message"
+              style={{ display: errors.siteFiles ? "block" : "none" }}
+            >
+              {errors.siteFiles}
+            </div>
           </div>
         </div>
 
         <div className="bf-submit-section">
-          <div className="bf-error-message" style={{ display: formError ? "block" : "none" }}>
+          <div
+            className="bf-error-message"
+            style={{ display: formError ? "block" : "none" }}
+          >
             {formError}
           </div>
-          <button type="submit" className="bf-btn bf-submit-btn">
-            Submit Project
+          <button
+            type="submit"
+            className="bf-btn bf-submit-btn"
+            disabled={submitting}
+          >
+            {submitting ? "Submitting..." : "Submit Project"}
           </button>
         </div>
       </form>

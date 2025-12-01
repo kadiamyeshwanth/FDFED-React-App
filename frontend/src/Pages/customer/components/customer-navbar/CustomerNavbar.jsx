@@ -1,9 +1,34 @@
 // src/Pages/customer/components/customer-navbar/CustomerNavbar.jsx
 import { Link } from "react-router-dom";
+import { useState, useEffect } from "react";
+import axios from "axios";
 import Dropdown from "./sub-components/Dropdown";
 import "./CustomerNavbar.css";
 
 const CustomerNavbar = () => {
+  const [hasUnviewedMessages, setHasUnviewedMessages] = useState(false);
+
+  useEffect(() => {
+    const fetchUnviewedMessages = async () => {
+      try {
+        const res = await axios.get("/api/customer/unviewed-company-messages", {
+          withCredentials: true,
+        });
+        setHasUnviewedMessages(
+          res.data.success &&
+            res.data.unviewedByProject &&
+            res.data.unviewedByProject.length > 0
+        );
+      } catch (err) {
+        console.error("Error fetching unviewed messages:", err);
+      }
+    };
+
+    fetchUnviewedMessages();
+    const interval = setInterval(fetchUnviewedMessages, 30000);
+    return () => clearInterval(interval);
+  }, []);
+
   return (
     <div className="customer_navbar">
       <nav className="customer_navbar_navbar">
@@ -23,13 +48,30 @@ const CustomerNavbar = () => {
 
           <Dropdown />
 
-          <div className="customer_navbar_navItem">
+          <div
+            className="customer_navbar_navItem"
+            style={{ position: "relative" }}
+          >
             <Link
               to="/customerdashboard/ongoing_projects"
               className="customer_navbar_navLink"
             >
               ONGOING PROJECTS
             </Link>
+            {hasUnviewedMessages && (
+              <span
+                style={{
+                  position: "absolute",
+                  top: "0",
+                  right: "0",
+                  width: "8px",
+                  height: "8px",
+                  backgroundColor: "red",
+                  borderRadius: "50%",
+                  border: "1px solid white",
+                }}
+              />
+            )}
           </div>
 
           <div className="customer_navbar_navItem">
