@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import "../../Admin.css";
 import "./AdminCompanyDetail.css";
 
 const AdminCompanyDetail = () => {
@@ -9,13 +8,12 @@ const AdminCompanyDetail = () => {
   const [company, setCompany] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const apiBase = ""; // set to '' or use import.meta.env.VITE_API_URL
 
   useEffect(() => {
     const fetchCompany = async () => {
       setLoading(true);
       try {
-        const res = await fetch(`${apiBase}/admin/company/${id}`);
+        const res = await fetch(`/api/admin/company/${id}`);
         if (!res.ok) throw new Error(`Server responded ${res.status}`);
         const data = await res.json();
         setCompany(data.company ?? data);
@@ -29,9 +27,14 @@ const AdminCompanyDetail = () => {
   }, [id]);
 
   const handleDelete = async () => {
-    if (!confirm("Are you sure you want to delete this company? This action cannot be undone.")) return;
+    if (
+      !confirm(
+        "Are you sure you want to delete this company? This action cannot be undone."
+      )
+    )
+      return;
     try {
-      const res = await fetch(`${apiBase}/admin/delete-company/${id}`, {
+      const res = await fetch(`/api/admin/delete-company/${id}`, {
         method: "DELETE",
         headers: { "Content-Type": "application/json" },
       });
@@ -56,7 +59,10 @@ const AdminCompanyDetail = () => {
       <header className="acd-header">
         <h1 className="acd-title">🏢 Company Details</h1>
         <div className="acd-actions">
-          <button className="acd-btn acd-back" onClick={() => navigate("/admindashboard")}>
+          <button
+            className="acd-btn acd-back"
+            onClick={() => navigate("/admin/admindashboard")}
+          >
             ← Back to Dashboard
           </button>
           <button className="acd-btn acd-delete" onClick={handleDelete}>
@@ -67,14 +73,21 @@ const AdminCompanyDetail = () => {
 
       <main className="acd-card">
         <div className="acd-section acd-section-header">
-          <h2 className="acd-section-title">{company.companyName || "Company"}</h2>
+          <h2 className="acd-section-title">
+            {company.companyName || "Company"}
+          </h2>
           <p className="acd-subtitle">Company ID: {company._id}</p>
         </div>
 
         <div className="acd-alert acd-alert-info">
           <strong>ℹ️ Company Information</strong>
           <div className="acd-alert-sub">
-            Registered on {fmt(company.createdAt, { year: "numeric", month: "long", day: "numeric" })}
+            Registered on{" "}
+            {fmt(company.createdAt, {
+              year: "numeric",
+              month: "long",
+              day: "numeric",
+            })}
           </div>
         </div>
 
@@ -112,7 +125,9 @@ const AdminCompanyDetail = () => {
 
           <div className="acd-item">
             <label className="acd-label">Years in Business</label>
-            <div className="acd-value">{company.yearsInBusiness || "Not specified"}</div>
+            <div className="acd-value">
+              {company.yearsInBusiness || "Not specified"}
+            </div>
           </div>
 
           <div className="acd-item">
@@ -125,27 +140,41 @@ const AdminCompanyDetail = () => {
         <div className="acd-grid">
           <div className="acd-item">
             <label className="acd-label">Address</label>
-            <div className="acd-value">{company.location?.address || "Not provided"}</div>
+            <div className="acd-value">
+              {company.location?.address || "Not provided"}
+            </div>
           </div>
           <div className="acd-item">
             <label className="acd-label">City</label>
-            <div className="acd-value">{company.location?.city || "Not specified"}</div>
+            <div className="acd-value">
+              {company.location?.city || "Not specified"}
+            </div>
           </div>
           <div className="acd-item">
             <label className="acd-label">State</label>
-            <div className="acd-value">{company.location?.state || "Not specified"}</div>
+            <div className="acd-value">
+              {company.location?.state || "Not specified"}
+            </div>
           </div>
           <div className="acd-item">
             <label className="acd-label">Country</label>
-            <div className="acd-value">{company.location?.country || "Not specified"}</div>
+            <div className="acd-value">
+              {company.location?.country || "Not specified"}
+            </div>
           </div>
           <div className="acd-item">
             <label className="acd-label">Postal Code</label>
-            <div className="acd-value">{company.location?.postalCode || "Not specified"}</div>
+            <div className="acd-value">
+              {company.location?.postalCode || "Not specified"}
+            </div>
           </div>
         </div>
 
-        {(company.description || company.aboutCompany || company.aboutForCustomers || company.whyJoinUs || company.didYouKnow) && (
+        {(company.description ||
+          company.aboutCompany ||
+          company.aboutForCustomers ||
+          company.whyJoinUs ||
+          company.didYouKnow) && (
           <>
             <h3 className="acd-section-heading">Company Description</h3>
             <div className="acd-grid">
@@ -183,40 +212,58 @@ const AdminCompanyDetail = () => {
           </>
         )}
 
-        {Array.isArray(company.specialization) && company.specialization.length > 0 && (
-          <>
-            <h3 className="acd-section-heading">Specializations</h3>
-            <div className="acd-list">
-              {company.specialization.map((s, i) => (
-                <div className="acd-list-item" key={i}>• {s}</div>
-              ))}
-            </div>
-          </>
-        )}
+        {Array.isArray(company.specialization) &&
+          company.specialization.length > 0 && (
+            <>
+              <h3 className="acd-section-heading">Specializations</h3>
+              <div className="acd-list">
+                {company.specialization.map((s, i) => (
+                  <div className="acd-list-item" key={i}>
+                    • {s}
+                  </div>
+                ))}
+              </div>
+            </>
+          )}
 
-        {Array.isArray(company.currentOpenings) && company.currentOpenings.length > 0 && (
-          <>
-            <h3 className="acd-section-heading">Current Openings</h3>
-            <div className="acd-list">
-              {company.currentOpenings.map((o, i) => (
-                <div className="acd-list-item" key={i}>• {o}</div>
-              ))}
-            </div>
-          </>
-        )}
+        {Array.isArray(company.currentOpenings) &&
+          company.currentOpenings.length > 0 && (
+            <>
+              <h3 className="acd-section-heading">Current Openings</h3>
+              <div className="acd-list">
+                {company.currentOpenings.map((o, i) => (
+                  <div className="acd-list-item" key={i}>
+                    • {o}
+                  </div>
+                ))}
+              </div>
+            </>
+          )}
 
         <h3 className="acd-section-heading">Account Timestamps</h3>
         <div className="acd-grid">
           <div className="acd-item">
             <label className="acd-label">Created At</label>
             <div className="acd-value">
-              {fmt(company.createdAt, { year: "numeric", month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" })}
+              {fmt(company.createdAt, {
+                year: "numeric",
+                month: "short",
+                day: "numeric",
+                hour: "2-digit",
+                minute: "2-digit",
+              })}
             </div>
           </div>
           <div className="acd-item">
             <label className="acd-label">Last Updated</label>
             <div className="acd-value">
-              {fmt(company.updatedAt, { year: "numeric", month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" })}
+              {fmt(company.updatedAt, {
+                year: "numeric",
+                month: "short",
+                day: "numeric",
+                hour: "2-digit",
+                minute: "2-digit",
+              })}
             </div>
           </div>
         </div>

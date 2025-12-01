@@ -38,25 +38,25 @@ const TopSections = () => {
               icon: "home",
               title: "Residential Construction",
               desc: "Transform your vision into reality with our expert residential construction services.",
-              link: "/construction_companies_list",
+              link: "/customerdashboard/construction_companies_list",
             },
             {
               icon: "building",
               title: "Commercial Construction",
               desc: "Build modern, functional commercial spaces with our expert team.",
-              link: "/construction_companies_list",
+              link: "/customerdashboard/construction_companies_list",
             },
             {
               icon: "clipboard",
               title: "Project Management",
               desc: "Seamless project execution with our experienced management team.",
-              link: "/construction_companies_list",
+              link: "/customerdashboard/construction_companies_list",
             },
             {
               icon: "layers",
               title: "Architecture & Structure",
               desc: "Innovative designs crafted by our in-house architects.",
-              link: "/construction_companies_list",
+              link: "/customerdashboard/construction_companies_list",
             },
           ].map((s, i) => (
             <div key={i} className="service_card" style={{ "--order": i + 1 }}>

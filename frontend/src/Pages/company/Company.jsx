@@ -5,6 +5,8 @@ import { Routes, Route } from "react-router-dom";
 // Correct relative paths based on your folder structure
 import CompanyNavbar from "./components/company-navbar/CompanyNavbar";
 
+
+import CompanyProjectRequests from "./components/company-project-requests/CompanyProjectRequests";
 import CompanyDashboard from "./components/company-dashboard/CompanyDashboard";
 import CompanyBids from "./components/company-bids/CompanyBids";
 import CompanyOngoing from "./components/company-ongoing/CompanyOngoing";
@@ -29,7 +31,7 @@ const Company = () => {
               <Route path="companydashboard" element={<CompanyDashboard />} />
               <Route path="companybids" element={<CompanyBids />} />
               <Route path="companyongoing_projects" element={<CompanyOngoing />} />
-              <Route path="project_requests" element={<ProjectRequests />} />
+              <Route path="project_requests" element={<CompanyProjectRequests />} />
               <Route path="companyrevenue" element={<CompanyRevenue />} />
               <Route path="companyhiring" element={<CompanyHiring />} />
               <Route path="my-employees" element={<CompanyEmployees />} />

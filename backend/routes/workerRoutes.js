@@ -22,7 +22,8 @@ const {
     submitProposal,
     updatePassword,
     getMyCompany,
-    leaveCompany
+    leaveCompany,
+    submitMilestone
 } = require('../controllers/workerController');
 
 const isAuthenticated = require('../middlewares/auth');
@@ -34,6 +35,10 @@ router.get('/workerjoin_company', isAuthenticated, getJoinCompany);
 router.get('/workersettings', isAuthenticated, getSettings);
 router.get('/worker_edit', isAuthenticated, getEditProfile); // Protected this route
 router.get('/workerdashboard', isAuthenticated, getDashboard);
+// JSON API alias for dashboard data (avoids ambiguity if HTML version exists elsewhere)
+// Correct JSON dashboard API endpoint (mounted under /api prefix in app.js → /api/worker/dashboard)
+router.get('/worker/dashboard', isAuthenticated, getDashboard);
+router.get('/worker/jobs', isAuthenticated, getJobs);
 router.get('/worker/my-company', isAuthenticated, getMyCompany);
 
 
@@ -63,4 +68,5 @@ router.post('/worker/project-complete', isAuthenticated, markProjectAsCompleted)
 router.post('/worker/submit-proposal', isAuthenticated, submitProposal);
 router.post('/worker/password/update', isAuthenticated, updatePassword);
 router.post('/worker/leave-company', isAuthenticated, leaveCompany);
+router.post('/worker/submit-milestone', isAuthenticated, upload.single('image'), submitMilestone);
 module.exports = router;

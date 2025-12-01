@@ -7,20 +7,26 @@ const Dropdown = () => {
     <div className="customer_dropdown">
       <span className="customer_dropdown_navLink">
         SERVICES
-        <span className="customer_dropdown_arrow"></span> {/* ← No text */}
+        <span className="customer_dropdown_arrow"></span>
       </span>
 
       <div className="customer_dropdown_content">
         <Link
-          to="/construction_companies_list"
+          to="/customerdashboard/construction_companies_list"
           className="customer_dropdown_item"
         >
           Construction
         </Link>
-        <Link to="/architect" className="customer_dropdown_item">
+        <Link
+          to="/customerdashboard/architect"
+          className="customer_dropdown_item"
+        >
           Architect
         </Link>
-        <Link to="/interior_designer" className="customer_dropdown_item">
+        <Link
+          to="/customerdashboard/interior_designer"
+          className="customer_dropdown_item"
+        >
           Interior Designer
         </Link>
       </div>

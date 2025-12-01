@@ -80,6 +80,8 @@ const getOngoingProjects = async (req, res) => {
       projectObj.currentPhase = 'Update current ';
       projectObj.siteFilepaths = projectObj.siteFilepaths || [];
       projectObj.floors = projectObj.floors || [];
+      projectObj.milestones = projectObj.milestones || [];
+      projectObj.recentUpdates = projectObj.recentUpdates || [];
       return projectObj;
     });
 
@@ -379,7 +381,6 @@ const getSettings = async (req, res) => {
         yearsInBusiness: companyFromDB.yearsInBusiness || '0',
         about: companyFromDB.aboutForCustomers || '',
         didYouKnow: companyFromDB.didYouKnow || '',
-        teamMembers: companyFromDB.teamMembers || [],
         completedProjects: companyFromDB.completedProjects || []
       }
     };
@@ -447,14 +448,47 @@ const updateCompanyProfile = async (req, res) => {
       company.whyJoinUs = whyJoinUs;
       company.currentOpenings = currentOpenings;
     } else if (profileType === 'customer') {
-      const { companyLocation, projectsCompleted, yearsInBusiness, customerAboutCompany, didYouKnow, teamMembers, completedProjects } = req.body;
+      const { companyLocation, projectsCompleted, yearsInBusiness, customerAboutCompany, didYouKnow, completedProjects } = req.body;
       if (companyLocation) company.location.city = companyLocation;
       company.projectsCompleted = projectsCompleted;
       company.yearsInBusiness = yearsInBusiness;
       company.aboutForCustomers = customerAboutCompany;
       company.didYouKnow = didYouKnow;
-      if (teamMembers) company.teamMembers = JSON.parse(teamMembers);
-      if (completedProjects) company.completedProjects = JSON.parse(completedProjects);
+      
+      if (completedProjects) {
+        const parsedProjects = JSON.parse(completedProjects);
+        
+        // Process uploaded files
+        const files = req.files || [];
+        
+        // Map files by fieldname
+        const beforeImages = files.filter(f => f.fieldname === 'projectBeforeImages');
+        const afterImages = files.filter(f => f.fieldname === 'projectAfterImages');
+        const certificates = files.filter(f => f.fieldname === 'certificateFiles');
+        
+        // Update projects with uploaded file URLs
+        parsedProjects.forEach((project, index) => {
+          // Check if new before image was uploaded for this index
+          const beforeImg = beforeImages.find(f => f.originalname.includes(`_${index}`));
+          if (beforeImg && beforeImg.path) {
+            project.beforeImage = beforeImg.path;
+          }
+          
+          // Check if new after image was uploaded for this index
+          const afterImg = afterImages.find(f => f.originalname.includes(`_${index}`));
+          if (afterImg && afterImg.path) {
+            project.afterImage = afterImg.path;
+          }
+          
+          // Check if new certificate was uploaded for this index
+          const cert = certificates.find(f => f.originalname.includes(`_${index}`));
+          if (cert && cert.path) {
+            project.materialCertificate = cert.path;
+          }
+        });
+        
+        company.completedProjects = parsedProjects;
+      }
     }
 
     await company.save();

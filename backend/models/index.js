@@ -80,18 +80,16 @@ const companySchema = new mongoose.Schema(
     },
     projectsCompleted: { type: String },
     yearsInBusiness: { type: String },
-    teamMembers: [
-      {
-        name: { type: String },
-        position: { type: String },
-        image: { type: String },
-      },
-    ],
     completedProjects: [
       {
         title: { type: String },
         description: { type: String },
-        image: { type: String },
+        beforeImage: { type: String },
+        afterImage: { type: String },
+        location: { type: String },
+        tenderId: { type: String },
+        materialCertificate: { type: String },
+        gpsLink: { type: String },
       },
     ],
     didYouKnow: { type: String },
@@ -267,6 +265,15 @@ const architectHiringSchema = new mongoose.Schema({
       createdAt: { type: Date, default: Date.now }
     }
   ],
+  milestones: [
+    {
+      percentage: { type: Number, required: true, min: 0, max: 100 },
+      description: { type: String, required: true },
+      status: { type: String, enum: ["Pending", "Approved", "Rejected"], default: "Pending" },
+      image: { type: String },
+      submittedAt: { type: Date, default: Date.now }
+    }
+  ],
 
   createdAt: { type: Date, default: Date.now },
   updatedAt: { type: Date, default: Date.now },
@@ -362,6 +369,25 @@ const constructionProjectSchema = new mongoose.Schema({
   currentPhase: { type: String, enum: ["Foundation", "Structure", "Interior work", "Finishing"] },
   mainImagePath: String,
   additionalImagePaths: [String],
+  milestones: [
+    {
+      percentage: { type: Number, required: true, min: 0, max: 100 },
+      companyMessage: { type: String, required: true },
+      isApprovedByCustomer: { type: Boolean, default: false },
+      submittedAt: { type: Date, default: Date.now },
+      approvedAt: { type: Date },
+      isCheckpoint: { type: Boolean, default: false },
+      needsRevision: { type: Boolean, default: false },
+      customerFeedback: { type: String, default: '' },
+      conversation: [
+        {
+          sender: { type: String, enum: ['company', 'customer'], required: true },
+          message: { type: String, required: true },
+          timestamp: { type: Date, default: Date.now }
+        }
+      ]
+    },
+  ],
   recentUpdates: [
     {
       updateText: String,
@@ -369,6 +395,12 @@ const constructionProjectSchema = new mongoose.Schema({
       createdAt: { type: Date, default: Date.now },
     },
   ],
+  completionImages: [{ type: String }],
+  customerReview: {
+    rating: { type: Number, min: 1, max: 5 },
+    reviewText: { type: String },
+    reviewDate: { type: Date }
+  },
   createdAt: { type: Date, default: Date.now },
   updatedAt: { type: Date, default: Date.now },
 });
@@ -413,6 +445,22 @@ const designRequestSchema = new mongoose.Schema({
     description: { type: String },
     sentAt: { type: Date }
   },
+  projectUpdates: [
+    {
+      updateText: { type: String, required: true },
+      updateImage: { type: String },
+      createdAt: { type: Date, default: Date.now }
+    }
+  ],
+  milestones: [
+    {
+      percentage: { type: Number, required: true, min: 0, max: 100 },
+      description: { type: String, required: true },
+      status: { type: String, enum: ["Pending", "Approved", "Rejected"], default: "Pending" },
+      image: { type: String },
+      submittedAt: { type: Date, default: Date.now }
+    }
+  ],
 });
 
 // Floor Schema for Bid

@@ -281,98 +281,102 @@ const LoginSignUp = () => {
   };
 
   return (
-    <div className="landing-page">
-      <div className="admin-link">
-        <Link to="/adminpage" className="admin-login-btn">
+    <div className="ls-landing-page">
+      <div className="ls-admin-link">
+        <Link to="/admin-login" className="ls-admin-login-btn">
           Admin Login
         </Link>
       </div>
 
-      <div className="main-container">
-        <div className="hero-content">
+      <div className="ls-main-container">
+        <div className="ls-hero-content">
           <h1>Build & Beyond</h1>
           <p>
             Welcome to Build & Beyond, your ultimate platform for seamless
             construction project management. Connect customers, companies, and
             workers effortlessly.
           </p>
-          <div className="btn-container">
+          <div className="ls-btn-container">
             <button
               onClick={() => handleTabChange("signup")}
-              className="btn btn-primary"
+              className="ls-btn ls-btn-primary"
             >
               Get Started
             </button>
             <button
               onClick={() => handleTabChange("signin")}
-              className="btn btn-secondary"
+              className="ls-btn ls-btn-secondary"
             >
               Learn More
             </button>
           </div>
         </div>
 
-        <div className="auth-card">
-          <div className="auth-tabs">
+        <div className="ls-auth-card">
+          <div className="ls-auth-tabs">
             <button
-              className={`tab-button ${activeTab === "signin" ? "active" : ""}`}
+              className={`ls-tab-button ${
+                activeTab === "signin" ? "active" : ""
+              }`}
               onClick={() => handleTabChange("signin")}
             >
               Sign In
             </button>
             <button
-              className={`tab-button ${activeTab === "signup" ? "active" : ""}`}
+              className={`ls-tab-button ${
+                activeTab === "signup" ? "active" : ""
+              }`}
               onClick={() => handleTabChange("signup")}
             >
               Sign Up
             </button>
           </div>
 
-          <div className="auth-content">
+          <div className="ls-auth-content">
             {/* SIGN IN */}
             {activeTab === "signin" && (
               <div className="form-content active">
                 <form onSubmit={handleSigninSubmit}>
-                  <div className="form-header">
+                  <div className="ls-form-header">
                     <h2>Welcome Back</h2>
                     <p>Please enter your details</p>
                   </div>
 
-                  <div className="form-group">
+                  <div className="ls-form-group">
                     <label htmlFor="signin-email">Email</label>
                     <input
                       type="email"
                       id="signin-email"
-                      className={`form-input ${
+                      className={`ls-form-input ${
                         errors["signin-email"] ? "error" : ""
                       }`}
                       value={signinData.email}
                       onChange={(e) => handleInputChange(e, "signin")}
                       required
                     />
-                    <div className="error-message">
+                    <div className="ls-error-message">
                       {errors["signin-email"]}
                     </div>
                   </div>
 
-                  <div className="form-group">
+                  <div className="ls-form-group">
                     <label htmlFor="signin-password">Password</label>
                     <input
                       type="password"
                       id="signin-password"
-                      className={`form-input ${
+                      className={`ls-form-input ${
                         errors["signin-password"] ? "error" : ""
                       }`}
                       value={signinData.password}
                       onChange={(e) => handleInputChange(e, "signin")}
                       required
                     />
-                    <div className="error-message">
+                    <div className="ls-error-message">
                       {errors["signin-password"]}
                     </div>
                   </div>
 
-                  <div className="form-options">
+                  <div className="ls-form-options">
                     <a
                       href="#"
                       onClick={(e) => {
@@ -384,11 +388,14 @@ const LoginSignUp = () => {
                     </a>
                   </div>
 
-                  <button type="submit" className="btn btn-primary w-100">
+                  <button
+                    type="submit"
+                    className="ls-btn ls-btn-primary ls-w-100"
+                  >
                     Sign In
                   </button>
                   {errors.general && (
-                    <div className="validation-error">{errors.general}</div>
+                    <div className="ls-validation-error">{errors.general}</div>
                   )}
                 </form>
               </div>
@@ -403,14 +410,14 @@ const LoginSignUp = () => {
                     <p>Join Build & Beyond today</p>
                   </div>
 
-                  <div className="user-type-selection">
+                  <div className="ls-user-type-selection">
                     <label>User Type</label>
-                    <div className="user-type-buttons">
+                    <div className="ls-user-type-buttons">
                       {["customer", "company", "worker"].map((type) => (
                         <button
                           key={type}
                           type="button"
-                          className={`user-type-btn ${
+                          className={`ls-user-type-btn ${
                             userType === type ? "active" : ""
                           }`}
                           onClick={() => handleUserTypeChange(type)}
@@ -421,140 +428,143 @@ const LoginSignUp = () => {
                     </div>
                   </div>
 
-                  <div className="signup-columns">
+                  <div className="ls-signup-columns">
                     <div className="signup-left">
                       {(userType === "customer" || userType === "worker") && (
                         <>
-                          <div className="form-group">
+                          <div className="ls-form-group">
                             <label htmlFor="name">Name</label>
                             <input
                               type="text"
                               id="name"
-                              className={`form-input ${
+                              className={`ls-form-input ${
                                 errors.name ? "error" : ""
                               }`}
                               value={signupData.name}
                               onChange={(e) => handleInputChange(e, "signup")}
                               required
                             />
-                            <div className="error-message">{errors.name}</div>
+                            <div className="ls-error-message">
+                              {errors.name}
+                            </div>
                           </div>
                         </>
                       )}
 
                       {userType === "company" && (
                         <>
-                          <div className="form-group">
+                          <div className="ls-form-group">
                             <label htmlFor="companyName">Company Name</label>
                             <input
                               type="text"
                               id="companyName"
-                              className={`form-input ${
+                              className={`ls-form-input ${
                                 errors.companyName ? "error" : ""
                               }`}
                               value={signupData.companyName}
                               onChange={(e) => handleInputChange(e, "signup")}
                               required
                             />
-                            <div className="error-message">
+                            <div className="ls-error-message">
                               {errors.companyName}
                             </div>
                           </div>
-                          <div className="form-group">
+                          <div className="ls-form-group">
                             <label htmlFor="contactPerson">
                               Contact Person
                             </label>
                             <input
                               type="text"
                               id="contactPerson"
-                              className={`form-input ${
+                              className={`ls-form-input ${
                                 errors.contactPerson ? "error" : ""
                               }`}
                               value={signupData.contactPerson}
                               onChange={(e) => handleInputChange(e, "signup")}
                               required
                             />
-                            <div className="error-message">
+                            <div className="ls-error-message">
                               {errors.contactPerson}
                             </div>
                           </div>
                         </>
                       )}
 
-                      <div className="form-group">
+                      <div className="ls-form-group">
                         <label htmlFor="email">Email</label>
                         <input
                           type="email"
                           id="email"
-                          className={`form-input ${
+                          className={`ls-form-input ${
                             errors.email ? "error" : ""
                           }`}
                           value={signupData.email}
                           onChange={(e) => handleInputChange(e, "signup")}
                           required
                         />
-                        <div className="error-message">{errors.email}</div>
+                        <div className="ls-error-message">{errors.email}</div>
                       </div>
                     </div>
 
                     <div className="signup-right">
                       {(userType === "customer" || userType === "worker") && (
-                        <div className="form-group">
+                        <div className="ls-form-group">
                           <label htmlFor="dob">Date of Birth</label>
                           <input
                             type="date"
                             id="dob"
-                            className={`form-input ${
+                            className={`ls-form-input ${
                               errors.dob ? "error" : ""
                             }`}
                             value={signupData.dob}
                             onChange={(e) => handleInputChange(e, "signup")}
                             required
                           />
-                          <div className="error-message">{errors.dob}</div>
+                          <div className="ls-error-message">{errors.dob}</div>
                         </div>
                       )}
 
-                      <div className="form-group">
+                      <div className="ls-form-group">
                         <label htmlFor="phone">Phone</label>
                         <input
                           type="tel"
                           id="phone"
-                          className={`form-input ${
+                          className={`ls-form-input ${
                             errors.phone ? "error" : ""
                           }`}
                           value={signupData.phone}
                           onChange={(e) => handleInputChange(e, "signup")}
                           required
                         />
-                        <div className="error-message">{errors.phone}</div>
+                        <div className="ls-error-message">{errors.phone}</div>
                       </div>
 
                       {userType === "worker" && (
                         <>
-                          <div className="form-group">
+                          <div className="ls-worker-details">
+                          <div className="ls-form-group">
                             <label htmlFor="aadharNumber">Aadhar Number</label>
                             <input
                               type="text"
                               id="aadharNumber"
-                              className={`form-input ${
+                              className={`ls-form-input ${
                                 errors.aadharNumber ? "error" : ""
                               }`}
                               value={signupData.aadharNumber}
                               onChange={(e) => handleInputChange(e, "signup")}
                               required
                             />
-                            <div className="error-message">
+                            <div className="ls-error-message">
                               {errors.aadharNumber}
                             </div>
                           </div>
-                          <div className="form-group">
+                          <div className="ls-form-group">
                             <label htmlFor="specialization">
                               Specialization
                             </label>
                             <select
                               id="specialization"
-                              className={`form-input ${
+                              className={`ls-form-input ls-select ${
                                 errors.specialization ? "error" : ""
                               }`}
                               value={signupData.specialization}
@@ -563,77 +573,80 @@ const LoginSignUp = () => {
                             >
                               <option value="">Select Specialization</option>
                               <option value="architect">Architect</option>
-                              <option value="interiordesign">Interior Design</option>
+                              <option value="interiordesign">
+                                Interior Design
+                              </option>
                             </select>
-                            <div className="error-message">
+                            <div className="ls-error-message">
                               {errors.specialization}
                             </div>
                           </div>
-                          <div className="form-group">
+                          <div className="ls-form-group">
                             <label htmlFor="experience">
                               Experience (years)
                             </label>
                             <input
                               type="number"
                               id="experience"
-                              className={`form-input ${
+                              className={`ls-form-input ${
                                 errors.experience ? "error" : ""
                               }`}
                               value={signupData.experience}
                               onChange={(e) => handleInputChange(e, "signup")}
                               min="0"
                             />
-                            <div className="error-message">
+                            <div className="ls-error-message">
                               {errors.experience}
                             </div>
+                          </div>
                           </div>
                         </>
                       )}
                     </div>
                   </div>
 
-                  <div className="password-section">
-                    <div className="form-group">
+                  <div className="ls-password-section">
+                    <div className="ls-form-group">
                       <label htmlFor="password">Password</label>
                       <input
                         type="password"
                         id="password"
-                        className={`form-input ${
+                        className={`ls-form-input ${
                           errors.password ? "error" : ""
                         }`}
                         value={signupData.password}
                         onChange={(e) => handleInputChange(e, "signup")}
                         required
                       />
-                      <div className="error-message">{errors.password}</div>
+                      <div className="ls-error-message">{errors.password}</div>
                     </div>
-                    <div className="form-group">
+                    <div className="ls-form-group">
                       <label htmlFor="confirmPassword">Confirm Password</label>
                       <input
                         type="password"
                         id="confirmPassword"
-                        className={`form-input ${
+                        className={`ls-form-input ${
                           errors.confirmPassword ? "error" : ""
                         }`}
                         value={signupData.confirmPassword}
                         onChange={(e) => handleInputChange(e, "signup")}
                         required
                       />
-                      <div className="error-message">
+                      <div className="ls-error-message">
                         {errors.confirmPassword}
                       </div>
                     </div>
                   </div>
 
                   {(userType === "company" || userType === "worker") && (
-                    <div className="file-upload-container">
+                    <div className="ls-file-upload-container">
                       <label>
                         {userType === "company"
                           ? "Company Documents"
                           : "Certificates"}
                       </label>
                       <input type="file" multiple onChange={handleFileChange} />
-                      <div className="file-list">
+                      <div className="ls-file-list">
                         {files.map((f, i) => (
                           <div key={i}>{f.name}</div>
                         ))}
@@ -642,8 +655,11 @@ const LoginSignUp = () => {
                   )}
 
                   {/* FIXED CHECKBOX */}
-                  <div className="terms-section">
-                    <div className="checkbox-container">
+                  <div className="ls-terms-section">
+                    <label
+                      className="ls-checkbox-container"
+                      htmlFor="signup-terms"
+                    >
                       <input
                         type="checkbox"
                         id="signup-terms"
@@ -655,18 +671,19 @@ const LoginSignUp = () => {
                           })
                         }
                       />
-                      <label htmlFor="signup-terms">
-                        I accept the terms and conditions
-                      </label>
-                    </div>
-                    <div className="validation-error">{errors.terms}</div>
+                      <span>I accept the terms and conditions</span>
+                    </label>
+                    <div className="ls-validation-error">{errors.terms}</div>
                   </div>
 
-                  <button type="submit" className="btn btn-primary w-100">
+                  <button
+                    type="submit"
+                    className="ls-btn ls-btn-primary ls-w-100"
+                  >
                     Sign Up
                   </button>
                   {errors.general && (
-                    <div className="validation-error">{errors.general}</div>
+                    <div className="ls-validation-error">{errors.general}</div>
                   )}
                 </form>
               </div>
@@ -678,15 +695,18 @@ const LoginSignUp = () => {
       {/* Forgot Password Modal */}
       {showForgotModal && (
         <div
-          className="modal"
+          className="ls-modal"
           onClick={() => {
             setShowForgotModal(false);
             resetForgotForm();
           }}
         >
-          <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+          <div
+            className="ls-modal-content"
+            onClick={(e) => e.stopPropagation()}
+          >
             <span
-              className="close"
+              className="ls-close"
               onClick={() => {
                 setShowForgotModal(false);
                 resetForgotForm();
@@ -699,7 +719,7 @@ const LoginSignUp = () => {
               {forgotStep === "email" && (
                 <div id="email-step">
                   <h2>Reset Password</h2>
-                  <div className="form-group">
+                  <div className="ls-form-group">
                     <label htmlFor="forgot-email">Email</label>
                     <input
                       type="email"
@@ -718,13 +738,13 @@ const LoginSignUp = () => {
               {forgotStep === "otp" && (
                 <div id="otp-step">
                   <h2>Enter OTP</h2>
-                  <div className="otp-container">
+                  <div className="ls-otp-container">
                     {otp.map((d, i) => (
                       <input
                         key={i}
                         type="text"
                         maxLength="1"
-                        className="otp-input"
+                        className="ls-otp-input"
                         value={d}
                         onChange={(e) => handleOtpChange(i, e.target.value)}
                         onKeyDown={(e) => handleOtpKeyDown(i, e)}
@@ -738,7 +758,7 @@ const LoginSignUp = () => {
                   <a
                     href="#"
                     onClick={handleResendOTP}
-                    className={resendTimeoutId ? "disabled" : ""}
+                    className={resendTimeoutId ? "ls-disabled" : ""}
                   >
                     {resendTimeoutId ? "Resend Code (30s)" : "Resend Code"}
                   </a>
@@ -748,7 +768,7 @@ const LoginSignUp = () => {
               {forgotStep === "password" && (
                 <div id="password-step">
                   <h2>Set New Password</h2>
-                  <div className="form-group">
+                  <div className="ls-form-group">
                     <label htmlFor="new-password">New Password</label>
                     <input
                       type="password"
@@ -758,7 +778,7 @@ const LoginSignUp = () => {
                       required
                     />
                   </div>
-                  <div className="form-group">
+                  <div className="ls-form-group">
                     <label htmlFor="confirm-new-password">
                       Confirm Password
                     </label>
@@ -774,7 +794,7 @@ const LoginSignUp = () => {
                 </div>
               )}
               {forgotError && (
-                <div className="validation-error">{forgotError}</div>
+                <div className="ls-validation-error">{forgotError}</div>
               )}
             </form>
           </div>

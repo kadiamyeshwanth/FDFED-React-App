@@ -1,22 +1,22 @@
 // src/Pages/customer/components/customer-navbar/CustomerNavbar.jsx
 import { Link } from "react-router-dom";
 import Dropdown from "./sub-components/Dropdown";
-// import NotificationIcon from "./sub-components/NotificationIcon";
 import "./CustomerNavbar.css";
 
 const CustomerNavbar = () => {
   return (
     <div className="customer_navbar">
       <nav className="customer_navbar_navbar">
-        {/* Logo */}
-        <Link to="/home" className="customer_navbar_logo">
+        <Link to="/customerdashboard/home" className="customer_navbar_logo">
           BUILD & BEYOND
         </Link>
 
-        {/* Nav Links */}
         <div className="customer_navbar_navLinks">
           <div className="customer_navbar_navItem">
-            <Link to="/home" className="customer_navbar_navLink">
+            <Link
+              to="/customerdashboard/home"
+              className="customer_navbar_navLink"
+            >
               HOME
             </Link>
           </div>
@@ -24,34 +24,36 @@ const CustomerNavbar = () => {
           <Dropdown />
 
           <div className="customer_navbar_navItem">
-            <Link to="/ongoing_projects" className="customer_navbar_navLink">
+            <Link
+              to="/customerdashboard/ongoing_projects"
+              className="customer_navbar_navLink"
+            >
               ONGOING PROJECTS
             </Link>
           </div>
 
           <div className="customer_navbar_navItem">
-            <Link to="/bidspace" className="customer_navbar_navLink">
+            <Link
+              to="/customerdashboard/bidspace"
+              className="customer_navbar_navLink"
+            >
               BIDSPACE
             </Link>
           </div>
 
-          {/* <div className="customer_navbar_navItem">
-            <Link to="/design_ideas" className="customer_navbar_navLink">
-              DESIGN IDEAS
-            </Link>
-          </div> */}
           <div className="customer_navbar_navItem">
-            <Link to="/job_status" className="customer_navbar_navLink">
+            <Link
+              to="/customerdashboard/job_status"
+              className="customer_navbar_navLink"
+            >
               JOB STATUS
             </Link>
           </div>
         </div>
 
-        {/* Right Section */}
         <div className="customer_navbar_rightSection">
-          {/* <NotificationIcon /> */}
           <div className="customer_navbar_profileIcon">
-            <Link to="/customersettings">
+            <Link to="/customerdashboard/customersettings">
               <svg
                 width="24"
                 height="24"

@@ -1,0 +1,342 @@
+/* Interior Designer Jobs Styles - wkidj prefix */
+:root {
+  --wkidj-primary-color: #2c3e50;
+  --wkidj-secondary-color: #3498db;
+  --wkidj-accent-color: #1abc9c;
+  --wkidj-background-color: #f5f7fa;
+  --wkidj-card-bg: #ffffff;
+  --wkidj-text-color: #333333;
+  --wkidj-text-light: #7f8c8d;
+  --wkidj-border-color: #e0e0e0;
+  --wkidj-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  --wkidj-transition: all 0.3s ease;
+}
+
+.wkidj-container {
+  min-height: calc(100vh - 60px);
+  padding: 20px;
+  background-color: var(--wkidj-background-color);
+}
+
+.wkidj-job-dashboard {
+  display: flex;
+  height: calc(100vh - 100px);
+  gap: 30px;
+  max-width: 1600px;
+  margin: 0 auto;
+}
+
+/* Job List Panel */
+.wkidj-job-list-panel {
+  flex: 0 0 380px;
+  background-color: var(--wkidj-card-bg);
+  border-radius: 12px;
+  box-shadow: var(--wkidj-shadow);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  height: 100%;
+}
+
+.wkidj-search-container {
+  padding: 20px;
+  border-bottom: 1px solid var(--wkidj-border-color);
+  position: relative;
+  flex-shrink: 0;
+}
+
+.wkidj-search-container input {
+  width: 100%;
+  padding: 12px 15px 12px 40px;
+  border: 1px solid var(--wkidj-border-color);
+  border-radius: 8px;
+  font-size: 14px;
+  transition: var(--wkidj-transition);
+}
+
+.wkidj-search-container input:focus {
+  outline: none;
+  border-color: var(--wkidj-secondary-color);
+  box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.2);
+}
+
+.wkidj-search-icon {
+  position: absolute;
+  left: 35px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--wkidj-text-light);
+}
+
+.wkidj-jobs-container {
+  overflow-y: auto;
+  padding: 15px;
+  flex-grow: 1;
+}
+
+.wkidj-job-card {
+  background-color: var(--wkidj-card-bg);
+  border: 1px solid var(--wkidj-border-color);
+  border-radius: 10px;
+  padding: 18px;
+  margin-bottom: 15px;
+  cursor: pointer;
+  transition: var(--wkidj-transition);
+}
+
+.wkidj-job-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+  border-left: 4px solid var(--wkidj-accent-color);
+}
+
+.wkidj-job-card.active {
+  border-left: 4px solid var(--wkidj-secondary-color);
+  background-color: rgba(52, 152, 219, 0.05);
+}
+
+.wkidj-job-type {
+  display: inline-block;
+  font-size: 12px;
+  font-weight: 600;
+  padding: 4px 10px;
+  border-radius: 12px;
+  margin-bottom: 10px;
+}
+
+.wkidj-job-type.wkidj-interior {
+  background-color: #fce4ec;
+  color: #c2185b;
+}
+
+.wkidj-job-title {
+  font-size: 16px;
+  font-weight: 600;
+  margin-bottom: 8px;
+  color: var(--wkidj-primary-color);
+}
+
+.wkidj-job-budget {
+  font-size: 14px;
+  color: var(--wkidj-text-light);
+  margin-bottom: 10px;
+}
+
+.wkidj-job-summary {
+  font-size: 14px;
+  color: var(--wkidj-text-color);
+}
+
+.wkidj-no-jobs {
+  text-align: center;
+  padding: 40px 20px;
+  color: var(--wkidj-text-light);
+}
+
+/* Job Details Panel */
+.wkidj-job-details-panel {
+  flex: 1;
+  background-color: var(--wkidj-card-bg);
+  border-radius: 12px;
+  box-shadow: var(--wkidj-shadow);
+  padding: 30px;
+  position: relative;
+  overflow-y: auto;
+  height: 100%;
+}
+
+.wkidj-empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  color: var(--wkidj-text-light);
+  text-align: center;
+}
+
+.wkidj-empty-icon {
+  font-size: 60px;
+  margin-bottom: 20px;
+  opacity: 0.3;
+}
+
+.wkidj-empty-state h2 {
+  font-size: 24px;
+  font-weight: 500;
+  margin-bottom: 10px;
+}
+
+.wkidj-empty-state p {
+  font-size: 16px;
+  max-width: 300px;
+}
+
+.wkidj-job-details-content {
+  animation: wkidj-fadeIn 0.3s ease-in-out;
+}
+
+.wkidj-details-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 30px;
+  padding-bottom: 20px;
+  border-bottom: 1px solid var(--wkidj-border-color);
+}
+
+.wkidj-details-header-left h2 {
+  font-size: 24px;
+  margin-bottom: 10px;
+  color: var(--wkidj-primary-color);
+}
+
+.wkidj-details-header-right {
+  text-align: right;
+}
+
+.wkidj-details-section {
+  margin-bottom: 30px;
+}
+
+.wkidj-details-section h3 {
+  font-size: 18px;
+  font-weight: 600;
+  margin-bottom: 15px;
+  color: var(--wkidj-primary-color);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.wkidj-details-section h3 i {
+  color: var(--wkidj-secondary-color);
+}
+
+.wkidj-details-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 20px;
+}
+
+.wkidj-detail-item {
+  margin-bottom: 15px;
+}
+
+.wkidj-detail-label {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--wkidj-text-light);
+  margin-bottom: 5px;
+}
+
+.wkidj-detail-value {
+  font-size: 16px;
+}
+
+.wkidj-reference-images {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: 15px;
+  margin-top: 15px;
+}
+
+.wkidj-reference-image {
+  height: 120px;
+  border-radius: 8px;
+  background-size: cover;
+  background-position: center;
+  cursor: pointer;
+  transition: var(--wkidj-transition);
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.wkidj-reference-image:hover {
+  transform: scale(1.05);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+}
+
+.wkidj-special-features {
+  background-color: #f9f9f9;
+  padding: 18px;
+  border-radius: 8px;
+  margin-top: 15px;
+  border-left: 3px solid var(--wkidj-accent-color);
+}
+
+.wkidj-job-action-buttons {
+  display: flex;
+  gap: 15px;
+  margin-top: 40px;
+}
+
+.wkidj-job-action-button {
+  padding: 12px 24px;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: var(--wkidj-transition);
+  border: none;
+  font-size: 16px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.wkidj-accept-button {
+  background-color: var(--wkidj-accent-color);
+  color: white;
+}
+
+.wkidj-accept-button:hover {
+  background-color: #16a085;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+}
+
+.wkidj-deny-button {
+  background-color: #e74c3c;
+  color: white;
+}
+
+.wkidj-deny-button:hover {
+  background-color: #c0392b;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+}
+
+@keyframes wkidj-fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Responsive */
+@media (max-width: 1200px) {
+  .wkidj-job-list-panel {
+    flex: 0 0 340px;
+  }
+}
+
+@media (max-width: 992px) {
+  .wkidj-job-dashboard {
+    flex-direction: column;
+    height: auto;
+  }
+  
+  .wkidj-job-list-panel, .wkidj-job-details-panel {
+    height: 500px;
+    width: 100%;
+  }
+}
+
+@media (max-width: 768px) {
+  .wkidj-details-grid {
+    grid-template-columns: 1fr;
+  }
+}

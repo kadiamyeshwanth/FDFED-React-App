@@ -6,6 +6,7 @@ const path = require("path");
 const connectDB = require("./config/db");
 const http = require("http");
 const { Server } = require("socket.io");
+const cloudinary = require('cloudinary').v2;
 
 const authRoutes = require("./routes/authRoutes");
 const companyRoutes = require("./routes/companyRoutes");
@@ -15,9 +16,15 @@ const workerRoutes = require("./routes/workerRoutes");
 const adminRoutes = require("./routes/adminRoutes");
 const chatRoutes = require("./routes/chatRoutes");
 
-const { PORT } = require("./config/constants");
+const { PORT, CLOUDINARY_CLOUD_NAME, CLOUDINARY_API_KEY, CLOUDINARY_API_SECRET } = require("./config/constants");
 const { ChatRoom } = require("./models");
 const { authorizeChatAccess } = require("./controllers/chatController");
+
+cloudinary.config({
+  cloud_name: CLOUDINARY_CLOUD_NAME,
+  api_key: CLOUDINARY_API_KEY,
+  api_secret: CLOUDINARY_API_SECRET
+});
 
 const app = express();
 const server = http.createServer(app);
@@ -104,6 +111,8 @@ app.use(bodyParser.json());
 app.use(cookieParser());
 app.use(express.json());
 app.use(express.static("Final Pages"));
+// Serve uploaded files (profile images, project images)
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 app.use(
   cors({
     origin: "http://localhost:5173",

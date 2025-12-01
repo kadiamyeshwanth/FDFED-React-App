@@ -14,7 +14,7 @@ const AdminConstructionProjectDetail = () => {
     const fetchProject = async () => {
       setLoading(true);
       try {
-        const res = await fetch(`${apiBase}/admin/construction-project/${id}`);
+        const res = await fetch(`/api/admin/construction-project/${id}`);
         if (!res.ok) throw new Error(`Server responded ${res.status}`);
         const data = await res.json();
         setProject(data.project ?? data);
@@ -28,9 +28,10 @@ const AdminConstructionProjectDetail = () => {
   }, [id]);
 
   const handleDelete = async () => {
-    if (!confirm("Are you sure you want to delete this construction project?")) return;
+    if (!confirm("Are you sure you want to delete this construction project?"))
+      return;
     try {
-      const res = await fetch(`${apiBase}/admin/delete-constructionProject/${id}`, {
+      const res = await fetch(`/api/admin/delete-constructionProject/${id}`, {
         method: "DELETE",
         headers: { "Content-Type": "application/json" },
       });
@@ -49,15 +50,22 @@ const AdminConstructionProjectDetail = () => {
 
   const fmt = (d) => (d ? new Date(d).toLocaleString() : "Not specified");
   const fmtShort = (d) => (d ? new Date(d).toLocaleDateString() : "Not set");
-  const fmtNum = (n) => (typeof n === "number" ? n.toLocaleString() : n ?? "Not specified");
-  const pct = Math.min(Math.max(Number(project.completionPercentage) || 0, 0), 100);
+  const fmtNum = (n) =>
+    typeof n === "number" ? n.toLocaleString() : n ?? "Not specified";
+  const pct = Math.min(
+    Math.max(Number(project.completionPercentage) || 0, 0),
+    100
+  );
 
   return (
     <div className="acp-container">
       <header className="acp-header">
         <h1 className="acp-title">🏗️ Construction Project Details</h1>
         <div className="acp-actions">
-          <button className="acp-btn acp-back" onClick={() => navigate("/admindashboard")}>
+          <button
+            className="acp-btn acp-back"
+            onClick={() => navigate("/admin/admindashboard")}
+          >
             ← Back to Dashboard
           </button>
           <button className="acp-btn acp-delete" onClick={handleDelete}>
@@ -68,7 +76,9 @@ const AdminConstructionProjectDetail = () => {
 
       <main className="acp-card">
         <section className="acp-section acp-section-header">
-          <h2 className="acp-section-title">{project.projectName ?? "Construction Project"}</h2>
+          <h2 className="acp-section-title">
+            {project.projectName ?? "Construction Project"}
+          </h2>
           <p className="acp-subtitle">Project ID: {project._id}</p>
         </section>
 
@@ -76,12 +86,22 @@ const AdminConstructionProjectDetail = () => {
         <div className="acp-grid">
           <div className="acp-item">
             <label className="acp-label">Status</label>
-            <div className="acp-value"><span className={`acp-badge acp-badge-${String(project.status ?? "").toLowerCase()}`}>{project.status ?? "—"}</span></div>
+            <div className="acp-value">
+              <span
+                className={`acp-badge acp-badge-${String(
+                  project.status ?? ""
+                ).toLowerCase()}`}
+              >
+                {project.status ?? "—"}
+              </span>
+            </div>
           </div>
 
           <div className="acp-item">
             <label className="acp-label">Current Phase</label>
-            <div className="acp-value">{project.currentPhase ?? "Not specified"}</div>
+            <div className="acp-value">
+              {project.currentPhase ?? "Not specified"}
+            </div>
           </div>
 
           <div className="acp-item">
@@ -89,14 +109,18 @@ const AdminConstructionProjectDetail = () => {
             <div className="acp-value">
               {pct}%
               <div className="acp-progress-bar" aria-hidden>
-                <div className="acp-progress-fill" style={{ width: `${pct}%` }}>{pct}%</div>
+                <div className="acp-progress-fill" style={{ width: `${pct}%` }}>
+                  {pct}%
+                </div>
               </div>
             </div>
           </div>
 
           <div className="acp-item">
             <label className="acp-label">Target Completion Date</label>
-            <div className="acp-value">{fmtShort(project.targetCompletionDate)}</div>
+            <div className="acp-value">
+              {fmtShort(project.targetCompletionDate)}
+            </div>
           </div>
         </div>
 
@@ -104,15 +128,21 @@ const AdminConstructionProjectDetail = () => {
         <div className="acp-grid">
           <div className="acp-item">
             <label className="acp-label">Customer Name</label>
-            <div className="acp-value">{project.customerName ?? project.customerId?.name ?? "—"}</div>
+            <div className="acp-value">
+              {project.customerName ?? project.customerId?.name ?? "—"}
+            </div>
           </div>
           <div className="acp-item">
             <label className="acp-label">Email</label>
-            <div className="acp-value">{project.customerEmail ?? project.customerId?.email ?? "—"}</div>
+            <div className="acp-value">
+              {project.customerEmail ?? project.customerId?.email ?? "—"}
+            </div>
           </div>
           <div className="acp-item">
             <label className="acp-label">Phone</label>
-            <div className="acp-value">{project.customerPhone ?? project.customerId?.phone ?? "—"}</div>
+            <div className="acp-value">
+              {project.customerPhone ?? project.customerId?.phone ?? "—"}
+            </div>
           </div>
         </div>
 
@@ -136,15 +166,21 @@ const AdminConstructionProjectDetail = () => {
           </div>
           <div className="acp-item">
             <label className="acp-label">Project Timeline</label>
-            <div className="acp-value">{project.projectTimeline ?? "—"} months</div>
+            <div className="acp-value">
+              {project.projectTimeline ?? "—"} months
+            </div>
           </div>
           <div className="acp-item">
             <label className="acp-label">Accessibility Needs</label>
-            <div className="acp-value">{project.accessibilityNeeds ?? "None"}</div>
+            <div className="acp-value">
+              {project.accessibilityNeeds ?? "None"}
+            </div>
           </div>
           <div className="acp-item">
             <label className="acp-label">Energy Efficiency</label>
-            <div className="acp-value">{project.energyEfficiency ?? "Standard"}</div>
+            <div className="acp-value">
+              {project.energyEfficiency ?? "Standard"}
+            </div>
           </div>
 
           <div className="acp-item acp-full">
@@ -169,11 +205,16 @@ const AdminConstructionProjectDetail = () => {
 
         {Array.isArray(project.floors) && project.floors.length > 0 && (
           <>
-            <h3 className="acp-section-heading">Floor Details ({project.floors.length})</h3>
+            <h3 className="acp-section-heading">
+              Floor Details ({project.floors.length})
+            </h3>
             {project.floors.map((floor, i) => (
               <div className="acp-floor-card" key={i}>
-                <strong>Floor {floor.floorNumber}:</strong> {floor.floorType} | {floor.floorArea} sq ft
-                {floor.floorDescription && <div className="acp-floor-desc">{floor.floorDescription}</div>}
+                <strong>Floor {floor.floorNumber}:</strong> {floor.floorType} |{" "}
+                {floor.floorArea} sq ft
+                {floor.floorDescription && (
+                  <div className="acp-floor-desc">{floor.floorDescription}</div>
+                )}
               </div>
             ))}
           </>

@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const { submitArchitect, submitDesignRequest, submitConstructionForm, getProjects, getProjectById, getEditProject, updateProject, submitBid, acceptBid, declineBid, acceptWorkerRequest, rejectWorkerRequest } = require('../controllers/projectController');
+const { submitArchitect, submitDesignRequest, submitConstructionForm, getProjects, getProjectById, getEditProject, updateProject, submitBid, acceptBid, declineBid, acceptWorkerRequest, rejectWorkerRequest, approveMilestone, requestMilestoneRevision } = require('../controllers/projectController');
 const isAuthenticated = require('../middlewares/auth');
 const { upload } = require('../middlewares/upload');
 
@@ -10,10 +10,12 @@ router.post('/construction_form', isAuthenticated, upload.any(), submitConstruct
 router.get('/api/projects', getProjects);
 router.get('/api/projects/:id', getProjectById);
 router.get('/edit-project/:id', isAuthenticated, getEditProject);
-router.post('/api/projects/update', upload.fields([{ name: 'mainImage', maxCount: 1 }, { name: 'additionalImages', maxCount: 10 }, { name: 'updateImages', maxCount: 1 }]), updateProject);
+router.post('/projects/update', upload.fields([{ name: 'mainImage', maxCount: 1 }, { name: 'additionalImages', maxCount: 10 }, { name: 'updateImages', maxCount: 1 }]), updateProject);
 router.post('/customer/submit-bid', isAuthenticated, submitBid);
 router.post('/customer/accept-bid', isAuthenticated, acceptBid);
 router.post('/customer/decline-bid', isAuthenticated, declineBid);
+router.post('/customer/approve-milestone', isAuthenticated, approveMilestone);
+router.post('/customer/request-milestone-revision', isAuthenticated, requestMilestoneRevision);
 router.post('/company/worker-request/accept', isAuthenticated, acceptWorkerRequest);
 router.post('/company/worker-request/reject', isAuthenticated, rejectWorkerRequest);
 

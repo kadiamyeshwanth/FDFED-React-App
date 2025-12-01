@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 // src/Pages/customer/components/customer-construction/CustomerConstruction.jsx
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
@@ -52,9 +53,9 @@ const CustomerConstruction = () => {
   // Back to Top
   useEffect(() => {
     const handleScroll = () => {
-      const btn = document.querySelector(".back-to-top");
+      const btn = document.querySelector(".construction-back-to-top");
       if (btn) {
-        btn.classList.toggle("visible", window.scrollY > 400);
+        btn.classList.toggle("construction-visible", window.scrollY > 400);
       }
     };
     window.addEventListener("scroll", handleScroll);
@@ -81,21 +82,30 @@ const CustomerConstruction = () => {
   };
 
   if (loading)
-    return <div className="status-message">Loading companies...</div>;
-  if (error) return <div className="status-message error">{error}</div>;
+    return (
+      <div className="construction-status-message construction-loading">
+        Loading companies...
+      </div>
+    );
+  if (error)
+    return (
+      <div className="construction-status-message construction-error">
+        {error}
+      </div>
+    );
 
   return (
     <div className="construction-page">
       {/* Page Title */}
-      <h1 className="page-title">
+      <h1 className="construction-page-title">
         Hire Companies
-        <div className="underline"></div>
+        <div className="construction-underline"></div>
       </h1>
 
       {/* Sort Dropdown */}
-      <div className="sort-container">
+      <div className="construction-sort-container">
         <select
-          className="sort-select"
+          className="construction-sort-select"
           value={sortBy}
           onChange={(e) => setSortBy(e.target.value)}
         >
@@ -106,57 +116,61 @@ const CustomerConstruction = () => {
       </div>
 
       {/* Company Cards */}
-      <div className="company-container">
+      <div className="construction-company-container">
         {companies.length > 0 ? (
           companies.map((company) => (
             <div
               key={company._id}
-              className="company-card"
+              className="construction-company-card"
               data-id={company._id}
               data-name={company.companyName.toLowerCase()}
               data-projects={company.projectsCompleted || 0}
               data-years={company.yearsInBusiness || 0}
             >
-              <div className="company-name">{company.companyName}</div>
+              <div className="construction-company-name">
+                {company.companyName}
+              </div>
 
-              <div className="company-stats">
-                <div className="stat">
-                  <span className="stat-number">
+              <div className="construction-company-stats">
+                <div className="construction-stat">
+                  <span className="construction-stat-number">
                     {company.projectsCompleted || "0+"}
                   </span>
-                  <span className="stat-label">Projects</span>
+                  <span className="construction-stat-label">Projects</span>
                 </div>
-                <div className="stat">
-                  <span className="stat-number">
+                <div className="construction-stat">
+                  <span className="construction-stat-number">
                     {company.yearsInBusiness || "0"}
                   </span>
-                  <span className="stat-label">Years</span>
+                  <span className="construction-stat-label">Years</span>
                 </div>
               </div>
 
-              <div className="company-details">
+              <div className="construction-company-details">
                 {company.aboutCompany ||
                   "Leading construction company with expertise in residential and commercial buildings, infrastructure development, and engineering services."}
               </div>
 
-              <div className="location">
+              <div className="construction-location">
                 <i className="fas fa-map-marker-alt"></i>
                 {company.location?.city
                   ? `${company.location.city}, India`
                   : "Location not specified, India"}
               </div>
 
-              <div className="buttons">
+              <div className="construction-buttons">
                 <button
-                  className="view-details-btn"
+                  className="construction-view-details-btn"
                   onClick={() => showDetails(company._id)}
                 >
                   View Details
                 </button>
                 <button
-                  className="book-now-btn"
+                  className="construction-book-now-btn"
                   onClick={() =>
-                    navigate(`/constructionform?companyId=${company._id}`)
+                    navigate(
+                      `/customerdashboard/constructionform?companyId=${company._id}`
+                    )
                   }
                 >
                   Book Now
@@ -165,7 +179,7 @@ const CustomerConstruction = () => {
             </div>
           ))
         ) : (
-          <div className="no-companies">
+          <div className="construction-no-companies">
             <p>No construction companies found.</p>
           </div>
         )}
@@ -173,87 +187,133 @@ const CustomerConstruction = () => {
 
       {/* Details Modal */}
       {selectedCompany && (
-        <div className="details-overlay active" onClick={closeDetails}>
-          <div className="details-content" onClick={(e) => e.stopPropagation()}>
-            <button className="close-details" onClick={closeDetails}>
+        <div
+          className="construction-details-overlay construction-active"
+          onClick={closeDetails}
+        >
+          <div
+            className="construction-details-content"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <button
+              className="construction-close-details"
+              onClick={closeDetails}
+            >
               <i className="fas fa-times"></i>
             </button>
 
-            <h2 className="detail-company-name">
+            <h2 className="construction-detail-company-name">
               {selectedCompany.companyName}
             </h2>
-            <p className="detail-company-subtitle">
+            <p className="construction-detail-company-subtitle">
               {selectedCompany.contactPerson
                 ? `${selectedCompany.contactPerson} - `
                 : ""}
               Leading Engineering & Construction
             </p>
 
-            <div className="detail-section">
-              <h3 className="detail-section-title">Company Overview</h3>
-              <div className="detail-stats">
-                <div className="detail-stat">
-                  <div className="detail-stat-number">
+            <div className="construction-detail-section">
+              <h3 className="construction-detail-section-title">
+                Company Overview
+              </h3>
+              <div className="construction-detail-stats">
+                <div className="construction-detail-stat">
+                  <div className="construction-detail-stat-number">
                     {selectedCompany.projectsCompleted || "0+"}
                   </div>
-                  <div className="detail-stat-label">Projects Completed</div>
+                  <div className="construction-detail-stat-label">
+                    Projects Completed
+                  </div>
                 </div>
-                <div className="detail-stat">
-                  <div className="detail-stat-number">
+                <div className="construction-detail-stat">
+                  <div className="construction-detail-stat-number">
                     {selectedCompany.yearsInBusiness || "0"}
                   </div>
-                  <div className="detail-stat-label">Years in Business</div>
+                  <div className="construction-detail-stat-label">
+                    Years in Business
+                  </div>
                 </div>
-                <div className="detail-stat">
-                  <div className="detail-stat-number">
+                <div className="construction-detail-stat">
+                  <div className="construction-detail-stat-number">
                     {selectedCompany.size || "N/A"}
                   </div>
-                  <div className="detail-stat-label">Employees</div>
+                  <div className="construction-detail-stat-label">
+                    Employees
+                  </div>
                 </div>
               </div>
-              <p className="detail-description">
+              <p className="construction-detail-description">
                 {selectedCompany.aboutForCustomers ||
                   "Company description not available."}
               </p>
             </div>
 
-            {selectedCompany.teamMembers &&
-              selectedCompany.teamMembers.length > 0 && (
-                <div className="detail-section">
-                  <h3 className="detail-section-title">Key Team Members</h3>
-                  {selectedCompany.teamMembers.map((member, idx) => (
-                    <div key={idx} className="detail-team-member">
-                      <img
-                        src={member.image || "/api/placeholder/120/120"}
-                        alt={member.name}
-                        className="member-image"
-                      />
-                      <div className="member-info">
-                        <h4 className="member-name">{member.name}</h4>
-                        <p className="member-position">{member.position}</p>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              )}
-
             {selectedCompany.completedProjects &&
               selectedCompany.completedProjects.length > 0 && (
-                <div className="detail-section">
-                  <h3 className="detail-section-title">Completed Projects</h3>
-                  <div className="detail-projects">
+                <div className="construction-detail-section">
+                  <h3 className="construction-detail-section-title">
+                    Completed Projects
+                  </h3>
+                  <div className="construction-detail-projects">
                     {selectedCompany.completedProjects.map((project, idx) => (
-                      <div key={idx} className="project-item">
-                        <img
-                          src={project.image || "/api/placeholder/120/120"}
-                          alt={project.title}
-                          className="project-image"
-                        />
-                        <div className="project-info">
-                          <h4 className="project-name">{project.title}</h4>
-                          <p className="project-description">
+                      <div key={idx} className="construction-project-item">
+                        <div className="construction-project-images">
+                          {project.beforeImage && (
+                            <div className="construction-project-image-container">
+                              <img
+                                src={project.beforeImage}
+                                alt={`${project.title} - Before`}
+                                className="construction-project-image"
+                              />
+                              <span className="construction-image-label">Before Construction</span>
+                            </div>
+                          )}
+                          {project.afterImage && (
+                            <div className="construction-project-image-container">
+                              <img
+                                src={project.afterImage}
+                                alt={`${project.title} - After`}
+                                className="construction-project-image"
+                              />
+                              <span className="construction-image-label">After Construction</span>
+                            </div>
+                          )}
+                        </div>
+                        <div className="construction-project-info">
+                          <h4 className="construction-project-name">
+                            {project.title}
+                          </h4>
+                          <p className="construction-project-description">
                             {project.description}
                           </p>
+                          {project.location && (
+                            <p className="construction-project-location">
+                              <i className="fas fa-map-marker-alt"></i> {project.location}
+                            </p>
+                          )}
+                          {project.tenderId && (
+                            <p className="construction-project-tender">
+                              <strong>Tender ID:</strong> {project.tenderId}
+                            </p>
+                          )}
+                          {project.gpsLink && project.gpsLink.trim() !== "" && (
+                            <p className="construction-project-link">
+                              <a href={project.gpsLink} target="_blank" rel="noopener noreferrer">
+                                <i className="fas fa-map"></i> View on Map
+                              </a>
+                            </p>
+                          )}
+                          {project.materialCertificate && project.materialCertificate.trim() !== "" && (project.materialCertificate.startsWith('http') || project.materialCertificate.startsWith('https')) ? (
+                            <p className="construction-project-link">
+                              <a href={project.materialCertificate} target="_blank" rel="noopener noreferrer">
+                                <i className="fas fa-certificate"></i> Material Certificate
+                              </a>
+                            </p>
+                          ) : project.materialCertificate && project.materialCertificate.trim() !== "" ? (
+                            <p className="construction-project-certificate-pending">
+                              <i className="fas fa-certificate"></i> Certificate uploaded (pending processing)
+                            </p>
+                          ) : null}
                         </div>
                       </div>
                     ))}
@@ -262,16 +322,18 @@ const CustomerConstruction = () => {
               )}
 
             {selectedCompany.didYouKnow && (
-              <div className="detail-section">
-                <h3 className="detail-section-title">Did You Know?</h3>
-                <p className="detail-description">
+              <div className="construction-detail-section">
+                <h3 className="construction-detail-section-title">
+                  Did You Know?
+                </h3>
+                <p className="construction-detail-description">
                   {selectedCompany.didYouKnow}
                 </p>
               </div>
             )}
 
             <button
-              className="detail-book-now"
+              className="construction-detail-book-now"
               onClick={() =>
                 navigate(`/constructionform?companyId=${selectedCompany._id}`)
               }
@@ -285,7 +347,7 @@ const CustomerConstruction = () => {
       {/* Back to Top Button */}
       <a
         href="#"
-        className="back-to-top"
+        className="construction-back-to-top"
         onClick={(e) => {
           e.preventDefault();
           window.scrollTo({ top: 0, behavior: "smooth" });
