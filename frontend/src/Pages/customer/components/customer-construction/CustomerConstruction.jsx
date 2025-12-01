@@ -11,6 +11,7 @@ const CustomerConstruction = () => {
   const [error, setError] = useState(null);
   const [selectedCompany, setSelectedCompany] = useState(null);
   const [sortBy, setSortBy] = useState("name");
+  const [showAllReviews, setShowAllReviews] = useState(false);
   const navigate = useNavigate();
 
   // Fetch companies
@@ -73,11 +74,13 @@ const CustomerConstruction = () => {
 
   const showDetails = (companyId) => {
     setSelectedCompany(companies.find((c) => c._id === companyId));
+    setShowAllReviews(false);
     document.body.style.overflow = "hidden";
   };
 
   const closeDetails = () => {
     setSelectedCompany(null);
+    setShowAllReviews(false);
     document.body.style.overflow = "auto";
   };
 
@@ -157,6 +160,38 @@ const CustomerConstruction = () => {
                   ? `${company.location.city}, India`
                   : "Location not specified, India"}
               </div>
+
+              {/* Display average rating if available */}
+              {company.totalReviews > 0 && (
+                <div style={{
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  gap: "8px",
+                  padding: "10px",
+                  backgroundColor: "#fff3cd",
+                  borderRadius: "8px",
+                  margin: "10px 0",
+                  border: "1px solid #ffc107"
+                }}>
+                  <div style={{ display: "flex", gap: "2px" }}>
+                    {[1, 2, 3, 4, 5].map((star) => (
+                      <span key={star} style={{ 
+                        fontSize: "18px", 
+                        color: star <= Math.round(company.averageRating || 0) ? "#ffc107" : "#ddd" 
+                      }}>
+                        ★
+                      </span>
+                    ))}
+                  </div>
+                  <span style={{ fontWeight: "700", color: "#856404", fontSize: "16px" }}>
+                    {company.averageRating}
+                  </span>
+                  <span style={{ color: "#856404", fontSize: "14px" }}>
+                    ({company.totalReviews} {company.totalReviews === 1 ? 'review' : 'reviews'})
+                  </span>
+                </div>
+              )}
 
               <div className="construction-buttons">
                 <button
@@ -318,6 +353,198 @@ const CustomerConstruction = () => {
                       </div>
                     ))}
                   </div>
+                </div>
+              )}
+
+            {/* Completed Projects on Our Website - Reviews Section */}
+            {selectedCompany.completedProjectsWithReviews &&
+              selectedCompany.completedProjectsWithReviews.length > 0 && (
+                <div className="construction-detail-section" style={{
+                  backgroundColor: "#f8f9fa",
+                  padding: "25px",
+                  borderRadius: "12px",
+                  border: "2px solid #e0e0e0"
+                }}>
+                  <h3 className="construction-detail-section-title" style={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "10px",
+                    marginBottom: "20px"
+                  }}>
+                    <span>⭐ Completed Projects on Our Website</span>
+                  </h3>
+                  
+                  {/* Average Rating Summary */}
+                  <div style={{
+                    backgroundColor: "white",
+                    padding: "20px",
+                    borderRadius: "10px",
+                    marginBottom: "25px",
+                    textAlign: "center",
+                    boxShadow: "0 2px 8px rgba(0,0,0,0.1)"
+                  }}>
+                    <div style={{ fontSize: "48px", fontWeight: "700", color: "#333", marginBottom: "10px" }}>
+                      {selectedCompany.averageRating || 0}
+                    </div>
+                    <div style={{ display: "flex", justifyContent: "center", gap: "5px", marginBottom: "10px" }}>
+                      {[1, 2, 3, 4, 5].map((star) => (
+                        <span key={star} style={{ 
+                          fontSize: "32px", 
+                          color: star <= Math.round(selectedCompany.averageRating || 0) ? "#ffc107" : "#ddd" 
+                        }}>
+                          ★
+                        </span>
+                      ))}
+                    </div>
+                    <div style={{ color: "#666", fontSize: "16px" }}>
+                      Based on {selectedCompany.totalReviews} {selectedCompany.totalReviews === 1 ? 'review' : 'reviews'}
+                    </div>
+                  </div>
+
+                  {/* Individual Reviews */}
+                  <div style={{ display: "flex", flexDirection: "column", gap: "15px" }}>
+                    {selectedCompany.completedProjectsWithReviews
+                      .slice(0, showAllReviews ? selectedCompany.completedProjectsWithReviews.length : 2)
+                      .map((project, idx) => (
+                      <div key={idx} style={{
+                        backgroundColor: "white",
+                        padding: "20px",
+                        borderRadius: "10px",
+                        boxShadow: "0 2px 6px rgba(0,0,0,0.08)",
+                        border: "1px solid #e0e0e0"
+                      }}>
+                        <div style={{ 
+                          display: "flex", 
+                          justifyContent: "space-between", 
+                          alignItems: "flex-start",
+                          marginBottom: "12px",
+                          flexWrap: "wrap",
+                          gap: "10px"
+                        }}>
+                          <h4 style={{ 
+                            margin: 0, 
+                            color: "#333",
+                            fontSize: "18px",
+                            fontWeight: "600"
+                          }}>
+                            {project.projectName}
+                          </h4>
+                          <div style={{ display: "flex", alignItems: "center", gap: "5px" }}>
+                            {[1, 2, 3, 4, 5].map((star) => (
+                              <span key={star} style={{ 
+                                fontSize: "20px", 
+                                color: star <= (project.customerReview?.rating || 0) ? "#ffc107" : "#ddd" 
+                              }}>
+                                ★
+                              </span>
+                            ))}
+                            <span style={{ 
+                              marginLeft: "8px", 
+                              fontWeight: "700", 
+                              color: "#ffc107",
+                              fontSize: "18px"
+                            }}>
+                              {project.customerReview?.rating || 0}/5
+                            </span>
+                          </div>
+                        </div>
+                        
+                        {/* Completion Images Gallery */}
+                        {project.completionImages && project.completionImages.length > 0 && (
+                          <div style={{ marginTop: "15px" }}>
+                            <h5 style={{ 
+                              fontSize: "14px", 
+                              color: "#333", 
+                              marginBottom: "10px",
+                              fontWeight: "600" 
+                            }}>
+                              📸 Project Completion Photos
+                            </h5>
+                            <div style={{
+                              display: "grid",
+                              gridTemplateColumns: "repeat(auto-fill, minmax(120px, 1fr))",
+                              gap: "10px"
+                            }}>
+                              {project.completionImages.map((img, imgIdx) => (
+                                <img
+                                  key={imgIdx}
+                                  src={`http://localhost:3000/${img}`}
+                                  alt={`Completion ${imgIdx + 1}`}
+                                  style={{
+                                    width: "100%",
+                                    height: "120px",
+                                    objectFit: "cover",
+                                    borderRadius: "6px",
+                                    cursor: "pointer",
+                                    border: "2px solid #e0e0e0",
+                                    transition: "transform 0.2s"
+                                  }}
+                                  onMouseEnter={(e) => e.target.style.transform = "scale(1.05)"}
+                                  onMouseLeave={(e) => e.target.style.transform = "scale(1)"}
+                                  onClick={() => window.open(`http://localhost:3000/${img}`, '_blank')}
+                                />
+                              ))}
+                            </div>
+                          </div>
+                        )}
+                        
+                        {project.customerReview?.reviewText && (
+                          <p style={{ 
+                            margin: "12px 0 0 0", 
+                            color: "#555", 
+                            lineHeight: "1.6",
+                            fontStyle: "italic",
+                            padding: "12px",
+                            backgroundColor: "#f8f9fa",
+                            borderRadius: "6px",
+                            borderLeft: "4px solid #ffc107"
+                          }}>
+                            "{project.customerReview.reviewText}"
+                          </p>
+                        )}
+                        
+                        {project.customerReview?.reviewDate && (
+                          <div style={{ 
+                            marginTop: "12px", 
+                            color: "#999", 
+                            fontSize: "13px",
+                            textAlign: "right"
+                          }}>
+                            {new Date(project.customerReview.reviewDate).toLocaleDateString("en-IN", {
+                              day: "numeric",
+                              month: "long",
+                              year: "numeric"
+                            })}
+                          </div>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+
+                  {/* View More Button */}
+                  {selectedCompany.completedProjectsWithReviews.length > 2 && (
+                    <div style={{ textAlign: "center", marginTop: "20px" }}>
+                      <button
+                        onClick={() => setShowAllReviews(!showAllReviews)}
+                        style={{
+                          backgroundColor: "#4CAF50",
+                          color: "white",
+                          border: "none",
+                          padding: "12px 30px",
+                          borderRadius: "8px",
+                          cursor: "pointer",
+                          fontWeight: "600",
+                          fontSize: "16px",
+                          boxShadow: "0 2px 4px rgba(0,0,0,0.2)",
+                          transition: "background-color 0.3s"
+                        }}
+                        onMouseEnter={(e) => e.target.style.backgroundColor = "#45a049"}
+                        onMouseLeave={(e) => e.target.style.backgroundColor = "#4CAF50"}
+                      >
+                        {showAllReviews ? "Show Less" : "View All"}
+                      </button>
+                    </div>
+                  )}
                 </div>
               )}
 
