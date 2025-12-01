@@ -29,6 +29,7 @@ const AdminBidDetail = () => {
     fetchBid();
   }, [id]);
 
+
   const handleDelete = async () => {
     if (!confirm("Are you sure you want to delete this bid?")) return;
     try {
@@ -44,6 +45,7 @@ const AdminBidDetail = () => {
       alert("Error deleting bid: " + err.message);
     }
   };
+
 
   if (loading) return <div className="adb-loading">Loading bid details…</div>;
   if (error) return <div className="adb-error">Error: {error}</div>;
@@ -72,6 +74,7 @@ const AdminBidDetail = () => {
           <p className="adb-subtitle">Bid ID: {bid._id}</p>
         </section>
 
+
         <h3 className="adb-section-heading">Bid Status</h3>
         <div className="adb-grid">
           <div className="adb-item">
@@ -93,6 +96,7 @@ const AdminBidDetail = () => {
             <div className="adb-value">{new Date(bid.updatedAt).toLocaleDateString()}</div>
           </div>
         </div>
+
 
         <h3 className="adb-section-heading">Customer Information</h3>
         <div className="adb-grid">
@@ -117,6 +121,7 @@ const AdminBidDetail = () => {
             <div className="adb-value">{bid.projectLocation ?? "—"}</div>
           </div>
         </div>
+
 
         <h3 className="adb-section-heading">Project Details</h3>
         <div className="adb-grid">
@@ -156,7 +161,6 @@ const AdminBidDetail = () => {
             </div>
           )}
         </div>
-
         {Array.isArray(bid.floors) && bid.floors.length > 0 && (
           <>
             <h3 className="adb-section-heading">Floor Details ({bid.floors.length})</h3>
@@ -168,9 +172,16 @@ const AdminBidDetail = () => {
             ))}
           </>
         )}
+<<<<<<< Updated upstream
 
         <h3 className="adb-section-heading">Company Bids ({(bid.companyBids || []).length})</h3>
         {(bid.companyBids && bid.companyBids.length > 0) ? (
+=======
+        <h3 className="adb-section-heading">
+          Company Bids ({(bid.companyBids || []).length})
+        </h3>
+        {bid.companyBids && bid.companyBids.length > 0 ? (
+>>>>>>> Stashed changes
           bid.companyBids.map((cb, i) => (
             <div className="adb-bid-card" key={i}>
               <h4 className="adb-bid-title">{i + 1}. {cb.companyName ?? cb.company?.companyName ?? "Company"}</h4>
@@ -182,7 +193,6 @@ const AdminBidDetail = () => {
         ) : (
           <p className="adb-empty-note">No bids received yet.</p>
         )}
-
         <h3 className="adb-section-heading">Timestamps</h3>
         <div className="adb-grid">
           <div className="adb-item">
