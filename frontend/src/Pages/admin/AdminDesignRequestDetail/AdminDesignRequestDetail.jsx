@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import "./AdminDesignRequestDetail.css";
 
+
 const AdminDesignRequestDetail = () => {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -10,6 +11,7 @@ const AdminDesignRequestDetail = () => {
   const [error, setError] = useState(null);
   const apiBase = ""; // leave empty for same origin or set VITE_API_URL
 
+  
   useEffect(() => {
     const fetchRequest = async () => {
       setLoading(true);

@@ -2,7 +2,6 @@
 * { box-sizing: border-box; margin: 0; padding: 0; }
 
 .dashboard-container { max-width: 1400px; margin: 0 auto; padding: 20px; }
-
 .header {
   background: white;
   padding: 25px 30px;

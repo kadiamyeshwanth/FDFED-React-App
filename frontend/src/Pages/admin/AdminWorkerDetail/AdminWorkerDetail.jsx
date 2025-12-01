@@ -8,7 +8,7 @@ const AdminWorkerDetail = () => {
   const [worker, setWorker] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const apiBase = ""; // leave empty to use same origin or set import.meta.env.VITE_API_URL
+  const apiBase = ""; 
 
   useEffect(() => {
     const fetchWorker = async () => {
