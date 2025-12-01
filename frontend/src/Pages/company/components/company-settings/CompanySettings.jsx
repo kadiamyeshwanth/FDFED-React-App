@@ -339,12 +339,12 @@ export default function CompanySettings() {
     }
   }
 
-  // Security form handlers (local demo only)
+  // Security form handlers
   function handleSecurityChange(e) {
     const { name, value } = e.target;
     setSecurityForm(prev => ({ ...prev, [name]: value }));
   }
-  function submitSecurity(e) {
+  async function submitSecurity(e) {
     e.preventDefault();
     if (!securityForm.currentPassword) {
       alert("Enter current password");
@@ -359,9 +359,25 @@ export default function CompanySettings() {
       return;
     }
 
-    // In production, call your API endpoint to change password.
-    alert("Password changed (demo). Implement backend call.");
-    setSecurityForm({ currentPassword: "", newPassword: "", confirmPassword: "" });
+    try {
+      const response = await axios.post(
+        'http://localhost:3000/api/company/password/update',
+        {
+          currentPassword: securityForm.currentPassword,
+          newPassword: securityForm.newPassword
+        },
+        { withCredentials: true }
+      );
+
+      if (response.data) {
+        alert("Password updated successfully!");
+        setSecurityForm({ currentPassword: "", newPassword: "", confirmPassword: "" });
+      }
+    } catch (error) {
+      console.error('Password update error:', error);
+      const errorMsg = error.response?.data?.error || 'Failed to update password. Please try again.';
+      alert(errorMsg);
+    }
   }
 
   // small helper to toggle sidebar section

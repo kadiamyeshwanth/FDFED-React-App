@@ -1,4 +1,5 @@
 const mongoose = require('mongoose');
+const bcrypt = require('bcrypt');
 const { Company, Bid, ConstructionProjectSchema, Worker, WorkerToCompany, CompanytoWorker } = require('../models');
 const { getTargetDate } = require('../utils/helpers');
 const { findOrCreateChatRoom } = require('./chatController');
@@ -595,8 +596,40 @@ const getEmployees = async (req, res) => {
   }
 };
 
+const updatePassword = async (req, res) => {
+  try {
+    const companyId = req.user.user_id;
+    const { currentPassword, newPassword } = req.body;
+
+    if (!currentPassword || !newPassword) {
+      return res.status(400).json({ error: 'Both current password and new password are required.' });
+    }
+
+    const company = await Company.findById(companyId);
+    if (!company) {
+      return res.status(404).json({ error: 'Company not found.' });
+    }
+
+    // Verify current password
+    const isMatch = await bcrypt.compare(currentPassword, company.password);
+    if (!isMatch) {
+      return res.status(401).json({ error: 'Current password is incorrect.' });
+    }
+
+    // Update password (will be hashed by pre-save middleware in model)
+    company.password = newPassword;
+    await company.save();
+
+    res.status(200).json({ message: 'Password updated successfully.' });
+  } catch (error) {
+    console.error('Error updating password:', error);
+    res.status(500).json({ error: 'Server error while updating password.' });
+  }
+};
+
 module.exports = { 
   getDashboard, getOngoingProjects, getProjectRequests, updateProjectStatusController, 
   getHiring, getSettings, getBids, getCompanyRevenue, createHireRequest,  
-  updateCompanyProfile, handleWorkerRequest, submitBidController, submitProjectProposal, getEmployees 
+  updateCompanyProfile, handleWorkerRequest, submitBidController, submitProjectProposal, getEmployees,
+  updatePassword
 };

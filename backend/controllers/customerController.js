@@ -25,10 +25,10 @@ const getJobRequestStatus = async (req, res) => {
 
     const rawArchitectApplications = await ArchitectHiring.find({
       customer: req.user.user_id,
-    }).lean();
+    }).select('+milestones +projectUpdates').lean();
     const rawInteriorApplications = await DesignRequest.find({
       customerId: req.user.user_id,
-    }).lean();
+    }).select('+milestones +projectUpdates').lean();
     const companyApplications = await ConstructionProjectSchema.find({
       customerId: req.user.user_id,
     }).lean();
@@ -692,6 +692,157 @@ const updatePassword = async (req, res) => {
   }
 };
 
+const approveMilestone = async (req, res) => {
+  try {
+    const { projectId, milestoneId } = req.params;
+    const { projectType } = req.body;
+
+    let project;
+    if (projectType === 'architect') {
+      project = await ArchitectHiring.findById(projectId);
+    } else if (projectType === 'interior') {
+      project = await DesignRequest.findById(projectId);
+    }
+
+    if (!project) {
+      return res.status(404).json({ error: 'Project not found' });
+    }
+
+    const milestone = project.milestones.id(milestoneId);
+    if (!milestone) {
+      return res.status(404).json({ error: 'Milestone not found' });
+    }
+
+    milestone.status = 'Approved';
+    milestone.approvedAt = new Date();
+    await project.save();
+
+    res.status(200).json({ success: true, message: 'Milestone approved successfully' });
+  } catch (error) {
+    console.error('Error approving milestone:', error);
+    res.status(500).json({ error: 'Server error' });
+  }
+};
+
+const rejectMilestone = async (req, res) => {
+  try {
+    const { projectId, milestoneId } = req.params;
+    const { projectType, reason } = req.body;
+
+    let project;
+    if (projectType === 'architect') {
+      project = await ArchitectHiring.findById(projectId);
+    } else if (projectType === 'interior') {
+      project = await DesignRequest.findById(projectId);
+    }
+
+    if (!project) {
+      return res.status(404).json({ error: 'Project not found' });
+    }
+
+    const milestone = project.milestones.id(milestoneId);
+    if (!milestone) {
+      return res.status(404).json({ error: 'Milestone not found' });
+    }
+
+    milestone.status = 'Rejected';
+    milestone.rejectedAt = new Date();
+    if (reason) milestone.rejectionReason = reason;
+    await project.save();
+
+    res.status(200).json({ success: true, message: 'Milestone rejected' });
+  } catch (error) {
+    console.error('Error rejecting milestone:', error);
+    res.status(500).json({ error: 'Server error' });
+  }
+};
+
+const requestMilestoneRevision = async (req, res) => {
+  try {
+    const { projectId, milestoneId } = req.params;
+    const { projectType, revisionNotes } = req.body;
+
+    if (!revisionNotes || !revisionNotes.trim()) {
+      return res.status(400).json({ error: 'Revision notes are required' });
+    }
+
+    let project;
+    if (projectType === 'architect') {
+      project = await ArchitectHiring.findById(projectId);
+    } else if (projectType === 'interior') {
+      project = await DesignRequest.findById(projectId);
+    }
+
+    if (!project) {
+      return res.status(404).json({ error: 'Project not found' });
+    }
+
+    const milestone = project.milestones.id(milestoneId);
+    if (!milestone) {
+      return res.status(404).json({ error: 'Milestone not found' });
+    }
+
+    // Add to revision history
+    if (!milestone.revisionHistory) {
+      milestone.revisionHistory = [];
+    }
+    milestone.revisionHistory.push({
+      requestedAt: new Date(),
+      notes: revisionNotes
+    });
+
+    milestone.status = 'Revision Requested';
+    milestone.revisionRequestedAt = new Date();
+    milestone.revisionNotes = revisionNotes;
+    
+    await project.save();
+
+    res.status(200).json({ success: true, message: 'Revision request sent to worker' });
+  } catch (error) {
+    console.error('Error requesting milestone revision:', error);
+    res.status(500).json({ error: 'Server error' });
+  }
+};
+
+const reportMilestoneToAdmin = async (req, res) => {
+  try {
+    const { projectId, milestoneId } = req.params;
+    const { projectType, reportReason } = req.body;
+
+    if (!reportReason || !reportReason.trim()) {
+      return res.status(400).json({ error: 'Report reason is required' });
+    }
+
+    let project;
+    if (projectType === 'architect') {
+      project = await ArchitectHiring.findById(projectId);
+    } else if (projectType === 'interior') {
+      project = await DesignRequest.findById(projectId);
+    }
+
+    if (!project) {
+      return res.status(404).json({ error: 'Project not found' });
+    }
+
+    const milestone = project.milestones.id(milestoneId);
+    if (!milestone) {
+      return res.status(404).json({ error: 'Milestone not found' });
+    }
+
+    milestone.status = 'Under Review';
+    milestone.reportedToAdminAt = new Date();
+    milestone.adminReport = reportReason;
+    
+    await project.save();
+
+    // TODO: Send notification to admin
+    res.status(200).json({ success: true, message: 'Milestone reported to admin for review' });
+  } catch (error) {
+    console.error('Error reporting milestone to admin:', error);
+    res.status(500).json({ error: 'Server error' });
+  }
+};
+
 module.exports = {
   submitBidForm,
   getDashboard,
@@ -715,4 +866,8 @@ module.exports = {
   acceptCompanyBid,
   acceptCompanyProposal,
   updatePassword,
+  approveMilestone,
+  rejectMilestone,
+  requestMilestoneRevision,
+  reportMilestoneToAdmin,
 };

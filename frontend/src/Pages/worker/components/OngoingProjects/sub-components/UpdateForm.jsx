@@ -3,7 +3,8 @@ import './UpdateForm.css';
 
 const UpdateForm = ({ 
   projectId, 
-  projectType
+  projectType,
+  onSuccess
 }) => {
   const [percentage, setPercentage] = useState('');
   const [description, setDescription] = useState('');
@@ -42,6 +43,8 @@ const UpdateForm = ({
         // Reset file input
         const fileInput = document.querySelector(`input[name="milestoneImage-${projectId}"]`);
         if (fileInput) fileInput.value = '';
+        // Call success callback to close modal and refresh data
+        if (onSuccess) onSuccess();
       } else {
         alert(data.error || 'Failed to submit milestone');
       }

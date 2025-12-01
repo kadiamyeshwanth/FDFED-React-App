@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import UpdateForm from './UpdateForm';
 import './ProjectCard.css';
+import ReviewModal from '../../../../../components/ReviewModal/ReviewModal';
+import ReviewDisplay from '../../../../../components/ReviewDisplay/ReviewDisplay';
 
 // For Accepted Projects - with update form
 export const AcceptedProjectCard = ({ 
@@ -9,7 +11,8 @@ export const AcceptedProjectCard = ({
   onViewDetails, 
   onUpdateChange, 
   onUpdateSubmit,
-  onMarkComplete 
+  onMarkComplete,
+  onRefreshProjects
 }) => {
   const [showMilestoneForm, setShowMilestoneForm] = useState(false);
   const [showUpdateForm, setShowUpdateForm] = useState(false);
@@ -17,6 +20,65 @@ export const AcceptedProjectCard = ({
   const [updateText, setUpdateText] = useState('');
   const [updateImage, setUpdateImage] = useState(null);
   const [lightboxImage, setLightboxImage] = useState(null);
+  const [resubmitMilestoneId, setResubmitMilestoneId] = useState(null);
+  const [reviewModal, setReviewModal] = useState({
+    isOpen: false,
+    projectId: null,
+    projectName: null,
+    projectType: null
+  });
+
+  // Check if project is 100% complete
+  const isProjectComplete = (proj) => {
+    if (!proj.milestones || proj.milestones.length === 0) return false;
+    const totalProgress = proj.milestones
+      .filter(m => m.status === 'Approved')
+      .reduce((sum, m) => sum + m.percentage, 0);
+    return totalProgress >= 100;
+  };
+
+  // Check if worker has already reviewed
+  const hasWorkerReviewed = (proj) => {
+    return proj.review && proj.review.workerToCustomer && proj.review.workerToCustomer.rating;
+  };
+
+  // Submit review
+  const handleSubmitReview = async ({ rating, comment }) => {
+    try {
+      const response = await fetch('/api/worker/review', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          projectId: reviewModal.projectId,
+          projectType: reviewModal.projectType,
+          rating,
+          comment
+        }),
+        credentials: 'include'
+      });
+
+      const data = await response.json();
+      
+      if (response.ok) {
+        alert('Review submitted successfully!');
+        setReviewModal({ isOpen: false, projectId: null, projectName: null, projectType: null });
+        if (onRefreshProjects) onRefreshProjects();
+        
+        // Check if project is now completed (both reviews done)
+        if (data.isProjectCompleted) {
+          alert('Both reviews completed! Project moved to Completed section.');
+        }
+      } else {
+        alert(data.error || 'Failed to submit review');
+        throw new Error(data.error);
+      }
+    } catch (error) {
+      console.error('Error submitting review:', error);
+      throw error;
+    }
+  };
 
   const handleUpdateSubmit = async (e) => {
     e.preventDefault();
@@ -48,7 +110,8 @@ export const AcceptedProjectCard = ({
         setUpdateText('');
         setUpdateImage(null);
         setShowUpdateForm(false);
-        window.location.reload();
+        setShowActivity(true);
+        if (onRefreshProjects) onRefreshProjects();
       } else {
         alert(data.error || 'Failed to post update');
       }
@@ -102,6 +165,11 @@ export const AcceptedProjectCard = ({
             onTextChange={onUpdateChange}
             onImageChange={onUpdateChange}
             onSubmit={onUpdateSubmit}
+            onSuccess={() => {
+              setShowMilestoneForm(false);
+              setShowActivity(true);
+              if (onRefreshProjects) onRefreshProjects();
+            }}
           />
         </div>
       )}
@@ -173,7 +241,7 @@ export const AcceptedProjectCard = ({
                 if (activity.type === 'milestone') {
                   const milestone = activity.data;
                   return (
-                    <div key={`milestone-${index}`} className={`wkop-activity-item wkop-milestone-activity wkop-milestone-${milestone.status.toLowerCase()}`}>
+                    <div key={`milestone-${index}`} className={`wkop-activity-item wkop-milestone-activity wkop-milestone-${milestone.status.toLowerCase().replace(/\s+/g, '-')}`}>
                       <div className="wkop-activity-type-badge">
                         <span className="wkop-badge-milestone">Milestone</span>
                       </div>
@@ -182,10 +250,12 @@ export const AcceptedProjectCard = ({
                           <div className="wkop-milestone-header">
                             <div className="wkop-milestone-percentage">
                               <span className="wkop-percentage-badge">{milestone.percentage}%</span>
-                              <span className={`wkop-status-badge wkop-status-${milestone.status.toLowerCase()}`}>
-                                {milestone.status === 'Pending' && 'Pending Approval'}
+                              <span className={`wkop-status-badge wkop-status-${milestone.status.toLowerCase().replace(/\s+/g, '-')}`}>
+                                {milestone.status === 'Pending' && '⏳ Pending Approval'}
                                 {milestone.status === 'Approved' && '✅ Approved'}
                                 {milestone.status === 'Rejected' && '❌ Rejected'}
+                                {milestone.status === 'Revision Requested' && '🔄 Revision Requested'}
+                                {milestone.status === 'Under Review' && '⚠️ Under Admin Review'}
                               </span>
                             </div>
                             <div className="wkop-activity-timestamp">
@@ -201,6 +271,77 @@ export const AcceptedProjectCard = ({
                           <div className="wkop-activity-content">
                             <p>{milestone.description}</p>
                           </div>
+
+                          {/* Show revision request details */}
+                          {milestone.status === 'Revision Requested' && milestone.revisionNotes && (
+                            <div className="wkop-revision-request-box">
+                              <div className="wkop-revision-header">
+                                <span className="wkop-revision-icon">🔄</span>
+                                <strong>Customer Revision Request</strong>
+                              </div>
+                              <div className="wkop-revision-date">
+                                Requested on: {new Date(milestone.revisionRequestedAt).toLocaleDateString('en-IN', {
+                                  day: '2-digit',
+                                  month: 'short',
+                                  year: 'numeric',
+                                  hour: '2-digit',
+                                  minute: '2-digit'
+                                })}
+                              </div>
+                              <div className="wkop-revision-notes">
+                                <p><strong>What needs to be revised:</strong></p>
+                                <p>{milestone.revisionNotes}</p>
+                              </div>
+                              <div className="wkop-revision-action">
+                                <span className="wkop-revision-hint">
+                                  💡 Please review the customer's feedback and submit an updated milestone
+                                </span>
+                              </div>
+                              <div className="wkop-revision-button-container">
+                                <button 
+                                  className="wkop-btn-resubmit"
+                                  onClick={() => {
+                                    setResubmitMilestoneId(milestone._id);
+                                    setShowMilestoneForm(true);
+                                    setShowActivity(false);
+                                  }}
+                                >
+                                  🔄 Resubmit Milestone
+                                </button>
+                              </div>
+                            </div>
+                          )}
+
+                          {/* Show admin review notice */}
+                          {milestone.status === 'Under Review' && (
+                            <div className="wkop-admin-review-box">
+                              <div className="wkop-review-header">
+                                <span className="wkop-review-icon">⚠️</span>
+                                <strong>Under Admin Review</strong>
+                              </div>
+                              <p>This milestone has been reported to the admin for review. Please wait for admin decision.</p>
+                            </div>
+                          )}
+
+                          {/* Show approval/rejection info */}
+                          {milestone.status === 'Approved' && milestone.approvedAt && (
+                            <div className="wkop-approval-box">
+                              ✅ Approved on: {new Date(milestone.approvedAt).toLocaleDateString('en-IN', {
+                                day: '2-digit',
+                                month: 'short',
+                                year: 'numeric',
+                                hour: '2-digit',
+                                minute: '2-digit'
+                              })}
+                            </div>
+                          )}
+
+                          {milestone.status === 'Rejected' && milestone.rejectionReason && (
+                            <div className="wkop-rejection-box">
+                              <strong>Rejection Reason:</strong>
+                              <p>{milestone.rejectionReason}</p>
+                            </div>
+                          )}
                         </div>
                         {milestone.image && (
                           <div className="wkop-activity-image">
@@ -259,6 +400,33 @@ export const AcceptedProjectCard = ({
         </div>
       )}
 
+      {/* Review Section - Show when project is 100% complete */}
+      {isProjectComplete(project) && !hasWorkerReviewed(project) && (
+        <div className="wkop-review-prompt">
+          <div className="wkop-review-prompt-content">
+            <i className="fas fa-star"></i>
+            <h4>Project Complete!</h4>
+            <p>This project has reached 100% completion. Please rate and review your experience with the customer.</p>
+            <button
+              className="wkop-btn-review"
+              onClick={() => setReviewModal({
+                isOpen: true,
+                projectId: project._id,
+                projectName: project.projectName,
+                projectType: project.projectType
+              })}
+            >
+              ⭐ Rate & Review Customer
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Display Reviews if completed */}
+      {project.review && (project.review.customerToWorker || project.review.workerToCustomer) && (
+        <ReviewDisplay review={project.review} userType="worker" />
+      )}
+
       {/* Lightbox Modal for Image Preview */}
       {lightboxImage && (
         <div className="wkop-lightbox-overlay" onClick={() => setLightboxImage(null)}>
@@ -268,6 +436,15 @@ export const AcceptedProjectCard = ({
           </div>
         </div>
       )}
+
+      {/* Review Modal */}
+      <ReviewModal
+        isOpen={reviewModal.isOpen}
+        onClose={() => setReviewModal({ isOpen: false, projectId: null, projectName: null, projectType: null })}
+        onSubmit={handleSubmitReview}
+        projectName={reviewModal.projectName}
+        reviewType="worker"
+      />
     </div>
   );
 };

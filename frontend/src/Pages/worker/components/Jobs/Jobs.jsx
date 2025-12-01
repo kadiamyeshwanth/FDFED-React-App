@@ -11,6 +11,8 @@ const Jobs = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [user, setUser] = useState(null);
+  const [showProposalModal, setShowProposalModal] = useState(false);
+  const [proposalData, setProposalData] = useState({ price: '', description: '' });
 
   useEffect(() => {
     fetchJobs();
@@ -100,6 +102,51 @@ const Jobs = () => {
     }
   };
 
+  const handleCreateProposal = () => {
+    setShowProposalModal(true);
+  };
+
+  const handleCloseProposalModal = () => {
+    setShowProposalModal(false);
+    setProposalData({ price: '', description: '' });
+  };
+
+  const handleProposalSubmit = async (e) => {
+    e.preventDefault();
+    
+    if (!proposalData.price || !proposalData.description) {
+      alert('Please fill in all fields');
+      return;
+    }
+
+    try {
+      const response = await fetch('/api/worker/submit-proposal', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({
+          projectId: selectedJob._id,
+          projectType: 'architect',
+          price: proposalData.price,
+          description: proposalData.description
+        })
+      });
+
+      const data = await response.json();
+      
+      if (data.success) {
+        alert('Proposal submitted successfully!');
+        handleCloseProposalModal();
+        fetchJobs(); // Refresh the list
+      } else {
+        throw new Error(data.error || 'Failed to submit proposal');
+      }
+    } catch (error) {
+      console.error('Error submitting proposal:', error);
+      alert('An error occurred: ' + error.message);
+    }
+  };
+
   const formatDate = (dateString) => {
     return new Date(dateString).toLocaleDateString('en-US', { 
       year: 'numeric', 
@@ -138,8 +185,50 @@ const Jobs = () => {
           selectedJob={selectedJob}
           onAccept={() => updateJobStatus(selectedJob._id, 'Accepted')}
           onReject={() => updateJobStatus(selectedJob._id, 'Rejected')}
+          onCreateProposal={handleCreateProposal}
           formatDate={formatDate}
         />
+        
+        {/* Proposal Modal */}
+        {showProposalModal && (
+          <div className="wkj-modal" onClick={handleCloseProposalModal}>
+            <div className="wkj-modal-content" onClick={(e) => e.stopPropagation()}>
+              <span className="wkj-close-modal" onClick={handleCloseProposalModal}>&times;</span>
+              <div className="wkj-modal-header">
+                <h2>Create Proposal</h2>
+              </div>
+              <div className="wkj-modal-body">
+                <form onSubmit={handleProposalSubmit}>
+                  <div className="wkj-form-group">
+                    <label htmlFor="proposalPrice">Project Price (₹)</label>
+                    <input 
+                      type="number" 
+                      id="proposalPrice" 
+                      value={proposalData.price}
+                      onChange={(e) => setProposalData({...proposalData, price: e.target.value})}
+                      placeholder="Enter project price"
+                      required
+                    />
+                  </div>
+                  <div className="wkj-form-group">
+                    <label htmlFor="proposalDescription">Description of Services</label>
+                    <textarea 
+                      id="proposalDescription" 
+                      rows="4"
+                      value={proposalData.description}
+                      onChange={(e) => setProposalData({...proposalData, description: e.target.value})}
+                      placeholder="e.g., Complete architectural blueprints for a 3-bedroom house, including 2 revisions."
+                      required
+                    />
+                  </div>
+                  <button type="submit" className="wkj-job-action-button wkj-accept-button">
+                    <i className="fas fa-file-signature"></i> Submit Proposal
+                  </button>
+                </form>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </main>
   );

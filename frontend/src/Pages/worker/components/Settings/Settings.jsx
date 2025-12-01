@@ -221,7 +221,7 @@ const Settings = () => {
         <div className="wkst-settings-content">
           {/* Profile Section */}
           {activeSection === 'profile' && (
-            <ProfileSection user={user} />
+            <ProfileSection user={user} onProfileUpdated={fetchUserData} />
           )}
 
           {/* Availability Section */}

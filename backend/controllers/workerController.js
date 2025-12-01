@@ -750,9 +750,36 @@ const submitMilestone = async (req, res) => {
     // Check if milestone with this percentage already exists
     const existingMilestone = project.milestones.find(m => m.percentage === milestonePercentage);
     if (existingMilestone) {
-      return res.status(400).json({ 
-        error: `A milestone for ${milestonePercentage}% already exists. Each percentage can only be submitted once.` 
-      });
+      // Allow resubmission only if status is "Revision Requested" or "Rejected"
+      if (existingMilestone.status === 'Revision Requested' || existingMilestone.status === 'Rejected') {
+        // Update the existing milestone
+        existingMilestone.description = description;
+        existingMilestone.status = 'Pending';
+        existingMilestone.submittedAt = new Date();
+        
+        // Update image if new one is uploaded
+        if (req.file) {
+          existingMilestone.image = req.file.path;
+        }
+        
+        // Clear previous rejection/revision data
+        existingMilestone.rejectedAt = undefined;
+        existingMilestone.rejectionReason = undefined;
+        existingMilestone.revisionRequestedAt = undefined;
+        existingMilestone.revisionNotes = undefined;
+        
+        await project.save();
+        
+        return res.status(200).json({ 
+          success: true, 
+          message: 'Milestone resubmitted successfully!',
+          milestone: existingMilestone
+        });
+      } else {
+        return res.status(400).json({ 
+          error: `A milestone for ${milestonePercentage}% already exists with status "${existingMilestone.status}". You can only resubmit rejected or revision-requested milestones.` 
+        });
+      }
     }
 
     // Create new milestone object
@@ -765,7 +792,7 @@ const submitMilestone = async (req, res) => {
 
     // Add image if uploaded
     if (req.file) {
-      newMilestone.image = req.file.path; // Cloudinary URL
+      newMilestone.image = req.file.path;
     }
 
     // Add milestone to project
