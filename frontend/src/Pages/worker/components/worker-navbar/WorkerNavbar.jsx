@@ -28,9 +28,25 @@ const WorkerNavbar = ({ user }) => {
     }
   }, [location]);
 
-  const handleLogout = () => {
-    localStorage.removeItem('user'); // Clear localStorage
-    navigate('/'); // Or window.location.href = '/logout' for server-side
+  const handleLogout = async () => {
+    try {
+      // Call backend logout to clear session/cookies
+      await fetch('/api/logout', {
+        method: 'GET',
+        credentials: 'include'
+      });
+      
+      // Clear localStorage
+      localStorage.removeItem('user');
+      
+      // Redirect to home page
+      window.location.href = '/';
+    } catch (error) {
+      console.error('Logout error:', error);
+      // Even if backend fails, clear local storage and redirect
+      localStorage.removeItem('user');
+      window.location.href = '/';
+    }
     setIsDropdownOpen(false);
   };
 
