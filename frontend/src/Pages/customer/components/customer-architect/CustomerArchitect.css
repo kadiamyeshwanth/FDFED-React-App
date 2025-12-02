@@ -1,8 +1,8 @@
-/* src/Pages/customer/components/customer-architect/CustomerArchitect.css */
+/* src/Pages/customer/components/customer-architect/CustomerArchitect.css - FLAT COLOR THEME */
 :root {
     --primary: #2c3e50;
-    --secondary: #d4af37;
-    --accent: #3498db;
+    --secondary: #d4af37; /* Gold/Yellow, kept as main secondary color */
+    --accent: #FF8C00; /* Vibrant Orange for pop/highlights */
     --light: #f8f9fa;
     --dark: #2c3e50;
     --gray: #6c757d;
@@ -166,7 +166,7 @@ body {
 }
 
 .ca-architect-card.ca-active {
-    background-color: rgba(212, 175, 55, 0.05);
+    background-color: rgba(212, 175, 55, 0.05); /* Gold tint */
     border-color: var(--secondary);
 }
 
@@ -280,7 +280,7 @@ body {
 }
 
 .ca-specialty {
-    background-color: rgba(212, 175, 55, 0.1);
+    background-color: rgba(212, 175, 55, 0.1); /* Gold tint */
     color: var(--secondary);
     padding: 5px 15px;
     border-radius: 20px;
@@ -388,7 +388,7 @@ body {
 }
 
 .ca-book-now-btn:hover {
-    background-color: #c99a1c;
+    background-color: #c99a1c; /* Slightly darker gold/secondary */
     transform: translateY(-3px);
     box-shadow: 0 6px 12px rgba(212, 175, 55, 0.25);
 }
@@ -400,7 +400,8 @@ body {
 .ca-company-info {
     margin-bottom: 30px;
     padding: 25px;
-    background: linear-gradient(135deg, rgba(212, 175, 55, 0.05) 0%, rgba(52, 152, 219, 0.05) 100%);
+    /* Removed gradient, using a solid light orange background */
+    background: #fff8e1;
     border-radius: 12px;
     border-left: 4px solid var(--secondary);
 }
@@ -428,6 +429,16 @@ body {
     position: relative;
 }
 
+.ca-company-info ul li::before {
+    content: '\f058'; /* Font Awesome check circle */
+    font-family: "Font Awesome 6 Free";
+    font-weight: 900;
+    position: absolute;
+    left: 0;
+    top: 0;
+    color: var(--secondary);
+}
+
 .ca-no-architects {
     text-align: center;
     color: var(--gray);
@@ -437,4 +448,453 @@ body {
 .ca-initial-message {
     opacity: 1;
     transition: opacity 0.5s ease;
+}
+
+/* Worker Badges and Contact Info */
+.ca-worker-badges {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-top: 12px;
+}
+
+.ca-availability-badge {
+    padding: 6px 14px;
+    border-radius: 20px;
+    font-size: 13px;
+    font-weight: 500;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.ca-availability-badge.ca-available {
+    background: #d4edda;
+    color: #155724;
+}
+
+.ca-availability-badge.ca-available i {
+    color: #28a745;
+}
+
+.ca-availability-badge.ca-busy {
+    background: #fff3cd;
+    color: #856404;
+}
+
+.ca-availability-badge.ca-busy i {
+    color: #ffc107;
+}
+
+.ca-availability-badge.ca-unavailable {
+    background: #f8d7da;
+    color: #721c24;
+}
+
+.ca-availability-badge.ca-unavailable i {
+    color: #dc3545;
+}
+
+.ca-contact-badge {
+    padding: 6px 12px;
+    background: #f0f2f5;
+    border-radius: 6px;
+    font-size: 13px;
+    color: #555;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.ca-contact-badge i {
+    color: var(--accent); /* Orange accent */
+}
+
+/* Skills Section */
+.ca-skills-section {
+    margin-top: 25px;
+    padding: 20px;
+    background: #f8f9fa;
+    border-radius: 10px;
+}
+
+.ca-skills-section h3 {
+    color: var(--primary);
+    margin-bottom: 15px;
+    font-size: 1.3rem;
+}
+
+.ca-skills-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 12px;
+}
+
+.ca-skill-badge {
+    padding: 10px 16px;
+    background: white;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    font-size: 14px;
+    color: #333;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: var(--transition);
+}
+
+.ca-skill-badge:hover {
+    border-color: var(--accent); /* Orange accent */
+    box-shadow: 0 2px 8px rgba(255, 140, 0, 0.15);
+}
+
+.ca-skill-badge i {
+    color: #28a745;
+    font-size: 14px;
+}
+
+/* Certifications Section */
+.ca-certifications-section {
+    margin-top: 25px;
+    padding: 20px;
+    background: #fff9e6;
+    border-radius: 10px;
+    border-left: 4px solid var(--secondary);
+}
+
+.ca-certifications-section h3 {
+    color: var(--primary);
+    margin-bottom: 15px;
+    font-size: 1.3rem;
+}
+
+.ca-certifications-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.ca-certification-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px;
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+}
+
+.ca-certification-item i {
+    color: var(--secondary);
+    font-size: 18px;
+}
+
+.ca-certification-item span {
+    font-size: 14px;
+    color: #333;
+    font-weight: 500;
+}
+
+/* Specialties Section */
+.ca-specialties-section {
+    margin-top: 25px;
+}
+
+.ca-specialties-section h3 {
+    color: var(--primary);
+    margin-bottom: 15px;
+    font-size: 1.3rem;
+}
+
+.ca-specialties {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.ca-specialty {
+    /* Removed gradient, using solid orange/secondary color */
+    background: var(--accent);
+    color: white;
+    padding: 8px 16px;
+    border-radius: 20px;
+    font-size: 13px;
+    font-weight: 500;
+}
+
+/* Reviews Section */
+.ca-reviews-section {
+    margin-top: 30px;
+    padding: 25px;
+    background: white;
+    border-radius: 10px;
+    box-shadow: var(--shadow);
+}
+
+.ca-reviews-section h3 {
+    color: var(--primary);
+    margin-bottom: 20px;
+    font-size: 1.4rem;
+}
+
+.ca-reviews-list {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.ca-review-card {
+    padding: 20px;
+    background: #f8f9fa;
+    border-radius: 10px;
+    border-left: 4px solid var(--accent); /* Orange accent */
+    transition: var(--transition);
+}
+
+.ca-review-card:hover {
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    transform: translateX(5px);
+}
+
+.ca-review-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+}
+
+.ca-review-author {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: var(--primary);
+    font-size: 15px;
+}
+
+.ca-review-author i {
+    font-size: 24px;
+    color: var(--accent); /* Orange accent */
+}
+
+.ca-review-rating {
+    display: flex;
+    gap: 3px;
+}
+
+.ca-review-rating .ca-star {
+    color: #ffc107;
+    font-size: 16px;
+}
+
+.ca-review-project {
+    font-size: 13px;
+    color: #666;
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.ca-review-project i {
+    color: var(--secondary);
+}
+
+.ca-review-comment {
+    font-size: 14px;
+    color: #333;
+    font-style: italic;
+    line-height: 1.6;
+    margin: 10px 0;
+    padding: 12px;
+    background: white;
+    border-radius: 8px;
+}
+
+.ca-review-date {
+    font-size: 12px;
+    color: #999;
+    margin-top: 8px;
+}
+
+/* Languages Section */
+.ca-languages-section {
+    margin-top: 25px;
+    padding: 20px;
+    background: #fff8e1; /* Light gold/yellow tint */
+    border-radius: 10px;
+}
+
+.ca-languages-section h3 {
+    color: var(--primary);
+    margin-bottom: 15px;
+    font-size: 1.3rem;
+}
+
+.ca-languages-section p {
+    color: #333;
+    font-size: 15px;
+    line-height: 1.6;
+}
+
+/* Price Section */
+.ca-price-section {
+    margin-top: 25px;
+    padding: 20px;
+    /* Removed gradient, using a solid light background color */
+    background: #fff3cd; 
+    border-radius: 10px;
+}
+
+.ca-price-section h3 {
+    color: var(--primary);
+    margin-bottom: 15px;
+    font-size: 1.3rem;
+}
+
+.ca-price-tag {
+    font-size: 1.4rem;
+    font-weight: 700;
+    color: var(--accent); /* Orange accent */
+    padding: 15px 20px;
+    background: white;
+    border-radius: 10px;
+    display: inline-block;
+    box-shadow: 0 3px 10px rgba(255, 140, 0, 0.2);
+}
+
+.ca-price-tag i {
+    margin-right: 8px;
+}
+
+/* Work Experience Section */
+.ca-experience-section {
+    margin-top: 30px;
+    padding: 25px;
+    background: white;
+    border-radius: 10px;
+    box-shadow: var(--shadow);
+}
+
+.ca-experience-section h3 {
+    color: var(--primary);
+    margin-bottom: 20px;
+    font-size: 1.4rem;
+}
+
+.ca-company-card {
+    background: #ffffff;
+    border: 1px solid #e0e0e0;
+    border-radius: 10px;
+    padding: 20px;
+    margin-bottom: 20px;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.ca-company-card:hover {
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    transform: translateY(-3px);
+}
+
+.ca-company-card h4 {
+    color: var(--accent); /* Orange accent */
+    font-size: 1.2rem;
+    margin-bottom: 12px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.ca-company-card h4 i {
+    color: var(--secondary); /* Gold/secondary color */
+    font-size: 1.1rem;
+}
+
+.ca-company-card p {
+    margin-bottom: 8px;
+    color: #555;
+    line-height: 1.6;
+}
+
+.ca-company-card p strong {
+    color: #333;
+    margin-right: 5px;
+}
+
+.ca-company-proofs {
+    margin-top: 15px;
+    padding-top: 15px;
+    border-top: 1px solid #e0e0e0;
+}
+
+.ca-company-proofs strong {
+    color: #333;
+    font-size: 14px;
+    display: block;
+    margin-bottom: 10px;
+}
+
+.ca-proof-gallery {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+    gap: 12px;
+    margin-top: 10px;
+}
+
+.ca-proof-image {
+    width: 100%;
+    height: 100px;
+    object-fit: cover;
+    border-radius: 8px;
+    border: 2px solid #e0e0e0;
+    transition: all 0.3s ease;
+    cursor: pointer;
+}
+
+.ca-proof-image:hover {
+    transform: scale(1.05);
+    border-color: var(--accent); /* Orange accent */
+    box-shadow: 0 4px 12px rgba(255, 140, 0, 0.3);
+}
+
+/* Project Gallery */
+.ca-project-gallery {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 15px;
+    margin-top: 15px;
+}
+
+.ca-project-gallery .ca-project-image {
+    height: 200px;
+    margin-top: 0;
+}
+
+.ca-project-document {
+    margin-top: 15px;
+    padding: 15px;
+    /* Removed gradient, using a solid light orange/yellow tint */
+    background: #fff3e0;
+    border-radius: 10px;
+    text-align: center;
+}
+
+.ca-project-document a {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    color: var(--accent); /* Orange accent */
+    text-decoration: none;
+    font-weight: 600;
+    font-size: 15px;
+    transition: all 0.3s ease;
+}
+
+.ca-project-document a:hover {
+    color: var(--secondary); /* Gold/secondary color */
+    transform: translateX(5px);
+}
+
+.ca-project-document a i {
+    font-size: 1.3rem;
 }

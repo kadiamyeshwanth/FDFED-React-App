@@ -33,6 +33,22 @@ const CompanyDashboard = () => {
 
         const backendData = await res.json();
 
+        const calculateDaysRemaining = (startDate, timeline) => {
+          try {
+            const totalMonths = parseInt(timeline, 10);
+            if (isNaN(totalMonths) || totalMonths <= 0) return 0;
+            const start = new Date(startDate);
+            const now = new Date();
+            const end = new Date(start);
+            end.setMonth(end.getMonth() + totalMonths);
+            if (now >= end) return 0;
+            const diffTime = end.getTime() - now.getTime();
+            return Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+          } catch {
+            return 0;
+          }
+        };
+
         const calculateProgress = (startDate, timeline) => {
           try {
             const totalMonths = parseInt(timeline, 10);
@@ -46,22 +62,6 @@ const CompanyDashboard = () => {
             const totalDuration = end.getTime() - start.getTime();
             const elapsedDuration = now.getTime() - start.getTime();
             return Math.floor((elapsedDuration / totalDuration) * 100);
-          } catch {
-            return 0;
-          }
-        };
-
-        const calculateDaysRemaining = (startDate, timeline) => {
-          try {
-            const totalMonths = parseInt(timeline, 10);
-            if (isNaN(totalMonths) || totalMonths <= 0) return 0;
-            const start = new Date(startDate);
-            const now = new Date();
-            const end = new Date(start);
-            end.setMonth(end.getMonth() + totalMonths);
-            if (now >= end) return 0;
-            const diffTime = end.getTime() - now.getTime();
-            return Math.ceil(diffTime / (1000 * 60 * 60 * 24));
           } catch {
             return 0;
           }
@@ -81,21 +81,24 @@ const CompanyDashboard = () => {
     fetchData();
   }, []);
 
-  const openModal = (bid) => {
-    setSelectedBid(bid);
-    setShowModal(true);
-  };
 
   const closeModal = () => {
     setShowModal(false);
     setSelectedBid(null);
   };
 
+  const openModal = (bid) => {
+    setSelectedBid(bid);
+    setShowModal(true);
+  };
+
   const handleAcceptBid = async () => {
     if (!selectedBid) return;
-    
+
     const proposedPrice = prompt(
-      `Enter your proposed price (must be ≤ ₹${selectedBid.estimatedBudget?.toLocaleString("en-IN") || "N/A"}):`,
+      `Enter your proposed price (must be ≤ ₹${
+        selectedBid.estimatedBudget?.toLocaleString("en-IN") || "N/A"
+      }):`,
       ""
     );
 
@@ -111,7 +114,11 @@ const CompanyDashboard = () => {
 
     if (selectedBid.estimatedBudget && price > selectedBid.estimatedBudget) {
       alert(
-        `Price (₹${price.toLocaleString("en-IN")}) exceeds the budget (₹${selectedBid.estimatedBudget.toLocaleString("en-IN")}). Please enter a lower price.`
+        `Price (₹${price.toLocaleString(
+          "en-IN"
+        )}) exceeds the budget (₹${selectedBid.estimatedBudget.toLocaleString(
+          "en-IN"
+        )}). Please enter a lower price.`
       );
       return;
     }
@@ -166,19 +173,35 @@ const CompanyDashboard = () => {
   if (loading) return <div className="cdb-loading">Loading Dashboard...</div>;
   if (error) return <div className="cdb-error">Error: {error}</div>;
 
-  const { activeProjects, completedProjects, revenue, bids, projects, calculateProgress, calculateDaysRemaining } = data;
+  const {
+    activeProjects,
+    completedProjects,
+    revenue,
+    bids,
+    projects,
+    calculateProgress,
+    calculateDaysRemaining,
+  } = data;
 
-  const pendingProjects = projects.filter(p => p.status === "pending");
-  const acceptedProjects = projects.filter(p => p.status === "accepted");
+  const pendingProjects = projects.filter((p) => p.status === "pending");
+  const acceptedProjects = projects.filter((p) => p.status === "accepted");
 
   return (
     <>
       <div className="cdb-main-container">
         <h1 className="cdb-page-title">Revenue Management</h1>
-        <DashboardStats active={activeProjects} completed={completedProjects} revenue={revenue} />
+        <DashboardStats
+          active={activeProjects}
+          completed={completedProjects}
+          revenue={revenue}
+        />
         <BidsList bids={bids} onOpen={openModal} />
         <ProjectsList projects={pendingProjects} />
-        <TimelineProjects projects={acceptedProjects} calcProgress={calculateProgress} calcDays={calculateDaysRemaining} />
+        <TimelineProjects
+          projects={acceptedProjects}
+          calcProgress={calculateProgress}
+          calcDays={calculateDaysRemaining}
+        />
       </div>
       <BidReviewModal
         open={showModal}
