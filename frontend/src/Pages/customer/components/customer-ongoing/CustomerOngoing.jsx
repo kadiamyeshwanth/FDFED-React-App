@@ -459,7 +459,7 @@ const CustomerOngoing = () => {
                                 {project.completionImages.map((img, idx) => (
                                   <img
                                     key={idx}
-                                    src={`http://localhost:3000/${img}`}
+                                    src={img}
                                     alt={`Completion ${idx + 1}`}
                                     style={{
                                       width: "100%",
