@@ -1,10 +1,12 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import './MyCompany.css';
 import EmptyState from './sub-components/EmptyState';
 import CompanyInfoCard from './sub-components/CompanyInfoCard';
 import ProjectsSection from './sub-components/ProjectsSection';
 
 const MyCompany = () => {
+  const navigate = useNavigate();
   const [user, setUser] = useState(null);
   const [company, setCompany] = useState(null);
   const [projects, setProjects] = useState([]);
@@ -69,8 +71,7 @@ const MyCompany = () => {
 
   const handleOpenChat = () => {
     if (chatId) {
-      // Navigate to chat page with chatId
-      window.location.href = `/chat?room=${chatId}`;
+      navigate(`/workerdashboard/chat/${chatId}`);
     }
   };
 

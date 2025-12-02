@@ -13,6 +13,7 @@ import CustomerOngoing from "./components/customer-ongoing/CustomerOngoing";
 import CustomerBidspace from "./components/customer-bidspace/CustomerBidspace";
 import CustomerJobStatus from "./components/customer-jobstatus/CustomerJobStatus";
 import CustomerSettings from "./components/customer-settings/CustomerSettings";
+import Chat from "../../components/Chat/Chat";
 
 import ArchitectForm from "./components/Forms/ArchitectForm";
 import InteriorDesignForm from "./components/Forms/InteriorDesignForm";
@@ -101,6 +102,7 @@ const Customer = () => {
                     <ConstructionForm />
                 }
               />
+              <Route path="chat/:roomId" element={<Chat userRole="customer" />} />
               <Route path="*" element={<CustomerHome />} />
             </Routes>
           }

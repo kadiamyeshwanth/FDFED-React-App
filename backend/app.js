@@ -60,25 +60,31 @@ io.on("connection", (socket) => {
     }
   });
 
-  socket.on("chatMessage", async ({ roomId, sender, senderModel, message }) => {
+  socket.on("chatMessage", async ({ roomId, senderId, senderModel, message }) => {
     try {
       const chatRoom = await ChatRoom.findOne({ roomId });
       if (chatRoom) {
         const newMessage = {
-          sender,
+          sender: senderId,
           senderModel,
           message,
-          createdAt: new Date(),
+          timestamp: new Date(),
         };
         chatRoom.messages.push(newMessage);
         await chatRoom.save();
-        socket
-          .to(roomId)
-          .emit("message", {
-            sender,
-            message,
-            createdAt: newMessage.createdAt,
-          });
+        
+        // Emit to both sender and receiver
+        const messageData = {
+          sender: senderId,
+          senderModel,
+          message,
+          timestamp: newMessage.timestamp,
+        };
+        
+        // Send to room (others)
+        socket.to(roomId).emit("message", messageData);
+        // Send back to sender so they see their own message
+        socket.emit("message", messageData);
       }
     } catch (error) {
       console.error("Error saving message:", error);
