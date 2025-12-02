@@ -519,14 +519,7 @@ const CustomerJobStatus = () => {
       <div key={app._id} className="cjs-application cjs-architect-app">
         <div className="cjs-status-container">
           <div className="cjs-status cjs-architect-status">{app.status}</div>
-          {app.status?.toLowerCase() === "accepted" && app.chatId && (
-            <Link
-              to={`/customerdashboard/chat/${app.chatId}`}
-              className="cjs-chat-button cjs-architect-chat"
-            >
-              Chat
-            </Link>
-          )}
+
         </div>
         <h3>
           <span className="cjs-project-name">{app.projectName}</span>
@@ -678,14 +671,7 @@ const CustomerJobStatus = () => {
       <div key={app._id} className="cjs-application cjs-interior-app">
         <div className="cjs-status-container">
           <div className="cjs-status cjs-interior-status">{app.status}</div>
-          {app.status?.toLowerCase() === "accepted" && app.chatId && (
-            <Link
-              to={`/customerdashboard/chat/${app.chatId}`}
-              className="cjs-chat-button cjs-interior-chat"
-            >
-              Chat
-            </Link>
-          )}
+
         </div>
         <h3 className="cjs-project-name">{app.projectName}</h3>
         <p>
@@ -773,11 +759,7 @@ const CustomerJobStatus = () => {
     <div key={app._id} className="cjs-application cjs-company-app">
       <div className="cjs-status-container">
         <div className="cjs-status cjs-company-status">{app.status}</div>
-        {app.status?.toLowerCase() === "accepted" && app.chatId && (
-          <Link to={`/customerdashboard/chat/${app.chatId}`} className="cjs-chat-button cjs-company-chat">
-            Chat
-          </Link>
-        )}
+
       </div>
       
       <h3>
