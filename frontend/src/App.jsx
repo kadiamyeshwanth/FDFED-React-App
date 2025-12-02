@@ -5,6 +5,7 @@ import Customer from "./Pages/customer/Customer";
 import Company from "./Pages/company/Company";
 import Worker from "./Pages/worker/Worker";
 import ProtectedRoute from "./components/ProtectedRoute";
+import AdminProtectedRoute from "./components/AdminProtectedRoute";
 import AdminLogin from "./Pages/admin/AdminLogin";
 import AdminDashboard from "./Pages/admin/AdminDashboard/AdminDashboard";
 import Admin from "./Pages/admin/Admin";
@@ -16,8 +17,15 @@ const App = () => {
     <Routes>
       <Route path="/" element={<LoginSignUp />} />
       <Route path="/admin-login" element={<AdminLogin />} />
-      {/* Admin Login Page */}
-      <Route path="/admin/*" element={<Admin />} />
+      {/* Admin Routes - Protected */}
+      <Route 
+        path="/admin/*" 
+        element={
+          <AdminProtectedRoute>
+            <Admin />
+          </AdminProtectedRoute>
+        } 
+      />
 
       <Route
         path="/customerdashboard/*"

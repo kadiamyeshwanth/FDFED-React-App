@@ -24,34 +24,51 @@ const {
   verifyWorker,
   rejectWorker
 } = require('../controllers/adminController');
-// Verify/Reject company/worker
-router.patch('/admin/verify-company/:id', verifyCompany);
-router.patch('/admin/reject-company/:id', rejectCompany);
-router.patch('/admin/verify-worker/:id', verifyWorker);
-router.patch('/admin/reject-worker/:id', rejectWorker);
+
 const authadmin = require('../middlewares/authadmin');
 
+// Admin login route (returns JWT token)
+router.post('/admin/login', authadmin); // POST with { email, password, passKey }
+
+// Admin session verification route
+router.get('/admin/verify-session', authadmin, (req, res) => {
+  // If middleware passes, admin is authenticated
+  res.json({ authenticated: true, role: 'admin' });
+});
+
+// Admin logout route
+router.post('/admin/logout', (req, res) => {
+  res.clearCookie('admin_token', { path: '/' });
+  res.json({ message: 'Logged out successfully' });
+});
+
+// Protect all admin routes with authadmin middleware
+router.patch('/admin/verify-company/:id', authadmin, verifyCompany);
+router.patch('/admin/reject-company/:id', authadmin, rejectCompany);
+router.patch('/admin/verify-worker/:id', authadmin, verifyWorker);
+router.patch('/admin/reject-worker/:id', authadmin, rejectWorker);
+
 // Admin dashboard route (protected)
-router.get('/admindashboard', getAdminDashboard);
+router.get('/admindashboard', authadmin, getAdminDashboard);
 
 // Delete routes
-router.delete('/admin/delete-customer/:id', deleteCustomer);
-router.delete('/admin/delete-company/:id', deleteCompany);
-router.delete('/admin/delete-worker/:id', deleteWorker);
-router.delete('/admin/delete-architectHiring/:id', deleteArchitectHiring);
-router.delete('/admin/delete-constructionProject/:id', deleteConstructionProject);
-router.delete('/admin/delete-designRequest/:id', deleteDesignRequest);
-router.delete('/admin/delete-bid/:id', deleteBid);
-router.delete('/admin/delete-jobApplication/:id', deleteJobApplication);
+router.delete('/admin/delete-customer/:id', authadmin, deleteCustomer);
+router.delete('/admin/delete-company/:id', authadmin, deleteCompany);
+router.delete('/admin/delete-worker/:id', authadmin, deleteWorker);
+router.delete('/admin/delete-architectHiring/:id', authadmin, deleteArchitectHiring);
+router.delete('/admin/delete-constructionProject/:id', authadmin, deleteConstructionProject);
+router.delete('/admin/delete-designRequest/:id', authadmin, deleteDesignRequest);
+router.delete('/admin/delete-bid/:id', authadmin, deleteBid);
+router.delete('/admin/delete-jobApplication/:id', authadmin, deleteJobApplication);
 
 // Detail view routes
-router.get('/admin/customer/:id', getCustomerDetail);
-router.get('/admin/company/:id', getCompanyDetail);
-router.get('/admin/worker/:id', getWorkerDetail);
-router.get('/admin/architect-hiring/:id', getArchitectHiringDetail);
-router.get('/admin/construction-project/:id', getConstructionProjectDetail);
-router.get('/admin/design-request/:id', getDesignRequestDetail);
-router.get('/admin/bid/:id', getBidDetail);
-router.get('/admin/job-application/:id', getJobApplicationDetail);
+router.get('/admin/customer/:id', authadmin, getCustomerDetail);
+router.get('/admin/company/:id', authadmin, getCompanyDetail);
+router.get('/admin/worker/:id', authadmin, getWorkerDetail);
+router.get('/admin/architect-hiring/:id', authadmin, getArchitectHiringDetail);
+router.get('/admin/construction-project/:id', authadmin, getConstructionProjectDetail);
+router.get('/admin/design-request/:id', authadmin, getDesignRequestDetail);
+router.get('/admin/bid/:id', authadmin, getBidDetail);
+router.get('/admin/job-application/:id', authadmin, getJobApplicationDetail);
 
 module.exports = router;

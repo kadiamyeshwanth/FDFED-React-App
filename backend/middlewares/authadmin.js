@@ -1,26 +1,29 @@
 const jwt = require('jsonwebtoken');
-
-const ADMIN_CREDENTIALS = {
-  email: 'admin@example.com',
-  password: 'Admin123!',
-  passKey: 'secret123'
-};
+const { JWT_SECRET, ADMIN_EMAIL, ADMIN_PASSWORD, ADMIN_PASSKEY } = require('../config/constants');
 
 // Middleware to protect admin routes
 module.exports = function authAdmin(req, res, next) {
   try {
-    const { email, password, passKey } = req.body;
-
-    // Option 1: Check credentials in login route
-    if (req.path === '/admin/login') {
+    // Special handling for login route - verify credentials
+    if (req.path === '/admin/login' || req.url === '/admin/login') {
+      const { email, password, passKey } = req.body;
+      
       if (
-        email === ADMIN_CREDENTIALS.email &&
-        password === ADMIN_CREDENTIALS.password &&
-        passKey === ADMIN_CREDENTIALS.passKey
+        email === ADMIN_EMAIL &&
+        password === ADMIN_PASSWORD &&
+        passKey === ADMIN_PASSKEY
       ) {
-        // Generate a temporary token for admin
-        const token = jwt.sign({ role: 'admin' }, 'your_jwt_secret', {
+        // Generate JWT token for admin
+        const token = jwt.sign({ role: 'admin' }, JWT_SECRET, {
           expiresIn: '1h',
+        });
+        // Set httpOnly cookie for security
+        res.cookie('admin_token', token, {
+          httpOnly: true,
+          sameSite: 'lax',
+          secure: false, // Set to true in production with HTTPS
+          maxAge: 60 * 60 * 1000, // 1 hour
+          path: '/',
         });
         return res.json({ message: 'Admin authenticated', token });
       } else {
@@ -28,14 +31,23 @@ module.exports = function authAdmin(req, res, next) {
       }
     }
 
-    // Option 2: Verify token for other protected routes
-    const token = req.header('Authorization')?.replace('Bearer ', '');
-    if (!token) return res.status(401).json({ message: 'Access Denied: No token provided' });
+    // For all other routes - verify token
+    // Accept token from Authorization header or cookie `admin_token`
+    const headerToken = req.header('Authorization')?.replace('Bearer ', '');
+    const cookieToken = req.cookies?.admin_token;
+    const token = headerToken || cookieToken;
+    
+    if (!token) {
+      return res.status(401).json({ message: 'Access Denied: No token provided' });
+    }
 
-    const verified = jwt.verify(token, 'your_jwt_secret');
-    if (verified.role !== 'admin')
+    const verified = jwt.verify(token, JWT_SECRET);
+    if (verified.role !== 'admin') {
       return res.status(403).json({ message: 'Forbidden: Not an admin' });
+    }
 
+    // Token is valid, proceed to next middleware/route
+    req.admin = verified;
     next();
   } catch (err) {
     return res.status(401).json({ message: 'Invalid or expired token' });

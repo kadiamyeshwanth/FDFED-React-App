@@ -31,7 +31,9 @@ const AdminDashboard = () => {
   const fetchDashboard = async () => {
     setLoading(true);
     try {
-      const res = await fetch(`/api/admindashboard`);
+      const res = await fetch(`/api/admindashboard`, {
+        credentials: 'include',
+      });
       if (!res.ok) throw new Error(`Server ${res.status}`);
       const json = await res.json();
       // controller returns { counts, stats, data }
@@ -40,7 +42,9 @@ const AdminDashboard = () => {
       
       // Fetch unviewed complaints count
       try {
-        const complaintsRes = await fetch(`/api/complaints/unviewed/count`);
+        const complaintsRes = await fetch(`/api/complaints/unviewed/count`, {
+          credentials: 'include',
+        });
         const complaintsData = await complaintsRes.json();
         if (complaintsData.success) {
           const complaintsMap = {};
@@ -71,6 +75,7 @@ const AdminDashboard = () => {
       const res = await fetch(`/api/admin/delete-${type}/${id}`, {
         method: "DELETE",
         headers: { "Content-Type": "application/json" },
+        credentials: 'include',
       });
       const json = await res.json();
       if (!res.ok) throw new Error(json.error || "Delete failed");
@@ -146,6 +151,19 @@ const AdminDashboard = () => {
     }
   };
 
+  const handleLogout = async () => {
+    try {
+      await fetch('/api/admin/logout', {
+        method: 'POST',
+        credentials: 'include',
+      });
+      navigate('/admin-login');
+    } catch (err) {
+      console.error('Logout error:', err);
+      navigate('/admin-login');
+    }
+  };
+
   return (
     <div className="dashboard-container">
       <header className="header">
@@ -153,6 +171,9 @@ const AdminDashboard = () => {
         <div className="header-actions">
           <button className="btn btn-primary" onClick={fetchDashboard}>
             🔄 Refresh Data
+          </button>
+          <button className="btn btn-secondary" onClick={handleLogout}>
+            🚪 Logout
           </button>
         </div>
       </header>

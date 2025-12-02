@@ -5,4 +5,8 @@ module.exports = {
   CLOUDINARY_CLOUD_NAME: 'dogvhnsje',
   CLOUDINARY_API_KEY: '495815872232324',
   CLOUDINARY_API_SECRET: 'oyzoTbfldFzYqkByasUqrbxbinE',
+  // Admin login credentials
+  ADMIN_EMAIL: 'admin@example.com',
+  ADMIN_PASSWORD: 'Admin123!',
+  ADMIN_PASSKEY: 'secret123',
 };

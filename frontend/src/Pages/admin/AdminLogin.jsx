@@ -1,5 +1,5 @@
 // src/Pages/admin/AdminLogin.jsx
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import "./AdminLogin.css";
 import { useNavigate } from "react-router-dom";
 
@@ -10,23 +10,41 @@ const AdminLogin = () => {
   const [passKey, setPassKey] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [showPassKey, setShowPassKey] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [errors, setErrors] = useState({
     email: false,
     password: false,
     passKey: false,
   });
 
-  const ADMIN_CREDENTIALS = {
-    email: "admin@example.com",
-    password: "Admin123!",
-    passKey: "secret123",
-  };
+  // Check if admin is already logged in
+  useEffect(() => {
+    const checkAuth = async () => {
+      try {
+        const res = await fetch("/api/admin/verify-session", { 
+          credentials: "include" 
+        });
+        const data = await res.json();
+        
+        if (res.ok && data.authenticated && data.role === 'admin') {
+          // Already logged in, redirect to dashboard
+          navigate("/admin/admindashboard", { replace: true });
+        } else {
+          setLoading(false);
+        }
+      } catch (error) {
+        // Not logged in, show login form
+        setLoading(false);
+      }
+    };
+    checkAuth();
+  }, [navigate]);
 
   const validateEmail = (email) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
   const validatePassword = (pwd) => pwd.length >= 8;
   const validatePassKey = (key) => key.trim() !== "";
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
     const emailValid = validateEmail(email);
@@ -41,15 +59,26 @@ const AdminLogin = () => {
 
     if (!emailValid || !passwordValid || !passKeyValid) return;
 
-    if (
-      email === ADMIN_CREDENTIALS.email &&
-      password === ADMIN_CREDENTIALS.password &&
-      passKey === ADMIN_CREDENTIALS.passKey
-    ) {
-      // Replace with your actual route
-      navigate("/admin/admindashboard")
-    } else {
-      alert("Invalid admin credentials");
+    try {
+      const response = await fetch('/api/admin/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({ email, password, passKey }),
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        // Token is automatically stored in cookie by backend
+        // Navigate to admin dashboard
+        navigate("/admin/admindashboard");
+      } else {
+        alert(data.message || "Invalid admin credentials");
+      }
+    } catch (error) {
+      console.error("Login error:", error);
+      alert("Login failed. Please try again.");
     }
   };
 
@@ -61,6 +90,21 @@ const AdminLogin = () => {
       alert("Please enter a valid email address first.");
     }
   };
+
+  // Show loading state while checking authentication
+  if (loading) {
+    return (
+      <div style={{ 
+        display: 'flex', 
+        justifyContent: 'center', 
+        alignItems: 'center', 
+        height: '100vh',
+        fontSize: '18px'
+      }}>
+        Loading...
+      </div>
+    );
+  }
 
   return (
     <div className="admin-login-body">
