@@ -629,3 +629,37 @@ body {
     max-width: 90%;
   }
 }
+
+/* --- ADDITIONAL COMPONENTS --- */
+/* PROPOSAL SENT STATUS */
+.requests-proposal-sent-status {
+  color: red;
+  font-weight: 600;
+}
+
+/* BUDGET HIGHLIGHT */
+.requests-budget-highlight {
+  color: #A06700;
+}
+
+/* FLOOR HEADER */
+.requests-floor-header {
+  grid-column: 1 / -1;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.5rem;
+  padding-bottom: 0;
+  color: #004D7A;
+  font-weight: 700;
+}
+
+/* NO FLOOR PLANS */
+.requests-no-floor-plans {
+  color: #6C757D;
+}
+
+/* CARD ACTIONS BOTTOM */
+.requests-card-actions-bottom {
+  margin-top: 1rem;
+}

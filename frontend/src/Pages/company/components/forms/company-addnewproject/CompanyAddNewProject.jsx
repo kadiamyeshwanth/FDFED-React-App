@@ -1,6 +1,18 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import "./CompanyAddNewProject.css";
+import RevisionAlert from './components/RevisionAlert';
+import ValidationSummary from './components/ValidationSummary';
+import ProgressHeader from './components/ProgressHeader';
+import MilestoneInput from './components/MilestoneInput';
+import MilestoneMessageBox from './components/MilestoneMessageBox';
+import CheckpointsOverview from './components/CheckpointsOverview';
+import TargetCompletionDateInput from './components/TargetCompletionDateInput';
+import CurrentPhaseSelect from './components/CurrentPhaseSelect';
+import FileUploadGroup from './components/FileUploadGroup';
+import CompletionImagesUpload from './components/CompletionImagesUpload';
+import RecentUpdates from './components/RecentUpdates';
+import FormButtons from './components/FormButtons';
 
 const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
 const allowedTypes = ["application/pdf", "image/jpeg", "image/jpg", "image/png"];
@@ -221,93 +233,14 @@ const CompanyAddNewProject = () => {
 
   return (
     <div className="container">
-      <h1>{projectId ? "Edit Construction Project" : "Add New Project"}</h1>
+
+      <ProgressHeader projectId={projectId} />
 
       {revisionMode && customerFeedback && (
-        <div style={{
-          backgroundColor: "#fff3cd",
-          border: "2px solid #ffc107",
-          borderRadius: "8px",
-          padding: "20px",
-          marginBottom: "20px"
-        }}>
-          <h3 style={{ marginTop: 0, color: "#856404" }}>⚠ Customer Revision Request</h3>
-          
-          {/* Show conversation history if available */}
-          {conversationHistory && conversationHistory.length > 0 && (
-            <div style={{
-              backgroundColor: "#f8f9fa",
-              padding: "15px",
-              borderRadius: "6px",
-              marginBottom: "15px",
-              border: "1px solid #dee2e6"
-            }}>
-              <strong style={{ display: "block", marginBottom: "12px", color: "#555" }}>
-                💬 Conversation History ({conversationHistory.length} {conversationHistory.length === 1 ? 'message' : 'messages'})
-              </strong>
-              <div style={{ maxHeight: "250px", overflowY: "auto" }}>
-                {conversationHistory.map((msg, idx) => (
-                  <div key={idx} style={{
-                    backgroundColor: msg.sender === 'company' ? "#e3f2fd" : "#fff3e0",
-                    padding: "10px",
-                    borderRadius: "8px",
-                    marginBottom: "8px",
-                    borderLeft: `4px solid ${msg.sender === 'company' ? "#2196f3" : "#ff9800"}`
-                  }}>
-                    <div style={{ 
-                      display: "flex", 
-                      justifyContent: "space-between", 
-                      marginBottom: "6px",
-                      fontSize: "0.85em",
-                      color: "#666"
-                    }}>
-                      <strong style={{ color: msg.sender === 'company' ? "#1976d2" : "#f57c00" }}>
-                        {msg.sender === 'company' ? '🏢 Your Company' : '👤 Customer'}
-                      </strong>
-                      <span>
-                        {new Date(msg.timestamp).toLocaleString("en-IN", {
-                          day: "numeric",
-                          month: "short",
-                          hour: "2-digit",
-                          minute: "2-digit"
-                        })}
-                      </span>
-                    </div>
-                    <p style={{ margin: 0, lineHeight: "1.5", color: "#333" }}>{msg.message}</p>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-          
-          <p style={{ marginBottom: "10px" }}>
-            <strong>Latest Customer Feedback:</strong>
-          </p>
-          <p style={{ 
-            backgroundColor: "white", 
-            padding: "15px", 
-            borderRadius: "6px",
-            marginBottom: "10px",
-            lineHeight: "1.6"
-          }}>
-            {customerFeedback}
-          </p>
-          <p style={{ margin: 0, color: "#666", fontSize: "0.95em" }}>
-            Please update your message below to address the customer's concerns. Your response will be added to the conversation history.
-          </p>
-        </div>
+        <RevisionAlert customerFeedback={customerFeedback} conversationHistory={conversationHistory} />
       )}
 
-      {errors.length > 0 && (
-        <div className="validation-summary" style={{ display: "block" }}>
-          <p>Please correct the following errors:</p>
-          <ul>
-            {errors.map((err, i) => (
-              <li key={i}>{err}</li>
-            ))}
-          </ul>
-        </div>
-      )}
+      {errors.length > 0 && <ValidationSummary errors={errors} />}
 
       <form id="constructionProjectForm" onSubmit={handleSubmit} encType="multipart/form-data">
         <input type="hidden" name="projectId" value={projectId || ""} />
@@ -320,184 +253,54 @@ const CompanyAddNewProject = () => {
               <span className="milestone-info">
                 Next Checkpoint: {nextCheckpoint}%
                 {existingMilestones.find(m => m.percentage === nextCheckpoint && m.isCheckpoint && !m.isApprovedByCustomer)
-                  ? " ⏳ Awaiting Customer Approval" 
+                  ? " ⏳ Awaiting Customer Approval"
                   : " (Available)"}
               </span>
             )}
           </div>
         </div>
 
-        <div className="form-group">
-          <label htmlFor="milestoneSelection">Update Project Progress (%)</label>
-          <input
-            type="number"
-            id="milestoneSelection" 
-            value={selectedMilestone} 
-            onChange={(e) => handleMilestoneChange(e.target.value)}
-            className="form-control"
-            min={getCheckpointFloor()}
-            max={getMaxAllowedPercentage() ?? getCheckpointFloor()}
-            placeholder={`Enter progress (${getCheckpointFloor()} - ${(getMaxAllowedPercentage() ?? getCheckpointFloor())})`}
-          />
-          {getMaxAllowedPercentage() === null && (
-            <small style={{ color: "#ff6b6b", display: "block", marginTop: "5px" }}>
-              Waiting for customer approval of checkpoint before proceeding
-            </small>
-          )}
-          {getMaxAllowedPercentage() !== null && (
-            <small style={{ color: "#666", display: "block", marginTop: "5px" }}>
-              You may adjust progress between {getCheckpointFloor()}% and {getMaxAllowedPercentage()}%. Reaching {getMaxAllowedPercentage()}% creates a checkpoint requiring approval.
-            </small>
-          )}
-          {completionPercentage === 100 && (
-            <small style={{ color: "#51cf66", display: "block", marginTop: "5px" }}>
-              Project fully completed!
-            </small>
-          )}
-        </div>
+        <MilestoneInput
+          selectedMilestone={selectedMilestone}
+          handleMilestoneChange={handleMilestoneChange}
+          getCheckpointFloor={getCheckpointFloor}
+          getMaxAllowedPercentage={getMaxAllowedPercentage}
+          completionPercentage={completionPercentage}
+        />
 
         {showMilestoneInput && (
-          <div className="form-group milestone-message-box" style={{ 
-            backgroundColor: "#f8f9fa", 
-            padding: "15px", 
-            borderRadius: "8px", 
-            border: "2px solid #4CAF50" 
-          }}>
-            <label htmlFor="milestoneMessage">
-              Progress Update Message for {selectedMilestone}% Completion
-              <span style={{ color: "#666", fontSize: "0.9em", display: "block", marginTop: "5px" }}>
-                {[25, 50, 75, 100].includes(parseInt(selectedMilestone)) 
-                  ? `This is a CHECKPOINT at ${selectedMilestone}%. Customer approval required before proceeding further.`
-                  : "Describe what has been completed and any queries for the customer"}
-              </span>
-            </label>
-            <textarea
-              id="milestoneMessage"
-              value={milestoneMessage}
-              onChange={(e) => setMilestoneMessage(e.target.value)}
-              rows="4"
-              placeholder={`Example: We have reached ${selectedMilestone}% completion. ${[25, 50, 75, 100].includes(parseInt(selectedMilestone)) ? 'This is a checkpoint milestone. ' : ''}Describe the work completed and any questions for the customer.`}
-              maxLength="500"
-              required={!!selectedMilestone}
-              style={{ width: "100%", padding: "10px", borderRadius: "4px", border: "1px solid #ddd" }}
-            />
-            <small style={{ color: "#666", display: "block", marginTop: "5px" }}>
-              {milestoneMessage.length}/500 characters
-            </small>
-          </div>
-        )}
-
-        <div className="form-group">
-          <label htmlFor="completionPercentage">Checkpoint Progress Overview</label>
-          <div className="milestones-overview" style={{ display: "flex", gap: "10px", marginTop: "10px" }}>
-            {[25, 50, 75, 100].map(milestone => {
-              const isCompleted = existingMilestones.some(m => m.percentage === milestone && m.isCheckpoint);
-              const milestoneData = existingMilestones.find(m => m.percentage === milestone && m.isCheckpoint);
-              const isApproved = milestoneData?.isApprovedByCustomer;
-              
-              return (
-                <div 
-                  key={milestone}
-                  style={{
-                    flex: 1,
-                    padding: "10px",
-                    borderRadius: "6px",
-                    textAlign: "center",
-                    backgroundColor: isCompleted ? (isApproved ? "#d4edda" : "#fff3cd") : "#e9ecef",
-                    border: `2px solid ${isCompleted ? (isApproved ? "#28a745" : "#ffc107") : "#dee2e6"}`,
-                    fontSize: "0.9em"
-                  }}
-                >
-                  <strong>{milestone}%</strong>
-                  <div style={{ fontSize: "0.8em", marginTop: "5px" }}>
-                    {isCompleted ? (isApproved ? "✓ Approved" : "⏳ Pending") : "○ Not Started"}
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-        </div>
-
-        <div className="form-group">
-          <label htmlFor="targetCompletionDate">Target Completion Date</label>
-          <input
-            type="date"
-            id="targetCompletionDate"
-            name="targetCompletionDate"
-            value={targetCompletionDate}
-            onChange={(e) => setTargetCompletionDate(e.target.value)}
-            required
+          <MilestoneMessageBox
+            selectedMilestone={selectedMilestone}
+            milestoneMessage={milestoneMessage}
+            setMilestoneMessage={setMilestoneMessage}
           />
-        </div>
-
-        <div className="form-group">
-          <label htmlFor="currentPhase">Current Phase</label>
-          <select id="currentPhase" name="currentPhase" value={currentPhase} onChange={(e) => setCurrentPhase(e.target.value)} required>
-            <option value="">Select current phase</option>
-            <option value="Foundation">Foundation</option>
-            <option value="Structure">Structure</option>
-            <option value="Interior work">Interior work</option>
-            <option value="Finishing">Finishing</option>
-          </select>
-        </div>
-
-        <div className="form-group">
-          <label htmlFor="mainImage">Main Project File</label>
-          <input type="file" id="mainImage" name="mainImage" accept=".pdf,.jpg,.jpeg,.png" onChange={(e) => setMainImage(e.target.files[0] || null)} />
-        </div>
-
-        <div className="form-group">
-          <label htmlFor="additionalImages">Additional Project Files</label>
-          <input type="file" id="additionalImages" name="additionalImages" accept=".pdf,.jpg,.jpeg,.png" multiple onChange={(e) => setAdditionalImages(Array.from(e.target.files || []))} />
-        </div>
-
-        {/* Completion Images - Only show when project reaches 100% */}
-        {parseInt(selectedMilestone) === 100 && (
-          <div className="form-group" style={{
-            backgroundColor: "#e8f5e9",
-            padding: "15px",
-            borderRadius: "8px",
-            border: "2px solid #4caf50"
-          }}>
-            <label htmlFor="completionImages" style={{ color: "#2e7d32", fontWeight: "600" }}>
-              📸 Project Completion Images (Recommended)
-            </label>
-            <p style={{ fontSize: "0.9em", color: "#555", marginBottom: "10px" }}>
-              Upload final project images to showcase the completed work to customers. These will be displayed in the customer's review section.
-            </p>
-            <input 
-              type="file" 
-              id="completionImages" 
-              name="completionImages" 
-              accept=".jpg,.jpeg,.png" 
-              multiple 
-              onChange={(e) => setCompletionImages(Array.from(e.target.files || []))}
-              style={{ width: "100%" }}
-            />
-            <small style={{ color: "#666", display: "block", marginTop: "5px" }}>
-              {completionImages.length > 0 ? `${completionImages.length} image(s) selected` : "No images selected yet"}
-            </small>
-          </div>
         )}
 
-        <div className="form-group">
-          <label>Recent Updates</label>
-          <div className="update-container">
-            <div className="form-group">
-              <label htmlFor="update1">Update 1</label>
-              <textarea id="update1" name="updates[]" rows="3" placeholder="e.g. Interior work is progressing as planned." value={updateText} onChange={(e) => setUpdateText(e.target.value)}></textarea>
-            </div>
-            <div className="form-group">
-              <label htmlFor="updateImage1">Update File</label>
-              <input type="file" id="updateImage1" name="updateImages" accept=".pdf,.jpg,.jpeg,.png" onChange={(e) => setUpdateImage(e.target.files[0] || null)} />
-            </div>
-          </div>
-        </div>
+        <CheckpointsOverview existingMilestones={existingMilestones} />
 
-        <div className="btn-container">
-          <button type="submit" className="btn btn-primary" disabled={loading}>{loading ? "Saving..." : "Save Project"}</button>
-          <button type="button" className="btn btn-secondary" onClick={() => navigate("companyongoing_projects")}>Cancel</button>
-        </div>
+        <TargetCompletionDateInput targetCompletionDate={targetCompletionDate} setTargetCompletionDate={setTargetCompletionDate} />
+
+        <CurrentPhaseSelect currentPhase={currentPhase} setCurrentPhase={setCurrentPhase} />
+
+        <FileUploadGroup
+          mainImage={mainImage}
+          setMainImage={setMainImage}
+          additionalImages={additionalImages}
+          setAdditionalImages={setAdditionalImages}
+        />
+
+        {parseInt(selectedMilestone) === 100 && (
+          <CompletionImagesUpload completionImages={completionImages} setCompletionImages={setCompletionImages} />
+        )}
+
+        <RecentUpdates
+          updateText={updateText}
+          setUpdateText={setUpdateText}
+          updateImage={updateImage}
+          setUpdateImage={setUpdateImage}
+        />
+
+        <FormButtons loading={loading} navigate={navigate} />
       </form>
     </div>
   );
