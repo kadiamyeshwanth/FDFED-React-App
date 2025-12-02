@@ -1,5 +1,6 @@
 /* src/Pages/customer/CustomerJobStatus.css */
 /* All class names prefixed with 'cjs-' to prevent global CSS conflicts */
+/* Theme: light orange. Hover animations/transitions removed. */
 
 .cjs-container {
   max-width: 1400px;
@@ -38,21 +39,21 @@
   padding: 16px 32px;
   cursor: pointer;
   border-bottom: 3px solid transparent;
-  transition: all 0.3s ease;
   font-weight: 500;
   color: #64748b;
   font-size: 1rem;
   background: transparent;
   border-radius: 8px 8px 0 0;
+  /* transitions removed */
 }
 
 .cjs-tab:hover {
   color: #1e293b;
-  background: #f8fafc;
+  background: #fff7ed; /* subtle light orange background on hover (no animation) */
 }
 
 .cjs-tab.cjs-active {
-  border-bottom: 3px solid #3b82f6;
+  border-bottom: 3px solid #fb923c; /* primary orange */
   font-weight: 600;
   color: #1e293b;
   background: white;
@@ -79,29 +80,29 @@
   font-size: 0.9rem;
   color: #64748b;
   cursor: pointer;
-  transition: all 0.3s ease;
   display: inline-flex;
   align-items: center;
   gap: 6px;
+  /* transitions removed */
 }
 
 .cjs-status-filter-btn:hover {
-  background: #f8fafc;
-  border-color: #cbd5e1;
+  background: #fff7ed; /* subtle */
+  border-color: #e9c7ad;
   color: #475569;
-  transform: translateY(-2px);
+  /* no transform */
 }
 
 .cjs-status-filter-btn.active {
-  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
-  color: white;
-  border-color: #3b82f6;
-  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+  background: linear-gradient(135deg, #ffd8b5 0%, #fb923c 100%);
+  color: #1e1b18;
+  border-color: #fb923c;
+  box-shadow: 0 2px 8px rgba(251, 146, 60, 0.12);
 }
 
 .cjs-status-filter-btn.active:hover {
-  background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
-  transform: translateY(-2px);
+  background: linear-gradient(135deg, #ffd8b5 0%, #fb923c 100%);
+  /* no transform or animation */
 }
 
 .cjs-content-section {
@@ -136,15 +137,15 @@
 }
 
 .cjs-architect-heading {
-  border-left: 5px solid #00c4b4;
+  border-left: 5px solid #ffd8b5; /* light orange accent */
 }
 
 .cjs-interior-heading {
-  border-left: 5px solid #ff6200;
+  border-left: 5px solid #ffb07a;
 }
 
 .cjs-company-heading {
-  border-left: 5px solid #8e44ad;
+  border-left: 5px solid #f97316;
 }
 
 .cjs-application {
@@ -154,42 +155,32 @@
   margin-bottom: 24px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
   border: 1px solid #e2e8f0;
-  transition: all 0.3s ease;
   position: relative;
   overflow: hidden;
   display: flex;
   flex-direction: column;
   gap: 20px;
-}
-
-.cjs-application:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
-  border-color: #cbd5e1;
+  /* no hover transform or animated before bar */
 }
 
 .cjs-application::before {
+  /* keep a subtle left accent but no animated height */
   content: "";
   position: absolute;
   top: 0;
   left: 0;
   width: 6px;
-  height: 0;
-  transition: height 0.4s ease;
-}
-
-.cjs-application:hover::before {
   height: 100%;
 }
 
 .cjs-architect-app::before {
-  background: #00c4b4;
+  background: #ffd8b5;
 }
 .cjs-interior-app::before {
-  background: #ff6200;
+  background: #ffb07a;
 }
 .cjs-company-app::before {
-  background: #8e44ad;
+  background: #f97316;
 }
 
 .cjs-status-container {
@@ -209,21 +200,21 @@
 }
 
 .cjs-architect-status {
-  background-color: #e0f7fa;
-  color: #00838f;
-  border: 1px solid #00838f;
+  background-color: #fff7ed;
+  color: #c2410c;
+  border: 1px solid #c2410c;
 }
 
 .cjs-interior-status {
-  background-color: #fff3e0;
-  color: #ff6200;
-  border: 1px solid #ff6200;
+  background-color: #fff4e6;
+  color: #b45309;
+  border: 1px solid #b45309;
 }
 
 .cjs-company-status {
-  background-color: #f5eef8;
-  color: #8e44ad;
-  border: 1px solid #8e44ad;
+  background-color: #fff2e8;
+  color: #92400e;
+  border: 1px solid #92400e;
 }
 
 .cjs-chat-button {
@@ -233,33 +224,32 @@
   border-radius: 8px;
   text-decoration: none;
   font-weight: 600;
-  transition: all 0.3s ease;
   gap: 8px;
   font-size: 0.95rem;
 }
 
 .cjs-architect-chat {
-  background: #00c4b4;
-  color: white;
+  background: #ffd8b5;
+  color: #1e1b18;
 }
 .cjs-architect-chat:hover {
-  background: #00838f;
+  background: #ffd8b5; /* no animation */
 }
 
 .cjs-interior-chat {
-  background: #ff6200;
-  color: white;
+  background: #ffb07a;
+  color: #1e1b18;
 }
 .cjs-interior-chat:hover {
-  background: #c74d00;
+  background: #ffb07a;
 }
 
 .cjs-company-chat {
-  background: #8e44ad;
+  background: #f97316;
   color: white;
 }
 .cjs-company-chat:hover {
-  background: #7a3a94;
+  background: #f97316;
 }
 
 .cjs-application h3 {
@@ -272,7 +262,7 @@
 
 .cjs-project-name {
   font-weight: 700;
-  color: #3b82f6;
+  color: #fb923c; /* primary orange for project names */
 }
 
 .cjs-section-title {
@@ -353,7 +343,7 @@
   gap: 16px;
   margin: 20px 0;
   padding: 20px;
-  background: #f8fafc;
+  background: #fff7ed;
   border-radius: 12px;
   border: 1px solid #e2e8f0;
 }
@@ -384,7 +374,7 @@
   gap: 24px;
   margin-top: 24px;
   padding: 24px;
-  background: #f8fafc;
+  background: #fffaf7;
   border-radius: 12px;
 }
 
@@ -398,7 +388,7 @@
 
 .cjs-proposal-container {
   background-color: white;
-  border: 1px solid gray;
+  border: 1px solid #d1b09a;
   border-radius: 10px;
   padding: 10px;
   margin-top: 15px;
@@ -413,13 +403,13 @@
 
 .cjs-image-title {
   color: #777;
-  margin: "10px 0 5px";
+  margin: 10px 0 5px;
   font-size: 0.95rem;
   font-weight: 600;
 }
 
 .cjs-proposal-section {
-  background-color: #f9fafb;
+  background-color: #fff7f0;
   border-radius: 8px;
   padding: 12px;
   margin-top: 10px;
@@ -437,7 +427,7 @@
 }
 
 .cjs-btn-accept-pay {
-  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  background: linear-gradient(135deg, #ffb07a 0%, #f97316 100%);
   color: white;
   text-decoration: none;
   border: none;
@@ -446,21 +436,20 @@
   padding: 12px 24px;
   display: inline-block;
   margin-top: 16px;
-  transition: all 0.3s ease;
-  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.2);
+  box-shadow: 0 2px 8px rgba(249, 115, 22, 0.12);
   cursor: pointer;
   font-size: 1rem;
   font-family: inherit;
 }
 
 .cjs-btn-accept-pay:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 6px 16px rgba(16, 185, 129, 0.3);
+  /* no animation on hover; keep appearance consistent */
+  background: linear-gradient(135deg, #ffb07a 0%, #f97316 100%);
 }
 
 /* Pending Notice */
 .cjs-pending-notice {
-  background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+  background: linear-gradient(135deg, #fff7ed 0%, #fff0dc 100%);
   border: 2px solid #fbbf24;
   border-radius: 12px;
   padding: 16px 20px;
@@ -471,7 +460,7 @@
   align-items: center;
   gap: 12px;
   font-size: 0.95rem;
-  box-shadow: 0 4px 12px rgba(251, 191, 36, 0.15);
+  box-shadow: 0 2px 8px rgba(251, 191, 36, 0.08);
 }
 
 /* Collapsible Buttons */
@@ -481,7 +470,7 @@
   flex-wrap: wrap;
   margin: 24px 0;
   padding: 16px;
-  background: #f8fafc;
+  background: #fffaf7;
   border-radius: 12px;
 }
 
@@ -494,7 +483,6 @@
   font-weight: 600;
   color: #475569;
   cursor: pointer;
-  transition: all 0.3s ease;
   display: flex;
   align-items: center;
   gap: 8px;
@@ -502,47 +490,46 @@
 }
 
 .cjs-section-btn:hover {
-  background: #f1f5f9;
-  border-color: #94a3b8;
-  transform: translateY(-2px);
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.06);
+  background: #fff7ed;
+  border-color: #e9c7ad;
+  /* no transform or animation */
 }
 
 .cjs-milestone-btn {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  color: white;
+  background: linear-gradient(135deg, #ffd8b5 0%, #fb923c 100%);
+  color: #1e1b18;
   border: none;
 }
 
 .cjs-milestone-btn:hover {
-  background: linear-gradient(135deg, #5568d3 0%, #65408b 100%);
+  background: linear-gradient(135deg, #ffd8b5 0%, #fb923c 100%);
 }
 
 .cjs-updates-btn {
-  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
-  color: white;
+  background: linear-gradient(135deg, #ffb07a 0%, #f97316 100%);
+  color: #1e1b18;
   border: none;
 }
 
 .cjs-updates-btn:hover {
-  background: linear-gradient(135deg, #059669 0%, #047857 100%);
+  background: linear-gradient(135deg, #ffb07a 0%, #f97316 100%);
 }
 
 .cjs-images-btn {
-  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
-  color: white;
+  background: linear-gradient(135deg, #ffd8b5 0%, #fb923c 100%);
+  color: #1e1b18;
   border: none;
 }
 
 .cjs-images-btn:hover {
-  background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+  background: linear-gradient(135deg, #ffd8b5 0%, #fb923c 100%);
 }
 
 /* Milestones Section */
 .cjs-milestones-section {
   margin: 24px 0;
   padding: 28px;
-  background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+  background: #fffaf7;
   border-radius: 16px;
   border: 1px solid #e2e8f0;
 }
@@ -564,17 +551,12 @@
   background: white;
   border-radius: 16px;
   padding: 28px;
-  border-left: 5px solid #cbd5e1;
+  border-left: 5px solid #e2e8f0;
   box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
   border: 1px solid #e2e8f0;
   border-left-width: 5px;
-  transition: all 0.3s ease;
   margin-bottom: 8px;
-}
-
-.cjs-milestone-card:hover {
-  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.08);
-  transform: translateY(-3px);
+  /* no hover animation */
 }
 
 .cjs-milestone-pending {
@@ -583,8 +565,8 @@
 }
 
 .cjs-milestone-approved {
-  border-left-color: #10b981;
-  background: linear-gradient(135deg, #ffffff 0%, #f0fdf4 100%);
+  border-left-color: #fb923c;
+  background: linear-gradient(135deg, #ffffff 0%, #fff7ed 100%);
 }
 
 .cjs-milestone-rejected {
@@ -602,8 +584,8 @@
 }
 
 .cjs-milestone-percentage {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  color: white;
+  background: linear-gradient(135deg, #ffd8b5 0%, #fb923c 100%);
+  color: #1e1b18;
   padding: 10px 18px;
   border-radius: 24px;
   font-weight: 700;
@@ -622,15 +604,15 @@
 }
 
 .cjs-status-pending {
-  background: #fef3c7;
+  background: #fff7ed;
   color: #92400e;
   border: 1px solid #fbbf24;
 }
 
 .cjs-status-approved {
-  background: #d1fae5;
-  color: #065f46;
-  border: 1px solid #10b981;
+  background: #fff7ed;
+  color: #7a2f06;
+  border: 1px solid #fb923c;
 }
 
 .cjs-status-rejected {
@@ -652,7 +634,7 @@
   margin: 16px 0;
   font-size: 1rem;
   padding: 14px;
-  background: #f8fafc;
+  background: #fffaf7;
   border-radius: 10px;
   border-left: 3px solid #e2e8f0;
 }
@@ -669,12 +651,8 @@
   max-height: 200px;
   border-radius: 12px;
   cursor: pointer;
-  transition: transform 0.3s ease;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-}
-
-.cjs-milestone-image:hover {
-  transform: scale(1.05);
+  /* no hover transform */
 }
 
 .cjs-milestone-actions {
@@ -693,36 +671,24 @@
   border-radius: 10px;
   font-weight: 600;
   cursor: pointer;
-  transition: all 0.2s ease;
   font-size: 0.95rem;
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 6px;
+  /* no hover animations */
 }
 
 .cjs-btn-approve {
-  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  background: linear-gradient(135deg, #ffb07a 0%, #f97316 100%);
   color: white;
-  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.2);
-}
-
-.cjs-btn-approve:hover {
-  background: linear-gradient(135deg, #059669 0%, #047857 100%);
-  transform: translateY(-2px);
-  box-shadow: 0 6px 16px rgba(16, 185, 129, 0.3);
+  box-shadow: 0 2px 8px rgba(249, 115, 22, 0.12);
 }
 
 .cjs-btn-reject {
   background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
   color: white;
-  box-shadow: 0 4px 12px rgba(239, 68, 68, 0.2);
-}
-
-.cjs-btn-reject:hover {
-  background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);
-  transform: translateY(-2px);
-  box-shadow: 0 6px 16px rgba(239, 68, 68, 0.3);
+  box-shadow: 0 2px 8px rgba(239, 68, 68, 0.12);
 }
 
 .cjs-milestone-approved-date,
@@ -744,9 +710,9 @@
 .cjs-updates-section {
   margin: 24px 0;
   padding: 28px;
-  background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
+  background: linear-gradient(135deg, #fff7ed 0%, #fff2e8 100%);
   border-radius: 16px;
-  border: 1px solid #86efac;
+  border: 1px solid #e2e8f0;
 }
 
 .cjs-updates-section h4 {
@@ -764,7 +730,7 @@
 
 .cjs-update-item {
   background: white;
-  border-left: 5px solid #10b981;
+  border-left: 5px solid #fb923c;
   border-radius: 12px;
   border: 1px solid #e2e8f0;
   border-left-width: 5px;
@@ -794,20 +760,16 @@
   max-height: 150px;
   border-radius: 8px;
   cursor: pointer;
-  transition: transform 0.2s ease;
-}
-
-.cjs-update-image:hover {
-  transform: scale(1.05);
+  /* no hover transform */
 }
 
 /* Images Section */
 .cjs-images-section {
   margin: 24px 0;
   padding: 28px;
-  background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);
+  background: linear-gradient(135deg, #fff8ff 0%, #fff2ff 100%);
   border-radius: 16px;
-  border: 1px solid #93c5fd;
+  border: 1px solid #e2e8f0;
 }
 
 .cjs-images-section h4 {
@@ -818,6 +780,7 @@
 }
 
 .cjs-images-grid {
+  margin-top: 8px;
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
   gap: 16px;
@@ -829,18 +792,11 @@
   object-fit: cover;
   border-radius: 12px;
   cursor: pointer;
-  transition: all 0.3s ease;
   border: 2px solid #e2e8f0;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+  /* no hover transform or animation */
 }
 
-.cjs-grid-image:hover {
-  transform: scale(1.05);
-  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.12);
-  border-color: #3b82f6;
-}
-
-/* Lightbox */
 .cjs-lightbox-overlay {
   position: fixed;
   top: 0;
@@ -886,12 +842,14 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: all 0.2s ease;
+  padding: 0;
+  line-height: 1;
 }
 
 .cjs-lightbox-close:hover {
-  background: #f3f4f6;
-  transform: scale(1.1);
+  background: #fff7ed;
+  color: #c2410c;
+  /* no rotation or transform */
 }
 
 @media (max-width: 768px) {
@@ -926,26 +884,19 @@
 .cjs-btn-revision {
   flex: 1;
   min-width: 130px;
-  background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
-  color: white;
-  box-shadow: 0 4px 12px rgba(245, 158, 11, 0.2);
+  background: linear-gradient(135deg, #ffd8b5 0%, #fb923c 100%);
+  color: #1e1b18;
+  box-shadow: 0 2px 8px rgba(245, 158, 11, 0.08);
   padding: 12px 16px;
   border: none;
   border-radius: 10px;
   font-weight: 600;
   cursor: pointer;
-  transition: all 0.2s ease;
   font-size: 0.95rem;
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 6px;
-}
-
-.cjs-btn-revision:hover {
-  background: linear-gradient(135deg, #d97706 0%, #b45309 100%);
-  transform: translateY(-2px);
-  box-shadow: 0 6px 16px rgba(245, 158, 11, 0.3);
 }
 
 .cjs-btn-report {
@@ -953,13 +904,12 @@
   min-width: 130px;
   background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
   color: white;
-  box-shadow: 0 4px 12px rgba(239, 68, 68, 0.2);
+  box-shadow: 0 2px 8px rgba(239, 68, 68, 0.08);
   padding: 12px 16px;
   border: none;
   border-radius: 10px;
   font-weight: 600;
   cursor: pointer;
-  transition: all 0.2s ease;
   font-size: 0.95rem;
   display: flex;
   align-items: center;
@@ -967,17 +917,11 @@
   gap: 6px;
 }
 
-.cjs-btn-report:hover {
-  background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);
-  transform: translateY(-2px);
-  box-shadow: 0 6px 16px rgba(239, 68, 68, 0.3);
-}
-
 /* Revision and Review Status Info */
 .cjs-milestone-revision-info {
   margin-top: 16px;
   padding: 16px;
-  background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+  background: linear-gradient(135deg, #fff7ed 0%, #fff0dc 100%);
   border-left: 4px solid #f59e0b;
   border-radius: 10px;
   font-size: 0.9rem;
@@ -1007,7 +951,7 @@
 
 /* Status Badge Colors */
 .cjs-status-revision-requested {
-  background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+  background: linear-gradient(135deg, #fff7ed 0%, #fff0dc 100%);
   color: #92400e !important;
 }
 
@@ -1018,12 +962,12 @@
 
 /* Milestone Card Background Colors for New Statuses */
 .cjs-milestone-revision-requested {
-  background: linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%);
+  background: linear-gradient(135deg, #fffaf0 0%, #fff7ed 100%);
   border-left: 5px solid #f59e0b;
 }
 
 .cjs-milestone-under-review {
-  background: linear-gradient(135deg, #fef2f2 0%, #fee2e2 100%);
+  background: linear-gradient(135deg, #fff2f2 0%, #fee2e2 100%);
   border-left: 5px solid #ef4444;
 }
 
@@ -1039,12 +983,6 @@
   justify-content: center;
   align-items: center;
   z-index: 10001;
-  animation: fadeIn 0.2s ease;
-}
-
-@keyframes fadeIn {
-  from { opacity: 0; }
-  to { opacity: 1; }
 }
 
 .cjs-modal-content {
@@ -1052,20 +990,8 @@
   border-radius: 16px;
   width: 90%;
   max-width: 550px;
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
-  animation: slideUp 0.3s ease;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.12);
   overflow: hidden;
-}
-
-@keyframes slideUp {
-  from {
-    transform: translateY(50px);
-    opacity: 0;
-  }
-  to {
-    transform: translateY(0);
-    opacity: 1;
-  }
 }
 
 .cjs-modal-header {
@@ -1074,7 +1000,7 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+  background: linear-gradient(135deg, #fffaf7 0%, #fff2e8 100%);
 }
 
 .cjs-modal-header h3 {
@@ -1096,16 +1022,14 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: all 0.2s ease;
   padding: 0;
   line-height: 1;
 }
 
 .cjs-modal-close:hover {
-  background: #fee2e2;
-  border-color: #ef4444;
-  color: #ef4444;
-  transform: rotate(90deg);
+  background: #fff7ed;
+  border-color: #f97316;
+  color: #f97316;
 }
 
 .cjs-modal-body {
@@ -1128,15 +1052,14 @@
   font-size: 0.95rem;
   font-family: inherit;
   resize: vertical;
-  transition: all 0.2s ease;
   color: #1e293b;
   line-height: 1.6;
 }
 
 .cjs-modal-textarea:focus {
   outline: none;
-  border-color: #f59e0b;
-  box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.1);
+  border-color: #f97316;
+  box-shadow: 0 0 0 0 rgba(0,0,0,0); /* no animation */
 }
 
 .cjs-modal-textarea::placeholder {
@@ -1145,7 +1068,7 @@
 
 .cjs-modal-footer {
   padding: 20px 28px;
-  background: #f8fafc;
+  background: #fffaf7;
   display: flex;
   gap: 12px;
   justify-content: flex-end;
@@ -1159,7 +1082,6 @@
   font-weight: 600;
   cursor: pointer;
   font-size: 0.95rem;
-  transition: all 0.2s ease;
   font-family: inherit;
 }
 
@@ -1170,43 +1092,30 @@
 }
 
 .cjs-modal-btn-cancel:hover {
-  background: #f1f5f9;
-  border-color: #cbd5e1;
+  background: #fff7ed;
+  border-color: #e9c7ad;
   color: #475569;
 }
 
 .cjs-modal-btn-submit {
-  background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
-  color: white;
-  box-shadow: 0 4px 12px rgba(245, 158, 11, 0.3);
+  background: linear-gradient(135deg, #ffd8b5 0%, #fb923c 100%);
+  color: #1e1b18;
+  box-shadow: 0 2px 8px rgba(245, 158, 11, 0.12);
 }
 
 .cjs-modal-btn-submit:hover {
-  background: linear-gradient(135deg, #d97706 0%, #b45309 100%);
-  transform: translateY(-2px);
-  box-shadow: 0 6px 16px rgba(245, 158, 11, 0.4);
+  background: linear-gradient(135deg, #ffd8b5 0%, #fb923c 100%);
 }
 
 /* Review Prompt Section */
 .cjs-review-prompt {
   margin-top: 32px;
   padding: 32px;
-  background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+  background: linear-gradient(135deg, #fff7ed 0%, #fff0dc 100%);
   border-radius: 16px;
   border: 2px solid #fbbf24;
-  box-shadow: 0 4px 16px rgba(251, 191, 36, 0.2);
-  animation: slideIn 0.5s ease;
-}
-
-@keyframes slideIn {
-  from {
-    opacity: 0;
-    transform: translateY(20px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+  box-shadow: 0 2px 8px rgba(251, 191, 36, 0.08);
+  /* animation removed */
 }
 
 .cjs-review-prompt-content {
@@ -1217,16 +1126,7 @@
   font-size: 48px;
   color: #f59e0b;
   margin-bottom: 16px;
-  animation: pulse 2s infinite;
-}
-
-@keyframes pulse {
-  0%, 100% {
-    transform: scale(1);
-  }
-  50% {
-    transform: scale(1.1);
-  }
+  /* no pulse animation */
 }
 
 .cjs-review-prompt-content h4 {
@@ -1245,19 +1145,18 @@
 
 .cjs-btn-review {
   padding: 14px 32px;
-  background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+  background: linear-gradient(135deg, #ffb07a 0%, #f97316 100%);
   color: white;
   border: none;
   border-radius: 10px;
   font-size: 16px;
   font-weight: 600;
   cursor: pointer;
-  transition: all 0.3s ease;
-  box-shadow: 0 6px 20px rgba(245, 158, 11, 0.4);
+  box-shadow: 0 2px 8px rgba(249, 115, 22, 0.12);
 }
 
 .cjs-btn-review:hover {
-  background: linear-gradient(135deg, #d97706 0%, #b45309 100%);
-  transform: translateY(-3px);
-  box-shadow: 0 8px 24px rgba(245, 158, 11, 0.5);
+  background: linear-gradient(135deg, #ffb07a 0%, #f97316 100%);
 }
+
+/* Removed keyframes and animations entirely from this file */
