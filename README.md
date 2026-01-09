@@ -58,18 +58,18 @@ You will need the following software installed on your machine:
 
 1.  **Clone the repository:**
     ```bash
-    git clone https://github.com/kadiamyeshwanth/FDFED
+    git clone https://github.com/kadiamyeshwanth/FDFED-React-App
     ```
 
 2.  **Navigate into the project directory:**
     ```bash
     # Move into the cloned repository folder
-    cd FDFED
+    cd FDFED-React-App
     ```
 
 3.  **Change directory to the application root (where app.js is located):**
     ```bash
-    cd FFSD
+    cd FDFED-React-App
     ```
 
 4.  **Install dependencies:**
