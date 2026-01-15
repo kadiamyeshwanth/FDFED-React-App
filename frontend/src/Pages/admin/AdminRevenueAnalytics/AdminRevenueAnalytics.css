@@ -1,0 +1,503 @@
+:root {
+  --ara-bg: #f5f7fb;
+  --ara-card: #ffffff;
+  --ara-text: #1f2937;
+  --ara-muted: #6b7280;
+  --ara-primary: #3b82f6;
+  --ara-success: #10b981;
+  --ara-warning: #f59e0b;
+  --ara-danger: #ef4444;
+  --ara-border: #e5e7eb;
+}
+
+.ara-container {
+  min-height: 100vh;
+  background: var(--ara-bg);
+  padding: 24px;
+}
+
+.ara-header {
+  background: var(--ara-card);
+  border-radius: 16px;
+  padding: 24px 28px;
+  margin-bottom: 24px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+}
+
+.ara-header-content {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.ara-btn-back-header {
+  background: #e2e8f0;
+  border: none;
+  padding: 10px 16px;
+  border-radius: 10px;
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.ara-title {
+  color: var(--ara-text);
+  font-size: 28px;
+  margin: 0;
+}
+
+.ara-subtitle {
+  color: var(--ara-muted);
+  margin: 6px 0 0;
+}
+
+.ara-main {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.ara-stats-section {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.ara-stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 20px;
+}
+
+.ara-stat-card {
+  background: var(--ara-card);
+  border-radius: 16px;
+  padding: 20px;
+  display: flex;
+  gap: 16px;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.06);
+  min-width: 0;
+  overflow: hidden;
+}
+
+.ara-stat-icon {
+  font-size: 28px;
+}
+
+.ara-stat-label {
+  color: var(--ara-muted);
+  font-size: 14px;
+  margin: 0 0 6px;
+}
+
+.ara-stat-value {
+  font-size: 24px;
+  font-weight: 700;
+  color: var(--ara-text);
+  word-break: break-word;
+}
+
+.ara-stat-meta {
+  margin-top: 8px;
+}
+
+.ara-stat-badge {
+  background: #eef2ff;
+  color: #4338ca;
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.ara-badge-warning {
+  background: #fef3c7;
+  color: #92400e;
+}
+
+.ara-badge-info {
+  background: #e0f2fe;
+  color: #0369a1;
+}
+
+.ara-stat-progress {
+  margin-top: 10px;
+}
+
+.ara-progress-bar {
+  height: 8px;
+  background: #e5e7eb;
+  border-radius: 999px;
+  overflow: hidden;
+}
+
+.ara-progress-fill {
+  height: 100%;
+}
+
+.ara-progress-success {
+  background: linear-gradient(90deg, #10b981, #34d399);
+}
+
+.ara-progress-text {
+  font-size: 12px;
+  color: var(--ara-muted);
+  margin-top: 4px;
+  display: inline-block;
+}
+
+.ara-phase-section {
+  background: var(--ara-card);
+  padding: 20px;
+  border-radius: 16px;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.06);
+}
+
+.ara-phase-title {
+  margin: 0 0 16px;
+  color: var(--ara-text);
+  font-size: 18px;
+}
+
+.ara-phase-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 16px;
+}
+
+.ara-phase-card {
+  border: 1px solid var(--ara-border);
+  border-radius: 14px;
+  padding: 14px;
+}
+
+.ara-phase-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.ara-phase-name {
+  margin: 0;
+  font-size: 15px;
+}
+
+.ara-phase-rate {
+  font-weight: 700;
+  color: var(--ara-primary);
+}
+
+.ara-phase-amounts {
+  display: grid;
+  gap: 6px;
+  margin-bottom: 10px;
+}
+
+.ara-phase-label {
+  font-size: 12px;
+  color: var(--ara-muted);
+}
+
+.ara-phase-value {
+  font-weight: 600;
+}
+
+.ara-phase-progress {
+  height: 6px;
+  background: #e5e7eb;
+  border-radius: 999px;
+  overflow: hidden;
+}
+
+.ara-phase-progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #3b82f6, #60a5fa);
+}
+
+.ara-projects-section {
+  background: var(--ara-card);
+  padding: 20px;
+  border-radius: 16px;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.06);
+}
+
+.ara-section-title {
+  margin: 0 0 16px;
+  font-size: 20px;
+  color: var(--ara-text);
+}
+
+.ara-table-container {
+  width: 100%;
+  overflow-x: auto;
+}
+
+.ara-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.ara-table th,
+.ara-table td {
+  padding: 12px;
+  border-bottom: 1px solid var(--ara-border);
+  text-align: left;
+  font-size: 14px;
+}
+
+.ara-table th {
+  background: #f9fafb;
+  color: var(--ara-muted);
+  font-weight: 700;
+}
+
+.ara-status-badge {
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.ara-status-completed {
+  background: #d1fae5;
+  color: #065f46;
+}
+
+.ara-status-ongoing {
+  background: #dbeafe;
+  color: #1e40af;
+}
+
+.ara-status-pending {
+  background: #fef3c7;
+  color: #92400e;
+}
+
+.ara-progress-bar-small {
+  height: 6px;
+  background: #e5e7eb;
+  border-radius: 999px;
+  overflow: hidden;
+}
+
+.ara-progress-fill-small {
+  height: 100%;
+  background: linear-gradient(90deg, #10b981, #34d399);
+}
+
+.ara-progress-text-small {
+  font-size: 12px;
+  color: var(--ara-muted);
+}
+
+.ara-btn-view {
+  background: var(--ara-primary);
+  color: white;
+  border: none;
+  padding: 6px 12px;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.ara-amount {
+  font-weight: 600;
+}
+
+.ara-amount-received {
+  color: var(--ara-success);
+}
+
+.ara-amount-pending {
+  color: var(--ara-warning);
+}
+
+.ara-mini-progress {
+  height: 4px;
+  background: #e5e7eb;
+  border-radius: 999px;
+  overflow: hidden;
+  margin-top: 4px;
+}
+
+.ara-mini-success {
+  background: linear-gradient(90deg, #10b981, #34d399);
+  height: 100%;
+}
+
+/* Modal */
+.ara-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.ara-modal-content {
+  background: white;
+  border-radius: 16px;
+  width: 90%;
+  max-width: 1000px;
+  max-height: 90vh;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.ara-modal-header {
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--ara-border);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.ara-modal-title {
+  margin: 0;
+  font-size: 20px;
+}
+
+.ara-modal-close {
+  background: transparent;
+  border: none;
+  font-size: 20px;
+  cursor: pointer;
+}
+
+.ara-modal-body {
+  padding: 20px;
+  overflow-y: auto;
+}
+
+.ara-modal-footer {
+  padding: 16px 20px;
+  border-top: 1px solid var(--ara-border);
+  display: flex;
+  justify-content: flex-end;
+}
+
+.ara-btn-close {
+  background: #e5e7eb;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.ara-modal-summary {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.ara-summary-card {
+  background: #f9fafb;
+  padding: 12px;
+  border-radius: 12px;
+}
+
+.ara-summary-label {
+  color: var(--ara-muted);
+  font-size: 12px;
+}
+
+.ara-summary-value {
+  font-size: 18px;
+  font-weight: 700;
+}
+
+.ara-summary-received { color: var(--ara-success); }
+.ara-summary-pending { color: var(--ara-warning); }
+
+.ara-modal-info-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 12px;
+}
+
+.ara-info-label {
+  font-size: 12px;
+  color: var(--ara-muted);
+}
+
+.ara-info-value {
+  font-weight: 600;
+}
+
+.ara-modal-phases-section {
+  margin-top: 20px;
+}
+
+.ara-phase-detail {
+  border: 1px solid var(--ara-border);
+  border-radius: 12px;
+  padding: 12px;
+  margin-bottom: 12px;
+}
+
+.ara-payment-item {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 8px 0;
+}
+
+.ara-payment-badge {
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.ara-payment-paid {
+  background: #d1fae5;
+  color: #065f46;
+}
+
+.ara-payment-pending {
+  background: #fef3c7;
+  color: #92400e;
+}
+
+.ara-phase-summary {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 8px;
+  font-size: 14px;
+}
+
+.ara-text-success { color: var(--ara-success); }
+.ara-text-warning { color: var(--ara-warning); }
+
+.ara-loading-container,
+.ara-error-container,
+.ara-empty-container {
+  min-height: 60vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+}
+
+.ara-loading-spinner {
+  width: 40px;
+  height: 40px;
+  border: 4px solid #e5e7eb;
+  border-top-color: var(--ara-primary);
+  border-radius: 50%;
+  animation: ara-spin 1s linear infinite;
+}
+
+@keyframes ara-spin {
+  to { transform: rotate(360deg); }
+}
+
+@media (max-width: 768px) {
+  .ara-header-content { flex-direction: column; align-items: flex-start; }
+  .ara-header { padding: 20px; }
+  .ara-table th, .ara-table td { white-space: nowrap; }
+}
