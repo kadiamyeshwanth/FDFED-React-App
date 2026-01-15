@@ -71,7 +71,6 @@ const getConstructionCompaniesList = async (req, res) => {
   try {
     const companies = await Company.find({}).lean();
     
-    // Get completed projects with reviews for each company
     const companiesWithReviews = await Promise.all(
       companies.map(async (company) => {
         const completedProjects = await ConstructionProjectSchema.find({
@@ -661,6 +660,61 @@ const acceptCompanyProposal = async (req, res) => {
   }
 };
 
+const rejectCompanyProposal = async (req, res) => {
+  try {
+    const { projectId } = req.params;
+    const { reason } = req.body;
+    const customerId = req.user.user_id;
+
+    const project = await ConstructionProjectSchema.findOne({
+      _id: projectId,
+      customerId: customerId,
+    });
+    if (!project || project.status !== "proposal_sent") {
+      return res
+        .status(404)
+        .json({ error: "Project not found or proposal not available." });
+    }
+
+    project.status = "rejected";
+    if (reason) {
+      project.rejectionReason = reason;
+    }
+
+    await project.save();
+    res.status(200).json({ success: true, message: "Proposal rejected successfully" });
+  } catch (error) {
+    console.error("Error rejecting company proposal:", error);
+    res.status(500).json({ error: "Server Error" });
+  }
+};
+
+const acceptConstructionProposal = async (req, res) => {
+  try {
+    const { projectId } = req.body;
+    const customerId = req.user.user_id;
+
+    const project = await ConstructionProjectSchema.findOne({
+      _id: projectId,
+      customerId: customerId,
+    });
+    
+    if (!project || project.status !== "proposal_sent") {
+      return res.status(404).json({ error: "Project not found or proposal not available." });
+    }
+
+    // Update project status to accepted
+    project.status = "accepted";
+    project.proposalAcceptedAt = new Date();
+
+    await project.save();
+    res.status(200).json({ success: true, message: "Proposal accepted successfully" });
+  } catch (error) {
+    console.error("Error accepting construction proposal:", error);
+    res.status(500).json({ error: "Server Error" });
+  }
+};
+
 const updatePassword = async (req, res) => {
   try {
     const customerId = req.user.user_id;
@@ -865,6 +919,8 @@ module.exports = {
   acceptProposal,
   acceptCompanyBid,
   acceptCompanyProposal,
+  acceptConstructionProposal,
+  rejectCompanyProposal,
   updatePassword,
   approveMilestone,
   rejectMilestone,
