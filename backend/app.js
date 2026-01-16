@@ -17,6 +17,7 @@ const workerRoutes = require("./routes/workerRoutes");
 const adminRoutes = require("./routes/adminRoutes");
 const chatRoutes = require("./routes/chatRoutes");
 const complaintRoutes = require("./routes/complaintRoutes");
+const paymentRoutes = require("./routes/paymentRoutes");
 
 const { PORT, CLOUDINARY_CLOUD_NAME, CLOUDINARY_API_KEY, CLOUDINARY_API_SECRET, FRONTEND_URL } = require("./config/constants");
 const { ChatRoom } = require("./models");
@@ -166,6 +167,7 @@ app.use('/api', projectRoutes);
 app.use('/api', adminRoutes);
 app.use('/api', chatRoutes);
 app.use("/api/complaints", complaintRoutes);
+app.use('/api/payment', paymentRoutes);
 
 server.listen(PORT, () => {
   console.log(`Server running at http://localhost:${PORT}`);
