@@ -179,52 +179,153 @@ const getCompanyRevenue = async (req, res) => {
     const currentQuarter = Math.floor(currentMonth / 3);
 
     let totalRevenue = 0;
+    let totalPending = 0;
+    let totalReceived = 0;
     let ongoingProjectValue = 0;
     let revenueThisMonth = 0;
     let revenueThisQuarter = 0;
     let revenueThisYear = 0;
     let completedProjectsCount = 0;
+    let ongoingProjectsCount = 0;
 
-    projects.forEach(p => {
-      const projectValue = p.paymentDetails?.totalAmount || 0;
-      const completionDate = p.updatedAt;
+    // Phase-wise analytics
+    let phaseAnalytics = {
+      phase1: { total: 0, received: 0, pending: 0, count: 0 },
+      phase2: { total: 0, received: 0, pending: 0, count: 0 },
+      phase3: { total: 0, received: 0, pending: 0, count: 0 },
+      phase4: { total: 0, received: 0, pending: 0, count: 0 },
+      final: { total: 0, received: 0, pending: 0, count: 0 }
+    };
 
+    // Process each project with detailed phase-wise breakdown
+    const projectsWithDetails = projects.map(p => {
+      const projectValue = p.paymentDetails?.totalAmount || p.proposal?.price || 0;
+      const received = p.paymentDetails?.amountPaidToCompany || 0;
+      const pending = projectValue - received;
+      
+      totalReceived += received;
+      totalPending += pending;
+
+      // Calculate phase-wise breakdown
+      const phases = p.proposal?.phases || [];
+      const milestones = p.milestones || [];
+      
+      let phaseBreakdown = phases.map(phase => {
+        const phaseAmount = phase.amount || (projectValue * ((phase.percentage || 0) / 100)) || 0;
+        const phasePercentage = phase.percentage || 0;
+        const phaseId = phase.isFinal ? 'final' : `phase${phases.indexOf(phase) + 1}`;
+        
+        // Find milestone for this phase (checkpoints at 25%, 50%, 75%, 100%)
+        let milestone = null;
+        if (phase.isFinal) {
+          milestone = milestones.find(m => m.percentage === 100);
+        } else {
+          const checkpointPercentage = phasePercentage;
+          milestone = milestones.find(m => m.percentage === checkpointPercentage);
+        }
+        
+        // Calculate payments for this phase
+        let upfrontPaid = 0;
+        let completionPaid = 0;
+        let finalPaid = 0;
+
+        if (milestone && milestone.payments) {
+          if (!phase.isFinal) {
+            if (milestone.payments.upfront?.status === 'released' || milestone.payments.upfront?.status === 'paid') {
+              upfrontPaid = milestone.payments.upfront.amount || 0;
+            }
+            if (milestone.payments.completion?.status === 'released' || milestone.payments.completion?.status === 'paid') {
+              completionPaid = milestone.payments.completion.amount || 0;
+            }
+          } else {
+            const finalStatus = milestone.payments.final?.status || milestone.payments.completion?.status;
+            if (finalStatus === 'released' || finalStatus === 'paid') {
+              finalPaid = milestone.payments.final?.amount || milestone.payments.completion?.amount || 0;
+            }
+          }
+        }
+
+        const phasePaid = upfrontPaid + completionPaid + finalPaid;
+        const phasePending = phaseAmount - phasePaid;
+        
+        // Update phase analytics
+        if (phaseAnalytics[phaseId]) {
+          phaseAnalytics[phaseId].total += phaseAmount;
+          phaseAnalytics[phaseId].received += phasePaid;
+          phaseAnalytics[phaseId].pending += phasePending;
+          phaseAnalytics[phaseId].count += 1;
+        }
+        
+        return {
+          name: phase.name,
+          percentage: phasePercentage,
+          amount: phaseAmount,
+          paid: phasePaid,
+          pending: phasePending,
+          isFinal: phase.isFinal || false,
+          status: milestone?.isApprovedByCustomer ? 'approved' : (milestone ? 'pending' : 'not_started'),
+          upfrontPaid,
+          completionPaid,
+          finalPaid
+        };
+      });
+
+      // Calculate completion metrics
+      const completedPhases = phaseBreakdown.filter(p => p.status === 'approved').length;
+      const totalPhases = phaseBreakdown.length;
+      
       if (p.status === 'completed') {
         totalRevenue += projectValue;
         completedProjectsCount++;
 
-        const completedDate = new Date(completionDate);
+        const completedDate = new Date(p.updatedAt);
         const completedMonth = completedDate.getMonth();
         const completedYear = completedDate.getFullYear();
         const completedQuarter = Math.floor(completedMonth / 3);
 
         if (completedYear === currentYear) {
-          revenueThisYear += projectValue;
+          revenueThisYear += received;
           if (completedMonth === currentMonth) {
-            revenueThisMonth += projectValue;
+            revenueThisMonth += received;
           }
           if (completedQuarter === currentQuarter) {
-            revenueThisQuarter += projectValue;
+            revenueThisQuarter += received;
           }
         }
       } else if (p.status === 'accepted') {
         ongoingProjectValue += projectValue;
+        ongoingProjectsCount++;
       }
+
+      return {
+        ...p,
+        phaseBreakdown,
+        totalAmount: projectValue,
+        receivedAmount: received,
+        pendingAmount: pending,
+        completedPhases,
+        totalPhases,
+        phaseCompletionRate: totalPhases > 0 ? (completedPhases / totalPhases) * 100 : 0
+      };
     });
 
     const averageProjectValue = completedProjectsCount > 0 ? totalRevenue / completedProjectsCount : 0;
 
     // routed file : company/revenue
     res.status(200).json({
-      projects,
+      projects: projectsWithDetails,
       metrics: {
-        totalRevenue,
+        totalRevenue: totalReceived, // Changed to show actual received amount
+        totalPending,
+        totalReceived,
         ongoingProjectValue,
         completedProjects: completedProjectsCount,
+        ongoingProjects: ongoingProjectsCount,
         averageProjectValue,
         revenueThisMonth,
         revenueThisQuarter,
-        revenueThisYear
+        revenueThisYear,
+        phaseAnalytics
       }
     });
   } catch (error) {
@@ -502,18 +603,40 @@ const updateCompanyProfile = async (req, res) => {
 
 const submitProjectProposal = async (req, res) => {
   try {
-    const { projectId, price, description } = req.body;
+    const { projectId, price, description, phases } = req.body;
     const companyId = req.user.user_id;
+
+    const PHASES_COUNT = 5;
+    const WORK_PHASE_PERCENTAGE = 25;
+    const FINAL_PHASE_PERCENTAGE = 10;
 
     const project = await ConstructionProjectSchema.findOne({ _id: projectId, companyId: companyId });
     if (!project) {
       return res.status(404).json({ error: 'Project not found or you are not authorized.' });
     }
 
+    if (!Array.isArray(phases) || phases.length !== PHASES_COUNT) {
+      return res.status(400).json({ error: `Exactly ${PHASES_COUNT} phases are required.` });
+    }
+
+    // Validate work phases (first 4) and final phase (last one)
+    const workPhases = phases.slice(0, 4);
+    const finalPhase = phases[4];
+
+    const invalidWorkPhase = workPhases.find(phase => parseFloat(phase.percentage) !== WORK_PHASE_PERCENTAGE);
+    if (invalidWorkPhase) {
+      return res.status(400).json({ error: `Each work phase must be ${WORK_PHASE_PERCENTAGE}% of the project.` });
+    }
+
+    if (!finalPhase.isFinal || parseFloat(finalPhase.percentage) !== FINAL_PHASE_PERCENTAGE) {
+      return res.status(400).json({ error: `Final phase must be ${FINAL_PHASE_PERCENTAGE}% of the project.` });
+    }
+
     project.status = 'proposal_sent';
     project.proposal = {
       price: parseFloat(price),
       description: description,
+      phases: phases,
       sentAt: new Date()
     };
 
