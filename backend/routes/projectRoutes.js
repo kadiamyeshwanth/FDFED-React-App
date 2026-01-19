@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const { submitArchitect, submitDesignRequest, submitConstructionForm, getProjects, getProjectById, getEditProject, updateProject, submitBid, acceptBid, declineBid, acceptWorkerRequest, rejectWorkerRequest, approveMilestone, requestMilestoneRevision, submitProjectReview, getProjectsWithUnviewedCustomerMessages, markCustomerMessagesViewed, getProjectsWithUnviewedCompanyMessages, markCompanyMessagesViewed } = require('../controllers/projectController');
+const { submitArchitect, submitDesignRequest, submitConstructionForm, getProjects, getProjectById, getEditProject, updateProject, submitBid, acceptBid, declineBid, acceptWorkerRequest, rejectWorkerRequest, approveMilestone, requestMilestoneRevision, payMilestone, submitProjectReview, getProjectsWithUnviewedCustomerMessages, markCustomerMessagesViewed, getProjectsWithUnviewedCompanyMessages, markCompanyMessagesViewed } = require('../controllers/projectController');
 
 const isAuthenticated = require('../middlewares/auth');
 const { upload } = require('../middlewares/upload');
@@ -18,6 +18,7 @@ router.post('/customer/decline-bid', isAuthenticated, declineBid);
 
 router.post('/customer/approve-milestone', isAuthenticated, approveMilestone);
 router.post('/customer/request-milestone-revision', isAuthenticated, requestMilestoneRevision);
+router.post('/customer/pay-milestone', isAuthenticated, payMilestone);
 
 router.get('/company/unviewed-customer-messages', isAuthenticated, getProjectsWithUnviewedCustomerMessages);
 router.post('/company/mark-messages-viewed/:projectId', isAuthenticated, markCustomerMessagesViewed);
