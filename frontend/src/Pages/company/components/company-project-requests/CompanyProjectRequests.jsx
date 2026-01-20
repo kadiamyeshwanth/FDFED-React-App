@@ -128,28 +128,21 @@ const CompanyProjectRequests = () => {
     }
   };
 
-  const handleSubmitProposal = async (e) => {
-    e.preventDefault();
-
-    const priceErrors = validatePrice(proposalData.price);
-    const descErrors = validateDescription(proposalData.description);
-    const allErrors = { ...priceErrors, ...descErrors };
-
-    if (Object.keys(allErrors).length > 0) {
-      setProposalErrors(allErrors);
-      return;
-    }
-
+  const handleSubmitProposal = async (proposalDataWithPhases) => {
     try {
+      // Prepare the submission data with phases
+      const submissionData = {
+        projectId: proposalDataWithPhases.projectId || proposalData.projectId,
+        price: proposalDataWithPhases.totalAmount || proposalDataWithPhases.price,
+        description: proposalDataWithPhases.description || "",
+        phases: proposalDataWithPhases.phases || [],
+      };
+
       const res = await fetch("http://localhost:3000/api/company/submit-proposal", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         credentials: "include",
-        body: JSON.stringify({
-          projectId: proposalData.projectId,
-          price: parseFloat(proposalData.price),
-          description: proposalData.description,
-        }),
+        body: JSON.stringify(submissionData),
       });
 
       if (!res.ok) {
