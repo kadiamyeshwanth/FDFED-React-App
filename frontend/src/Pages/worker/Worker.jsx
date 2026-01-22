@@ -9,6 +9,7 @@ import MyCompany from './components/MyCompany/MyCompany';
 import Settings from './components/Settings/Settings';
 import ProfileEdit from './components/ProfileEdit/ProfileEdit';
 import InteriorDesignerJobs from './components/InteriorDesignerJobs/InteriorDesignerJobs';
+import Revenue from './components/Revenue/Revenue';
 import Chat from '../../components/Chat/Chat';
 import './Worker.css';
 
@@ -29,6 +30,7 @@ const Worker = () => (
       <Route path="join_company" element={<JoinCompany />} />
       <Route path="ongoing-projects" element={<OngoingProjects />} />
       <Route path="my-company" element={<MyCompany />} />
+      <Route path="revenue" element={<Revenue />} />
       <Route path="settings" element={<Settings />} />
       <Route path="profile-edit" element={<ProfileEdit />} />
       <Route path="interior-jobs" element={<InteriorDesignerJobs />} />
