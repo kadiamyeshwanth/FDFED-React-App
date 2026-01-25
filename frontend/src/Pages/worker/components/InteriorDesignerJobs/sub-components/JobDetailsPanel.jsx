@@ -1,11 +1,11 @@
 import React from 'react';
 
-const JobDetailsPanel = ({ selectedJob, onAccept, onReject, formatDate }) => {
+const JobDetailsPanel = ({ selectedJob, onAccept, onReject, onCreateProposal, formatDate }) => {
   if (!selectedJob) {
     return (
-      <section className="wkidj-job-details-panel">
-        <div className="wkidj-empty-state">
-          <i className="fas fa-clipboard-list wkidj-empty-icon"></i>
+      <section className="wkj-job-details-panel">
+        <div className="wkj-empty-state">
+          <i className="fas fa-clipboard-list wkj-empty-icon"></i>
           <h2>No Job Selected</h2>
           <p>Click on a job offer from the list to view its details</p>
         </div>
@@ -14,121 +14,180 @@ const JobDetailsPanel = ({ selectedJob, onAccept, onReject, formatDate }) => {
   }
 
   return (
-    <section className="wkidj-job-details-panel">
-      <div className="wkidj-job-details-content">
-        <div className="wkidj-details-header">
-          <div className="wkidj-details-header-left">
-            <h2>{selectedJob.projectName || 'Untitled Project'}</h2>
-            <span className="wkidj-job-type wkidj-interior">
-              {selectedJob.roomType || 'Interior'}
+    <section className="wkj-job-details-panel">
+      <div className="wkj-job-details-content">
+        <div className="wkj-details-header">
+          <div className="wkj-details-header-left">
+            <h2>{selectedJob.projectName}</h2>
+            <span className={`wkj-job-type ${selectedJob.designRequirements?.designType?.toLowerCase() || 'other'}`}>
+              {selectedJob.designRequirements?.designType?.toLowerCase() || 'other'}
             </span>
-            <p className="wkidj-job-budget">{selectedJob.budget || 'Budget not specified'}</p>
+            <p className="wkj-job-budget">₹{selectedJob.additionalDetails?.budget}</p>
           </div>
-          <div className="wkidj-details-header-right">
-            <p className="wkidj-detail-label">Posted On</p>
-            <p className="wkidj-detail-value">
-              {selectedJob.createdAt 
-                ? formatDate(selectedJob.createdAt)
-                : 'N/A'}
+          <div className="wkj-details-header-right">
+            <p className="wkj-detail-label">Preferred Completion</p>
+            <p className="wkj-detail-value">
+              {selectedJob.additionalDetails?.completionDate 
+                ? formatDate(selectedJob.additionalDetails.completionDate)
+                : 'Not specified'}
             </p>
           </div>
         </div>
 
-        <div className="wkidj-details-section">
+        <div className="wkj-details-section">
           <h3><i className="fas fa-user"></i> Customer Details</h3>
-          <div className="wkidj-details-grid">
-            <div className="wkidj-detail-item">
-              <p className="wkidj-detail-label">Name</p>
-              <p className="wkidj-detail-value">
-                {selectedJob.customerId?.name || selectedJob.fullName || 'Anonymous'}
-              </p>
+          <div className="wkj-details-grid">
+            <div className="wkj-detail-item">
+              <p className="wkj-detail-label">Name</p>
+              <p className="wkj-detail-value">{selectedJob.customerDetails?.fullName || 'N/A'}</p>
             </div>
-            <div className="wkidj-detail-item">
-              <p className="wkidj-detail-label">Contact</p>
-              <p className="wkidj-detail-value">
-                {selectedJob.customerId?.phone || selectedJob.phone || 'N/A'}
-              </p>
+            <div className="wkj-detail-item">
+              <p className="wkj-detail-label">Contact</p>
+              <p className="wkj-detail-value">{selectedJob.customerDetails?.contactNumber || 'N/A'}</p>
             </div>
-            <div className="wkidj-detail-item">
-              <p className="wkidj-detail-label">Email</p>
-              <p className="wkidj-detail-value">
-                {selectedJob.customerId?.email || selectedJob.email || 'N/A'}
-              </p>
+            <div className="wkj-detail-item">
+              <p className="wkj-detail-label">Email</p>
+              <p className="wkj-detail-value">{selectedJob.customerDetails?.email || 'N/A'}</p>
             </div>
-            <div className="wkidj-detail-item">
-              <p className="wkidj-detail-label">Address</p>
-              <p className="wkidj-detail-value">{selectedJob.address || 'N/A'}</p>
+            <div className="wkj-detail-item">
+              <p className="wkj-detail-label">Address</p>
+              <p className="wkj-detail-value">
+                {selectedJob.customerAddress ? (
+                  <>
+                    {selectedJob.customerAddress.streetAddress}, 
+                    {selectedJob.customerAddress.city}, 
+                    {selectedJob.customerAddress.state} 
+                    {selectedJob.customerAddress.zipCode}
+                  </>
+                ) : 'N/A'}
+              </p>
             </div>
           </div>
         </div>
 
-        <div className="wkidj-details-section">
-          <h3><i className="fas fa-home"></i> Room Information</h3>
-          <div className="wkidj-details-grid">
-            <div className="wkidj-detail-item">
-              <p className="wkidj-detail-label">Room Type</p>
-              <p className="wkidj-detail-value">{selectedJob.roomType || 'N/A'}</p>
+        <div className="wkj-details-section">
+          <h3><i className="fas fa-map-marker-alt"></i> Plot Information</h3>
+          <div className="wkj-details-grid">
+            <div className="wkj-detail-item">
+              <p className="wkj-detail-label">Location</p>
+              <p className="wkj-detail-value">{selectedJob.plotInformation?.plotLocation || 'N/A'}</p>
             </div>
-            <div className="wkidj-detail-item">
-              <p className="wkidj-detail-label">Size</p>
-              <p className="wkidj-detail-value">
-                {selectedJob.roomSize 
-                  ? `${selectedJob.roomSize.length} × ${selectedJob.roomSize.width} ${selectedJob.roomSize.unit}` 
-                  : 'N/A'}
+            <div className="wkj-detail-item">
+              <p className="wkj-detail-label">Size</p>
+              <p className="wkj-detail-value">{selectedJob.plotInformation?.plotSize || 'N/A'}</p>
+            </div>
+            <div className="wkj-detail-item">
+              <p className="wkj-detail-label">Orientation</p>
+              <p className="wkj-detail-value">{selectedJob.plotInformation?.plotOrientation || 'N/A'}</p>
+            </div>
+            <div className="wkj-detail-item">
+              <p className="wkj-detail-label">Floors</p>
+              <p className="wkj-detail-value">{selectedJob.designRequirements?.numFloors || 'N/A'}</p>
+            </div>
+            <div className="wkj-detail-item">
+              <p className="wkj-detail-label">Room Requirements</p>
+              <p className="wkj-detail-value">
+                {selectedJob.designRequirements?.floorRequirements?.length > 0 
+                  ? selectedJob.designRequirements.floorRequirements.map((floor, i) => (
+                      <span key={i}>
+                        Floor {floor.floorNumber}: {floor.details}
+                        {i < selectedJob.designRequirements.floorRequirements.length - 1 ? ', ' : ''}
+                      </span>
+                    ))
+                  : 'No specific requirements provided'}
               </p>
             </div>
-            <div className="wkidj-detail-item">
-              <p className="wkidj-detail-label">Ceiling Height</p>
-              <p className="wkidj-detail-value">
-                {selectedJob.ceilingHeight 
-                  ? `${selectedJob.ceilingHeight.height} ${selectedJob.ceilingHeight.unit}` 
-                  : 'N/A'}
-              </p>
-            </div>
-            <div className="wkidj-detail-item">
-              <p className="wkidj-detail-label">Preferred Style</p>
-              <p className="wkidj-detail-value">{selectedJob.designPreference || 'N/A'}</p>
+            <div className="wkj-detail-item">
+              <p className="wkj-detail-label">Preferred Style</p>
+              <p className="wkj-detail-value">{selectedJob.designRequirements?.architecturalStyle || 'N/A'}</p>
             </div>
           </div>
-          {selectedJob.projectDescription && (
-            <div className="wkidj-special-features">
-              <p className="wkidj-detail-label">Special Features</p>
-              <p className="wkidj-detail-value">{selectedJob.projectDescription}</p>
-            </div>
-          )}
+          <div className="wkj-special-features">
+            <p className="wkj-detail-label">Special Features</p>
+            <p className="wkj-detail-value">
+              {selectedJob.designRequirements?.specialFeatures || 'None specified'}
+            </p>
+          </div>
         </div>
 
-        {selectedJob.inspirationImages && selectedJob.inspirationImages.length > 0 && (
-          <div className="wkidj-details-section">
-            <h3><i className="fas fa-images"></i> Inspiration Images</h3>
-            <div className="wkidj-reference-images">
-              {selectedJob.inspirationImages.map((image, index) => (
+        {selectedJob.additionalDetails?.referenceImages?.length > 0 && (
+          <div className="wkj-details-section">
+            <h3><i className="fas fa-images"></i> Reference Images</h3>
+            <div className="wkj-reference-images">
+              {selectedJob.additionalDetails.referenceImages.map((image, index) => (
                 <div 
                   key={index}
-                  className="wkidj-reference-image" 
-                  style={{ backgroundImage: `url('${image}')` }}
+                  className="wkj-reference-image" 
+                  style={{ backgroundImage: `url('${image.url}')` }}
                 ></div>
               ))}
             </div>
           </div>
         )}
 
-        {selectedJob.status !== 'accepted' && selectedJob.status !== 'rejected' && (
-          <div className="wkidj-job-action-buttons">
+        <div className="wkj-job-action-buttons">
+          {selectedJob.status === 'Pending' ? (
+            <>
+              <button 
+                className="wkj-job-action-button wkj-accept-button" 
+                onClick={onCreateProposal}
+              >
+                <i className="fas fa-file-signature"></i> Create Proposal
+              </button>
+              <button 
+                className="wkj-job-action-button wkj-deny-button" 
+                onClick={onReject}
+              >
+                <i className="fas fa-times"></i> Deny Job
+              </button>
+            </>
+          ) : selectedJob.status === 'Proposal Sent' || selectedJob.status === 'proposal_sent' ? (
+            <>
+              <div className="wkj-proposal-submitted-info">
+                <div className="wkj-proposal-header">
+                  <i className="fas fa-check-circle"></i>
+                  <h3>Proposal Submitted</h3>
+                </div>
+                {selectedJob.proposal && (
+                  <div className="wkj-proposal-details">
+                    <div className="wkj-proposal-detail-item">
+                      <span className="wkj-proposal-label">Quoted Price:</span>
+                      <span className="wkj-proposal-value">₹{selectedJob.proposal.price?.toLocaleString()}</span>
+                    </div>
+                    <div className="wkj-proposal-detail-item">
+                      <span className="wkj-proposal-label">Description:</span>
+                      <p className="wkj-proposal-description">{selectedJob.proposal.description}</p>
+                    </div>
+                    <div className="wkj-proposal-detail-item">
+                      <span className="wkj-proposal-label">Submitted:</span>
+                      <span className="wkj-proposal-value">
+                        {selectedJob.proposal.sentAt ? formatDate(selectedJob.proposal.sentAt) : 'N/A'}
+                      </span>
+                    </div>
+                  </div>
+                )}
+                <p className="wkj-proposal-status-text">
+                  <i className="fas fa-hourglass-half"></i> Waiting for customer response
+                </p>
+              </div>
+              <button 
+                className="wkj-job-action-button wkj-update-button" 
+                onClick={onCreateProposal}
+                style={{ marginTop: '1rem' }}
+              >
+                <i className="fas fa-edit"></i> Update Proposal (Lower Price)
+              </button>
+            </>
+          ) : (
             <button 
-              className="wkidj-job-action-button wkidj-accept-button" 
-              onClick={onAccept}
+              className="wkj-job-action-button" 
+              disabled
+              style={{ backgroundColor: '#95a5a6', cursor: 'not-allowed' }}
             >
-              <i className="fas fa-check"></i> Accept Job
+              <i className="fas fa-info-circle"></i> {selectedJob.status}
             </button>
-            <button 
-              className="wkidj-job-action-button wkidj-deny-button" 
-              onClick={onReject}
-            >
-              <i className="fas fa-times"></i> Deny Job
-            </button>
-          </div>
-        )}
+          )}
+        </div>
       </div>
     </section>
   );
