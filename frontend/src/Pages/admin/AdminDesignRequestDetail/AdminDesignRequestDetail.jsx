@@ -1,7 +1,14 @@
 import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
+import AdminLayout from "../../../components/admin/AdminLayout";
+import {
+  Card, Section, DataRow, Badge, ActionButton, PageHeader, Spinner,
+} from "../../../components/admin/AdminUIComponents";
+import {
+  ArrowLeft, Trash2, Palette, User, Mail, Phone, MapPin, Calendar,
+  Clock, Ruler, Home, PenTool, Target,
+} from "lucide-react";
 import "./AdminDesignRequestDetail.css";
-
 
 const AdminDesignRequestDetail = () => {
   const { id } = useParams();
@@ -9,9 +16,7 @@ const AdminDesignRequestDetail = () => {
   const [request, setRequest] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const apiBase = ""; // leave empty for same origin or set VITE_API_URL
 
-  
   useEffect(() => {
     const fetchRequest = async () => {
       setLoading(true);
@@ -46,160 +51,135 @@ const AdminDesignRequestDetail = () => {
     }
   };
 
-  if (loading)
-    return <div className="adr-loading">Loading design request…</div>;
-  if (error) return <div className="adr-error">Error: {error}</div>;
-  if (!request)
-    return <div className="adr-empty">Design request not found.</div>;
+  if (loading) return <AdminLayout><div className="detail-loading"><Spinner size="lg" /><p>Loading design request...</p></div></AdminLayout>;
+  if (error) return <AdminLayout><div className="detail-error"><p>Error: {error}</p></div></AdminLayout>;
+  if (!request) return <AdminLayout><div className="detail-empty"><p>Design request not found.</p></div></AdminLayout>;
 
   const fmtDate = (d) => (d ? new Date(d).toLocaleDateString() : "Not set");
   const fmtDateTime = (d) => (d ? new Date(d).toLocaleString() : "Not set");
 
+  const getStatusVariant = (status) => {
+    const s = String(status).toLowerCase();
+    if (s === "completed") return "success";
+    if (s === "accepted" || s === "in-progress") return "info";
+    if (s === "pending") return "warning";
+    if (s === "rejected") return "danger";
+    return "default";
+  };
+
   return (
-    <div className="adr-container">
-      <header className="adr-header">
-        <h1 className="adr-title">🎨 Design Request Details</h1>
-        <div className="adr-actions">
-          <button
-            className="adr-btn adr-back"
-            onClick={() => navigate("/admin/admindashboard")}
-          >
-            ← Back to Dashboard
-          </button>
-          <button className="adr-btn adr-delete" onClick={handleDelete}>
-            🗑️ Delete
-          </button>
-        </div>
-      </header>
+    <AdminLayout>
+      <div className="admin-detail-page">
+        <PageHeader
+          title={request.projectName || "Design Request"}
+          subtitle={`Request ID: ${request._id}`}
+          actions={
+            <div className="detail-header-actions">
+              <ActionButton label="Back to Dashboard" icon={ArrowLeft} variant="secondary" onClick={() => navigate("/admin/admindashboard")} />
+              <ActionButton label="Delete" icon={Trash2} variant="danger" onClick={handleDelete} />
+            </div>
+          }
+        />
 
-      <main className="adr-card">
-        <section className="adr-section adr-section-header">
-          <h2 className="adr-section-title">
-            {request.projectName || "Design Request"}
-          </h2>
-          <p className="adr-subtitle">Request ID: {request._id}</p>
-        </section>
-
-        <h3 className="adr-section-heading">Request Status</h3>
-        <div className="adr-grid">
-          <div className="adr-item">
-            <label className="adr-label">Status</label>
-            <div className="adr-value">
-              <span
-                className={`adr-badge adr-badge-${String(
-                  request.status ?? ""
-                ).toLowerCase()}`}
-              >
-                {request.status ?? "—"}
-              </span>
+        <div className="detail-kpi-row">
+          <div className="detail-kpi-card kpi-purple">
+            <Palette size={20} />
+            <div>
+              <span className="kpi-val">{request.roomType ?? "—"}</span>
+              <span className="kpi-lbl">Room Type</span>
             </div>
           </div>
-
-          <div className="adr-item">
-            <label className="adr-label">Created Date</label>
-            <div className="adr-value">{fmtDate(request.createdAt)}</div>
+          <div className="detail-kpi-card kpi-blue">
+            <Target size={20} />
+            <div>
+              <span className="kpi-val">{request.status ?? "—"}</span>
+              <span className="kpi-lbl">Status</span>
+            </div>
+          </div>
+          <div className="detail-kpi-card kpi-green">
+            <Calendar size={20} />
+            <div>
+              <span className="kpi-val">{fmtDate(request.createdAt)}</span>
+              <span className="kpi-lbl">Created</span>
+            </div>
           </div>
         </div>
 
-        <h3 className="adr-section-heading">Customer Information</h3>
-        <div className="adr-grid">
-          <div className="adr-item">
-            <label className="adr-label">Full Name</label>
-            <div className="adr-value">
-              {request.fullName ?? request.customerId?.name ?? "—"}
+        <Section title="Request Status">
+          <Card>
+            <div className="detail-grid">
+              <DataRow label="Status">
+                <Badge variant={getStatusVariant(request.status)}>{request.status ?? "—"}</Badge>
+              </DataRow>
+              <DataRow label="Created Date">{fmtDate(request.createdAt)}</DataRow>
             </div>
-          </div>
-          <div className="adr-item">
-            <label className="adr-label">Email</label>
-            <div className="adr-value">
-              {request.email ?? request.customerId?.email ?? "—"}
-            </div>
-          </div>
-          <div className="adr-item">
-            <label className="adr-label">Phone</label>
-            <div className="adr-value">
-              {request.phone ?? request.customerId?.phone ?? "—"}
-            </div>
-          </div>
-          <div className="adr-item adr-full">
-            <label className="adr-label">Address</label>
-            <div className="adr-value">{request.address ?? "—"}</div>
-          </div>
-        </div>
+          </Card>
+        </Section>
 
-        <h3 className="adr-section-heading">Room Details</h3>
-        <div className="adr-grid">
-          <div className="adr-item">
-            <label className="adr-label">Room Type</label>
-            <div className="adr-value">{request.roomType ?? "—"}</div>
-          </div>
-
-          <div className="adr-item">
-            <label className="adr-label">Room Size</label>
-            <div className="adr-value">
-              {request.roomSize
-                ? `${request.roomSize.length ?? "—"} x ${
-                    request.roomSize.width ?? "—"
-                  } ${request.roomSize.unit ?? ""}`
-                : "—"}
+        <Section title="Customer Information">
+          <Card>
+            <div className="detail-grid">
+              <DataRow label="Full Name">{request.fullName ?? request.customerId?.name ?? "—"}</DataRow>
+              <DataRow label="Email">{request.email ?? request.customerId?.email ?? "—"}</DataRow>
+              <DataRow label="Phone">{request.phone ?? request.customerId?.phone ?? "—"}</DataRow>
+              <DataRow label="Address">{request.address ?? "—"}</DataRow>
             </div>
-          </div>
+          </Card>
+        </Section>
 
-          {request.ceilingHeight?.height && (
-            <div className="adr-item">
-              <label className="adr-label">Ceiling Height</label>
-              <div className="adr-value">
-                {request.ceilingHeight.height}{" "}
-                {request.ceilingHeight.unit ?? ""}
-              </div>
+        <Section title="Room Details">
+          <Card>
+            <div className="detail-grid">
+              <DataRow label="Room Type">{request.roomType ?? "—"}</DataRow>
+              <DataRow label="Room Size">
+                {request.roomSize
+                  ? `${request.roomSize.length ?? "—"} x ${request.roomSize.width ?? "—"} ${request.roomSize.unit ?? ""}`
+                  : "—"}
+              </DataRow>
+              {request.ceilingHeight?.height && (
+                <DataRow label="Ceiling Height">
+                  {request.ceilingHeight.height} {request.ceilingHeight.unit ?? ""}
+                </DataRow>
+              )}
+              {request.designPreference && (
+                <DataRow label="Design Preference">{request.designPreference}</DataRow>
+              )}
             </div>
-          )}
-
-          {request.designPreference && (
-            <div className="adr-item">
-              <label className="adr-label">Design Preference</label>
-              <div className="adr-value">{request.designPreference}</div>
-            </div>
-          )}
-        </div>
+          </Card>
+        </Section>
 
         {request.projectDescription && (
-          <>
-            <h3 className="adr-section-heading">Project Description</h3>
-            <div className="adr-grid">
-              <div className="adr-item adr-full">
-                <label className="adr-label">Description</label>
-                <div className="adr-value">{request.projectDescription}</div>
+          <Section title="Project Description">
+            <Card>
+              <div className="detail-descriptions">
+                <div className="desc-block">
+                  <p>{request.projectDescription}</p>
+                </div>
               </div>
-            </div>
-          </>
+            </Card>
+          </Section>
         )}
 
         {request.workerId && (
-          <>
-            <h3 className="adr-section-heading">Assigned Worker</h3>
-            <div className="adr-grid">
-              <div className="adr-item">
-                <label className="adr-label">Worker Name</label>
-                <div className="adr-value">{request.workerId.name ?? "—"}</div>
+          <Section title="Assigned Worker">
+            <Card>
+              <div className="detail-grid">
+                <DataRow label="Worker Name">{request.workerId.name ?? "—"}</DataRow>
+                <DataRow label="Worker Email">{request.workerId.email ?? "—"}</DataRow>
               </div>
-              <div className="adr-item">
-                <label className="adr-label">Worker Email</label>
-                <div className="adr-value">{request.workerId.email ?? "—"}</div>
-              </div>
-            </div>
-          </>
+            </Card>
+          </Section>
         )}
 
-        <h3 className="adr-section-heading">Timestamps</h3>
-        <div className="adr-grid">
-          <div className="adr-item">
-            <label className="adr-label">Created At</label>
-            <div className="adr-value">{fmtDateTime(request.createdAt)}</div>
-          </div>
-        </div>
-      </main>
-    </div>
+        <Section title="Timestamps">
+          <Card>
+            <div className="detail-grid">
+              <DataRow label="Created At">{fmtDateTime(request.createdAt)}</DataRow>
+            </div>
+          </Card>
+        </Section>
+      </div>
+    </AdminLayout>
   );
 };
 

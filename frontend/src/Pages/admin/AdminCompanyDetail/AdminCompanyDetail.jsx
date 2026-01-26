@@ -1,5 +1,13 @@
 import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
+import AdminLayout from "../../../components/admin/AdminLayout";
+import {
+  Card, Section, DataRow, Badge, ActionButton, PageHeader, Spinner,
+} from "../../../components/admin/AdminUIComponents";
+import {
+  ArrowLeft, Trash2, Building2, Mail, Phone, MapPin, Calendar, Users,
+  Briefcase, Clock, Globe, FileText,
+} from "lucide-react";
 import "./AdminCompanyDetail.css";
 
 const AdminCompanyDetail = () => {
@@ -27,11 +35,7 @@ const AdminCompanyDetail = () => {
   }, [id]);
 
   const handleDelete = async () => {
-    if (
-      !confirm(
-        "Are you sure you want to delete this company? This action cannot be undone."
-      )
-    )
+    if (!confirm("Are you sure you want to delete this company? This action cannot be undone."))
       return;
     try {
       const res = await fetch(`/api/admin/delete-company/${id}`, {
@@ -47,228 +51,147 @@ const AdminCompanyDetail = () => {
     }
   };
 
-  if (loading) return <div className="acd-loading">Loading company…</div>;
-  if (error) return <div className="acd-error">Error: {error}</div>;
-  if (!company) return <div className="acd-empty">Company not found.</div>;
+  if (loading) return <AdminLayout><div className="detail-loading"><Spinner size="lg" /><p>Loading company...</p></div></AdminLayout>;
+  if (error) return <AdminLayout><div className="detail-error"><p>Error: {error}</p></div></AdminLayout>;
+  if (!company) return <AdminLayout><div className="detail-empty"><p>Company not found.</p></div></AdminLayout>;
 
   const fmt = (date, opts) =>
     date ? new Date(date).toLocaleString("en-US", opts) : "Not specified";
 
   return (
-    <div className="acd-container">
-      <header className="acd-header">
-        <h1 className="acd-title">🏢 Company Details</h1>
-        <div className="acd-actions">
-          <button
-            className="acd-btn acd-back"
-            onClick={() => navigate("/admin/admindashboard")}
-          >
-            ← Back to Dashboard
-          </button>
-          <button className="acd-btn acd-delete" onClick={handleDelete}>
-            🗑️ Delete Company
-          </button>
-        </div>
-      </header>
+    <AdminLayout>
+      <div className="admin-detail-page">
+        <PageHeader
+          title={company.companyName || "Company Details"}
+          subtitle={`Company ID: ${company._id}`}
+          actions={
+            <div className="detail-header-actions">
+              <ActionButton label="Back to Dashboard" icon={ArrowLeft} variant="secondary" onClick={() => navigate("/admin/admindashboard")} />
+              <ActionButton label="Delete Company" icon={Trash2} variant="danger" onClick={handleDelete} />
+            </div>
+          }
+        />
 
-      <main className="acd-card">
-        <div className="acd-section acd-section-header">
-          <h2 className="acd-section-title">
-            {company.companyName || "Company"}
-          </h2>
-          <p className="acd-subtitle">Company ID: {company._id}</p>
-        </div>
-
-        <div className="acd-alert acd-alert-info">
-          <strong>ℹ️ Company Information</strong>
-          <div className="acd-alert-sub">
-            Registered on{" "}
-            {fmt(company.createdAt, {
-              year: "numeric",
-              month: "long",
-              day: "numeric",
-            })}
-          </div>
-        </div>
-
-        <h3 className="acd-section-heading">Basic Information</h3>
-        <div className="acd-grid">
-          <div className="acd-item">
-            <label className="acd-label">Company Name</label>
-            <div className="acd-value">{company.companyName || "—"}</div>
-          </div>
-
-          <div className="acd-item">
-            <label className="acd-label">Contact Person</label>
-            <div className="acd-value">{company.contactPerson || "—"}</div>
-          </div>
-
-          <div className="acd-item">
-            <label className="acd-label">Email Address</label>
-            <div className="acd-value">{company.email || "—"}</div>
-          </div>
-
-          <div className="acd-item">
-            <label className="acd-label">Phone Number</label>
-            <div className="acd-value">{company.phone || "—"}</div>
-          </div>
-
-          <div className="acd-item">
-            <label className="acd-label">Company Size</label>
-            <div className="acd-value">{company.size || "Not specified"}</div>
-          </div>
-
-          <div className="acd-item">
-            <label className="acd-label">Projects Completed</label>
-            <div className="acd-value">{company.projectsCompleted ?? "0"}</div>
-          </div>
-
-          <div className="acd-item">
-            <label className="acd-label">Years in Business</label>
-            <div className="acd-value">
-              {company.yearsInBusiness || "Not specified"}
+        <div className="detail-kpi-row">
+          <div className="detail-kpi-card kpi-blue">
+            <Briefcase size={20} />
+            <div>
+              <span className="kpi-val">{company.projectsCompleted ?? "0"}</span>
+              <span className="kpi-lbl">Projects Done</span>
             </div>
           </div>
-
-          <div className="acd-item">
-            <label className="acd-label">Profile Type</label>
-            <div className="acd-value">{company.profileType || "company"}</div>
-          </div>
-        </div>
-
-        <h3 className="acd-section-heading">Location</h3>
-        <div className="acd-grid">
-          <div className="acd-item">
-            <label className="acd-label">Address</label>
-            <div className="acd-value">
-              {company.location?.address || "Not provided"}
+          <div className="detail-kpi-card kpi-purple">
+            <Clock size={20} />
+            <div>
+              <span className="kpi-val">{company.yearsInBusiness || "N/A"}</span>
+              <span className="kpi-lbl">Years Active</span>
             </div>
           </div>
-          <div className="acd-item">
-            <label className="acd-label">City</label>
-            <div className="acd-value">
-              {company.location?.city || "Not specified"}
+          <div className="detail-kpi-card kpi-green">
+            <Users size={20} />
+            <div>
+              <span className="kpi-val">{company.size || "N/A"}</span>
+              <span className="kpi-lbl">Team Size</span>
             </div>
           </div>
-          <div className="acd-item">
-            <label className="acd-label">State</label>
-            <div className="acd-value">
-              {company.location?.state || "Not specified"}
-            </div>
-          </div>
-          <div className="acd-item">
-            <label className="acd-label">Country</label>
-            <div className="acd-value">
-              {company.location?.country || "Not specified"}
-            </div>
-          </div>
-          <div className="acd-item">
-            <label className="acd-label">Postal Code</label>
-            <div className="acd-value">
-              {company.location?.postalCode || "Not specified"}
+          <div className="detail-kpi-card kpi-orange">
+            <Calendar size={20} />
+            <div>
+              <span className="kpi-val">{fmt(company.createdAt, { month: "short", day: "numeric", year: "numeric" })}</span>
+              <span className="kpi-lbl">Registered</span>
             </div>
           </div>
         </div>
 
-        {(company.description ||
-          company.aboutCompany ||
-          company.aboutForCustomers ||
-          company.whyJoinUs ||
-          company.didYouKnow) && (
-          <>
-            <h3 className="acd-section-heading">Company Description</h3>
-            <div className="acd-grid">
-              {company.description && (
-                <div className="acd-item acd-full">
-                  <label className="acd-label">Description</label>
-                  <div className="acd-value">{company.description}</div>
-                </div>
-              )}
-              {company.aboutCompany && (
-                <div className="acd-item acd-full">
-                  <label className="acd-label">About Company</label>
-                  <div className="acd-value">{company.aboutCompany}</div>
-                </div>
-              )}
-              {company.aboutForCustomers && (
-                <div className="acd-item acd-full">
-                  <label className="acd-label">About for Customers</label>
-                  <div className="acd-value">{company.aboutForCustomers}</div>
-                </div>
-              )}
-              {company.whyJoinUs && (
-                <div className="acd-item acd-full">
-                  <label className="acd-label">Why Join Us</label>
-                  <div className="acd-value">{company.whyJoinUs}</div>
-                </div>
-              )}
-              {company.didYouKnow && (
-                <div className="acd-item acd-full">
-                  <label className="acd-label">Did You Know</label>
-                  <div className="acd-value">{company.didYouKnow}</div>
-                </div>
-              )}
+        <Section title="Basic Information">
+          <Card>
+            <div className="detail-grid">
+              <DataRow label="Company Name">{company.companyName || "—"}</DataRow>
+              <DataRow label="Contact Person">{company.contactPerson || "—"}</DataRow>
+              <DataRow label="Email Address">{company.email || "—"}</DataRow>
+              <DataRow label="Phone Number">{company.phone || "—"}</DataRow>
+              <DataRow label="Company Size">{company.size || "Not specified"}</DataRow>
+              <DataRow label="Projects Completed">{company.projectsCompleted ?? "0"}</DataRow>
+              <DataRow label="Years in Business">{company.yearsInBusiness || "Not specified"}</DataRow>
+              <DataRow label="Profile Type">{company.profileType || "company"}</DataRow>
             </div>
-          </>
+          </Card>
+        </Section>
+
+        <Section title="Location">
+          <Card>
+            <div className="detail-grid">
+              <DataRow label="Address">{company.location?.address || "Not provided"}</DataRow>
+              <DataRow label="City">{company.location?.city || "Not specified"}</DataRow>
+              <DataRow label="State">{company.location?.state || "Not specified"}</DataRow>
+              <DataRow label="Country">{company.location?.country || "Not specified"}</DataRow>
+              <DataRow label="Postal Code">{company.location?.postalCode || "Not specified"}</DataRow>
+            </div>
+          </Card>
+        </Section>
+
+        {(company.description || company.aboutCompany || company.aboutForCustomers || company.whyJoinUs || company.didYouKnow) && (
+          <Section title="Company Description">
+            <Card>
+              <div className="detail-descriptions">
+                {company.description && (
+                  <div className="desc-block"><h4>Description</h4><p>{company.description}</p></div>
+                )}
+                {company.aboutCompany && (
+                  <div className="desc-block"><h4>About Company</h4><p>{company.aboutCompany}</p></div>
+                )}
+                {company.aboutForCustomers && (
+                  <div className="desc-block"><h4>About for Customers</h4><p>{company.aboutForCustomers}</p></div>
+                )}
+                {company.whyJoinUs && (
+                  <div className="desc-block"><h4>Why Join Us</h4><p>{company.whyJoinUs}</p></div>
+                )}
+                {company.didYouKnow && (
+                  <div className="desc-block"><h4>Did You Know</h4><p>{company.didYouKnow}</p></div>
+                )}
+              </div>
+            </Card>
+          </Section>
         )}
 
-        {Array.isArray(company.specialization) &&
-          company.specialization.length > 0 && (
-            <>
-              <h3 className="acd-section-heading">Specializations</h3>
-              <div className="acd-list">
+        {Array.isArray(company.specialization) && company.specialization.length > 0 && (
+          <Section title="Specializations">
+            <Card>
+              <div className="detail-tags">
                 {company.specialization.map((s, i) => (
-                  <div className="acd-list-item" key={i}>
-                    • {s}
-                  </div>
+                  <Badge key={i} variant="info">{s}</Badge>
                 ))}
               </div>
-            </>
-          )}
+            </Card>
+          </Section>
+        )}
 
-        {Array.isArray(company.currentOpenings) &&
-          company.currentOpenings.length > 0 && (
-            <>
-              <h3 className="acd-section-heading">Current Openings</h3>
-              <div className="acd-list">
+        {Array.isArray(company.currentOpenings) && company.currentOpenings.length > 0 && (
+          <Section title="Current Openings">
+            <Card>
+              <div className="detail-tags">
                 {company.currentOpenings.map((o, i) => (
-                  <div className="acd-list-item" key={i}>
-                    • {o}
-                  </div>
+                  <Badge key={i} variant="success">{o}</Badge>
                 ))}
               </div>
-            </>
-          )}
+            </Card>
+          </Section>
+        )}
 
-        <h3 className="acd-section-heading">Account Timestamps</h3>
-        <div className="acd-grid">
-          <div className="acd-item">
-            <label className="acd-label">Created At</label>
-            <div className="acd-value">
-              {fmt(company.createdAt, {
-                year: "numeric",
-                month: "short",
-                day: "numeric",
-                hour: "2-digit",
-                minute: "2-digit",
-              })}
+        <Section title="Account Timestamps">
+          <Card>
+            <div className="detail-grid">
+              <DataRow label="Created At">
+                {fmt(company.createdAt, { year: "numeric", month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" })}
+              </DataRow>
+              <DataRow label="Last Updated">
+                {fmt(company.updatedAt, { year: "numeric", month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" })}
+              </DataRow>
             </div>
-          </div>
-          <div className="acd-item">
-            <label className="acd-label">Last Updated</label>
-            <div className="acd-value">
-              {fmt(company.updatedAt, {
-                year: "numeric",
-                month: "short",
-                day: "numeric",
-                hour: "2-digit",
-                minute: "2-digit",
-              })}
-            </div>
-          </div>
-        </div>
-      </main>
-    </div>
+          </Card>
+        </Section>
+      </div>
+    </AdminLayout>
   );
 };
 

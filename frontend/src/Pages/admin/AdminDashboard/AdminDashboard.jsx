@@ -1,10 +1,30 @@
 import React, { useEffect, useState, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
+import {
+  Users,
+  Building2,
+  Briefcase,
+  BarChart3,
+  Eye,
+  Trash2,
+  CheckCircle,
+  XCircle,
+  RefreshCw,
+} from "lucide-react";
+import AdminLayout from "../../../components/admin/AdminLayout";
+import {
+  StatCard,
+  PageHeader,
+  Section,
+  AdminTable,
+  Spinner,
+  ActionButton,
+  Badge,
+} from "../../../components/admin/AdminUIComponents";
 import "./AdminDashboard.css";
 
 const AdminDashboard = () => {
   const navigate = useNavigate();
-  const apiBase = ""; 
 
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -32,27 +52,30 @@ const AdminDashboard = () => {
     setLoading(true);
     try {
       const res = await fetch(`/api/admindashboard`, {
-        credentials: 'include',
+        credentials: "include",
       });
       if (!res.ok) throw new Error(`Server ${res.status}`);
       const json = await res.json();
       setData(json);
       setError(null);
-     
+
       try {
-        const complaintsRes = await fetch(`/api/complaints/unviewed/count`, {
-          credentials: 'include',
-        });
+        const complaintsRes = await fetch(
+          `/api/complaints/unviewed/count`,
+          {
+            credentials: "include",
+          }
+        );
         const complaintsData = await complaintsRes.json();
         if (complaintsData.success) {
           const complaintsMap = {};
-          complaintsData.unviewedByProject.forEach(item => {
+          complaintsData.unviewedByProject.forEach((item) => {
             complaintsMap[item._id] = item.count;
           });
           setUnviewedComplaints(complaintsMap);
         }
       } catch (err) {
-        console.error('Error fetching unviewed complaints:', err);
+        console.error("Error fetching unviewed complaints:", err);
       }
     } catch (err) {
       setError(err.message || "Failed to load dashboard");
@@ -66,13 +89,15 @@ const AdminDashboard = () => {
   }, []);
 
   const handleDelete = async (type, id) => {
-    if (!window.confirm(`Are you sure you want to delete this ${type}?`))
+    if (
+      !window.confirm(`Are you sure you want to delete this ${type}?`)
+    )
       return;
     try {
       const res = await fetch(`/api/admin/delete-${type}/${id}`, {
         method: "DELETE",
         headers: { "Content-Type": "application/json" },
-        credentials: 'include',
+        credentials: "include",
       });
       const json = await res.json();
       if (!res.ok) throw new Error(json.error || "Delete failed");
@@ -80,6 +105,27 @@ const AdminDashboard = () => {
       alert(json.message || "Deleted");
     } catch (err) {
       alert("Error deleting: " + err.message);
+    }
+  };
+
+  const handleVerifyReject = async (type, id, action) => {
+    if (
+      !window.confirm(
+        `Are you sure you want to ${action} this ${type}?`
+      )
+    )
+      return;
+    try {
+      const res = await fetch(`/api/admin/${action}-${type}/${id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+      });
+      const json = await res.json();
+      if (!res.ok) throw new Error(json.error || `${action} failed`);
+      await fetchDashboard();
+      alert(json.message || `${action.charAt(0).toUpperCase() + action.slice(1)}d`);
+    } catch (err) {
+      alert(`Error: ${err.message}`);
     }
   };
 
@@ -120,785 +166,685 @@ const AdminDashboard = () => {
     });
   }, [tabData, search, statusFilter]);
 
-  if (loading)
-    return <div className="dashboard-loading">Loading dashboard…</div>;
-  if (error) return <div className="dashboard-error">Error: {error}</div>;
+  if (loading) {
+    return (
+      <AdminLayout>
+        <div className="loading-container">
+          <Spinner size="lg" />
+          <p>Loading dashboard...</p>
+        </div>
+      </AdminLayout>
+    );
+  }
+
+  if (error) {
+    return (
+      <AdminLayout>
+        <div className="error-container">
+          <h2>Error Loading Dashboard</h2>
+          <p>{error}</p>
+          <ActionButton
+            label="Retry"
+            variant="primary"
+            onClick={fetchDashboard}
+          />
+        </div>
+      </AdminLayout>
+    );
+  }
 
   const { counts, stats } = data;
+  const hasPendingCompanies = (data.data.companies || []).some(
+    (c) => c.status === "pending"
+  );
+  const hasPendingWorkers = (data.data.workers || []).some(
+    (w) => w.status === "pending"
+  );
 
-  const hasPendingCompanies = (data.data.companies || []).some(c => c.status === 'pending');
-  const hasPendingWorkers = (data.data.workers || []).some(w => w.status === 'pending');
+  const renderTableByTab = () => {
+    switch (activeTab) {
+      case "customers":
+        return (
+          <AdminTable
+            columns={[
+              { key: "name", label: "Name" },
+              { key: "email", label: "Email" },
+              { key: "phone", label: "Phone" },
+              {
+                key: "dob",
+                label: "DOB",
+                render: (row) =>
+                  row.dob ? new Date(row.dob).toLocaleDateString() : "—",
+              },
+              {
+                key: "createdAt",
+                label: "Joined",
+                render: (row) =>
+                  row.createdAt
+                    ? new Date(row.createdAt).toLocaleDateString()
+                    : "—",
+              },
+            ]}
+            data={filteredData}
+            actions={[
+              {
+                variant: "view",
+                label: "View",
+                icon: Eye,
+                onClick: (row) => navigate(`/admin/customer/${row._id}`),
+              },
+              {
+                variant: "delete",
+                label: "Delete",
+                icon: Trash2,
+                onClick: (row) => handleDelete("customer", row._id),
+              },
+            ]}
+          />
+        );
 
-  
-  const handleVerifyReject = async (type, id, action) => {
-    if (!window.confirm(`Are you sure you want to ${action} this ${type}?`)) return;
-    try {
-      const res = await fetch(`/api/admin/${action}-${type}/${id}`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-      });
-      const json = await res.json();
-      if (!res.ok) throw new Error(json.error || `${action} failed`);
-      await fetchDashboard();
-      alert(json.message || `${action.charAt(0).toUpperCase() + action.slice(1)}d`);
-    } catch (err) {
-      alert(`Error: ${err.message}`);
-    }
-  };
+      case "companies":
+        const companyActions = [
+          {
+            variant: "view",
+            label: "View",
+            icon: Eye,
+            onClick: (row) => navigate(`/admin/company/${row._id}`),
+          },
+        ];
+        if (hasPendingCompanies) {
+          companyActions.push(
+            {
+              variant: "success",
+              label: "Verify",
+              icon: CheckCircle,
+              onClick: (row) =>
+                handleVerifyReject("company", row._id, "verify"),
+            },
+            {
+              variant: "delete",
+              label: "Reject",
+              icon: XCircle,
+              onClick: (row) =>
+                handleVerifyReject("company", row._id, "reject"),
+            }
+          );
+        }
+        companyActions.push({
+          variant: "delete",
+          label: "Delete",
+          icon: Trash2,
+          onClick: (row) => handleDelete("company", row._id),
+        });
+        return (
+          <AdminTable
+            columns={[
+              { key: "companyName", label: "Company" },
+              { key: "contactPerson", label: "Contact" },
+              { key: "email", label: "Email" },
+              { key: "phone", label: "Phone" },
+              {
+                key: "location",
+                label: "Location",
+                render: (row) => row.location?.city || "N/A",
+              },
+              { key: "size", label: "Size" },
+              {
+                key: "projectsCompleted",
+                label: "Projects",
+                render: (row) => row.projectsCompleted || 0,
+              },
+              {
+                key: "status",
+                label: "Status",
+                render: (row) => <Badge variant={row.status}>{row.status}</Badge>,
+              },
+            ]}
+            data={filteredData}
+            actions={companyActions}
+          />
+        );
 
-  const handleLogout = async () => {
-    try {
-      await fetch('/api/admin/logout', {
-        method: 'POST',
-        credentials: 'include',
-      });
-      navigate('/admin-login');
-    } catch (err) {
-      console.error('Logout error:', err);
-      navigate('/admin-login');
+      case "workers":
+        const workerActions = [
+          {
+            variant: "view",
+            label: "View",
+            icon: Eye,
+            onClick: (row) => navigate(`/admin/worker/${row._id}`),
+          },
+        ];
+        if (hasPendingWorkers) {
+          workerActions.push(
+            {
+              variant: "success",
+              label: "Verify",
+              icon: CheckCircle,
+              onClick: (row) =>
+                handleVerifyReject("worker", row._id, "verify"),
+            },
+            {
+              variant: "delete",
+              label: "Reject",
+              icon: XCircle,
+              onClick: (row) =>
+                handleVerifyReject("worker", row._id, "reject"),
+            }
+          );
+        }
+        workerActions.push({
+          variant: "delete",
+          label: "Delete",
+          icon: Trash2,
+          onClick: (row) => handleDelete("worker", row._id),
+        });
+        return (
+          <AdminTable
+            columns={[
+              { key: "name", label: "Name" },
+              { key: "email", label: "Email" },
+              { key: "specialization", label: "Specialization" },
+              {
+                key: "experience",
+                label: "Exp",
+                render: (row) => `${row.experience || 0} yrs`,
+              },
+              {
+                key: "rating",
+                label: "Rating",
+                render: (row) => `⭐ ${Number(row.rating || 0).toFixed(1)}`,
+              },
+              {
+                key: "availability",
+                label: "Availability",
+                render: (row) => <Badge variant={row.availability}>{row.availability}</Badge>,
+              },
+              {
+                key: "isArchitect",
+                label: "Architect",
+                render: (row) => (row.isArchitect ? "Yes" : "No"),
+              },
+            ]}
+            data={filteredData}
+            actions={workerActions}
+          />
+        );
+
+      case "architect-hirings":
+        return (
+          <AdminTable
+            columns={[
+              { key: "projectName", label: "Project" },
+              {
+                key: "customer",
+                label: "Customer",
+                render: (row) =>
+                  row.customer?.name ||
+                  row.customerDetails?.fullName ||
+                  "—",
+              },
+              {
+                key: "designType",
+                label: "Type",
+                render: (row) =>
+                  row.designRequirements?.designType || "—",
+              },
+              {
+                key: "plotSize",
+                label: "Size",
+                render: (row) =>
+                  row.plotInformation?.plotSize || "—",
+              },
+              {
+                key: "budget",
+                label: "Budget",
+                render: (row) =>
+                  row.additionalDetails?.budget ?? "N/A",
+              },
+              {
+                key: "status",
+                label: "Status",
+                render: (row) => <Badge variant={row.status}>{row.status}</Badge>,
+              },
+              {
+                key: "createdAt",
+                label: "Created",
+                render: (row) =>
+                  row.createdAt
+                    ? new Date(row.createdAt).toLocaleDateString()
+                    : "—",
+              },
+            ]}
+            data={filteredData}
+            actions={[
+              {
+                variant: "view",
+                label: "View",
+                icon: Eye,
+                onClick: (row) =>
+                  navigate(`/admin/architect-hiring/${row._id}`),
+              },
+              {
+                variant: "delete",
+                label: "Delete",
+                icon: Trash2,
+                onClick: (row) =>
+                  handleDelete("architectHiring", row._id),
+              },
+            ]}
+          />
+        );
+
+      case "construction-projects":
+        return (
+          <AdminTable
+            columns={[
+              {
+                key: "projectName",
+                label: "Project",
+                render: (row) => (
+                  <div>
+                    {row.projectName}
+                    {unviewedComplaints[row._id] && (
+                      <span className="complaint-badge">
+                        {unviewedComplaints[row._id]}
+                      </span>
+                    )}
+                  </div>
+                ),
+              },
+              {
+                key: "customerName",
+                label: "Customer",
+                render: (row) =>
+                  row.customerName || row.customerId?.name,
+              },
+              { key: "buildingType", label: "Type" },
+              {
+                key: "totalArea",
+                label: "Area",
+                render: (row) => `${row.totalArea} sq ft`,
+              },
+              {
+                key: "estimatedBudget",
+                label: "Budget",
+                render: (row) =>
+                  `₹${row.estimatedBudget?.toLocaleString() || "N/A"}`,
+              },
+              {
+                key: "completionPercentage",
+                label: "Progress",
+                render: (row) =>
+                  `${row.completionPercentage || 0}%`,
+              },
+              {
+                key: "status",
+                label: "Status",
+                render: (row) => <Badge variant={row.status}>{row.status}</Badge>,
+              },
+            ]}
+            data={filteredData}
+            actions={[
+              {
+                variant: "view",
+                label: "View",
+                icon: Eye,
+                onClick: (row) =>
+                  navigate(`/admin/construction-project/${row._id}`),
+              },
+              {
+                variant: "delete",
+                label: "Delete",
+                icon: Trash2,
+                onClick: (row) =>
+                  handleDelete("constructionProject", row._id),
+              },
+            ]}
+          />
+        );
+
+      case "design-requests":
+        return (
+          <AdminTable
+            columns={[
+              { key: "projectName", label: "Project" },
+              {
+                key: "fullName",
+                label: "Customer",
+                render: (row) =>
+                  row.fullName || row.customerId?.name,
+              },
+              { key: "roomType", label: "Room Type" },
+              {
+                key: "roomSize",
+                label: "Size",
+                render: (row) =>
+                  row.roomSize
+                    ? `${row.roomSize.length}x${row.roomSize.width}`
+                    : "—",
+              },
+              {
+                key: "designPreference",
+                label: "Preference",
+                render: (row) =>
+                  row.designPreference || "N/A",
+              },
+              {
+                key: "status",
+                label: "Status",
+                render: (row) => <Badge variant={row.status}>{row.status}</Badge>,
+              },
+              {
+                key: "createdAt",
+                label: "Created",
+                render: (row) =>
+                  row.createdAt
+                    ? new Date(row.createdAt).toLocaleDateString()
+                    : "—",
+              },
+            ]}
+            data={filteredData}
+            actions={[
+              {
+                variant: "view",
+                label: "View",
+                icon: Eye,
+                onClick: (row) =>
+                  navigate(`/admin/design-request/${row._id}`),
+              },
+              {
+                variant: "delete",
+                label: "Delete",
+                icon: Trash2,
+                onClick: (row) =>
+                  handleDelete("designRequest", row._id),
+              },
+            ]}
+          />
+        );
+
+      case "bids":
+        return (
+          <AdminTable
+            columns={[
+              { key: "customerName", label: "Customer" },
+              { key: "buildingType", label: "Type" },
+              {
+                key: "totalArea",
+                label: "Area",
+                render: (row) => `${row.totalArea} sq ft`,
+              },
+              {
+                key: "estimatedBudget",
+                label: "Budget",
+                render: (row) =>
+                  `₹${row.estimatedBudget?.toLocaleString() || "N/A"}`,
+              },
+              {
+                key: "companyBids",
+                label: "Bids",
+                render: (row) => row.companyBids?.length || 0,
+              },
+              {
+                key: "status",
+                label: "Status",
+                render: (row) => <Badge variant={row.status}>{row.status}</Badge>,
+              },
+              {
+                key: "createdAt",
+                label: "Created",
+                render: (row) =>
+                  row.createdAt
+                    ? new Date(row.createdAt).toLocaleDateString()
+                    : "—",
+              },
+            ]}
+            data={filteredData}
+            actions={[
+              {
+                variant: "view",
+                label: "View",
+                icon: Eye,
+                onClick: (row) =>
+                  navigate(`/admin/bid/${row._id}`),
+              },
+              {
+                variant: "delete",
+                label: "Delete",
+                icon: Trash2,
+                onClick: (row) =>
+                  handleDelete("bid", row._id),
+              },
+            ]}
+          />
+        );
+
+      case "job-applications":
+        return (
+          <AdminTable
+            columns={[
+              { key: "fullName", label: "Applicant" },
+              { key: "email", label: "Email" },
+              { key: "positionApplying", label: "Position" },
+              { key: "compName", label: "Company" },
+              {
+                key: "experience",
+                label: "Exp",
+                render: (row) => `${row.experience} yrs`,
+              },
+              {
+                key: "expectedSalary",
+                label: "Salary",
+                render: (row) =>
+                  `₹${Number(row.expectedSalary || 0).toLocaleString()}`,
+              },
+              {
+                key: "status",
+                label: "Status",
+                render: (row) => <Badge variant={row.status}>{row.status}</Badge>,
+              },
+              {
+                key: "createdAt",
+                label: "Applied",
+                render: (row) =>
+                  row.createdAt
+                    ? new Date(row.createdAt).toLocaleDateString()
+                    : "—",
+              },
+            ]}
+            data={filteredData}
+            actions={[
+              {
+                variant: "view",
+                label: "View",
+                icon: Eye,
+                onClick: (row) =>
+                  navigate(`/admin/job-application/${row._id}`),
+              },
+              {
+                variant: "delete",
+                label: "Delete",
+                icon: Trash2,
+                onClick: (row) =>
+                  handleDelete("jobApplication", row._id),
+              },
+            ]}
+          />
+        );
+
+      default:
+        return <p>No data available</p>;
     }
   };
 
   return (
-    <div className="dashboard-container">
-      <header className="header">
-        <h1>🎯 Admin Dashboard</h1>
-        <div className="header-actions">
-          <button
-            className="btn btn-analytics"
-            onClick={() => navigate("/admin/revenue-analytics")}
-          >
-            📊 Revenue Analytics
-          </button>
-          <button className="btn btn-primary" onClick={fetchDashboard}>
-            🔄 Refresh Data
-          </button>
-          <button className="btn btn-secondary" onClick={handleLogout}>
-            🚪 Logout
-          </button>
-        </div>
-      </header>
-
-      <div className="stats-grid">
-        <div className="stat-card blue">
-          <h3>Total Customers</h3>
-          <div className="value">{counts?.customers ?? 0}</div>
-        </div>
-        <div className="stat-card purple">
-          <h3>Total Companies</h3>
-          <div className="value">{counts?.companies ?? 0}</div>
-        </div>
-        <div className="stat-card green">
-          <h3>Total Workers</h3>
-          <div className="value">{counts?.workers ?? 0}</div>
-        </div>
-        <div className="stat-card orange">
-          <h3>Active Projects</h3>
-          <div className="value">{stats?.activeProjects ?? 0}</div>
-        </div>
-        <div className="stat-card red">
-          <h3>Pending Requests</h3>
-          <div className="value">{stats?.pendingRequests ?? 0}</div>
-        </div>
-        <div className="stat-card indigo">
-          <h3>Open Bids</h3>
-          <div className="value">{stats?.openBids ?? 0}</div>
-        </div>
-      </div>
-
-      <div className="tabs">
-        <div className="tab-buttons">
-          <button
-            className={`tab-btn ${activeTab === "customers" ? "active" : ""}`}
-            onClick={() => {
-              setActiveTab("customers");
-              setSearch("");
-              setStatusFilter("all");
-            }}
-          >
-            Customers ({data.data.customers?.length ?? 0})
-          </button>
-          <button
-            className={`tab-btn ${activeTab === "companies" ? "active" : ""}`}
-            onClick={() => {
-              setActiveTab("companies");
-              setSearch("");
-              setStatusFilter("all");
-            }}
-            style={{ position: 'relative' }}
-          >
-            Companies ({data.data.companies?.length ?? 0})
-            {hasPendingCompanies && (
-              <span style={{
-                position: 'absolute',
-                top: 6,
-                right: 8,
-                backgroundColor: '#dc3545',
-                color: 'white',
-                borderRadius: '50%',
-                width: 10,
-                height: 10,
-                border: '2px solid white',
-                display: 'inline-block',
-              }} />
-            )}
-          </button>
-          <button
-            className={`tab-btn ${activeTab === "workers" ? "active" : ""}`}
-            onClick={() => {
-              setActiveTab("workers");
-              setSearch("");
-              setStatusFilter("all");
-            }}
-            style={{ position: 'relative' }}
-          >
-            Workers ({data.data.workers?.length ?? 0})
-            {hasPendingWorkers && (
-              <span style={{
-                position: 'absolute',
-                top: 6,
-                right: 8,
-                backgroundColor: '#dc3545',
-                color: 'white',
-                borderRadius: '50%',
-                width: 10,
-                height: 10,
-                border: '2px solid white',
-                display: 'inline-block',
-              }} />
-            )}
-          </button>
-          <button
-            className={`tab-btn ${
-              activeTab === "architect-hirings" ? "active" : ""
-            }`}
-            onClick={() => {
-              setActiveTab("architect-hirings");
-              setSearch("");
-              setStatusFilter("all");
-            }}
-          >
-            Architect Hirings ({data.data.architectHirings?.length ?? 0})
-          </button>
-          <button
-            className={`tab-btn ${
-              activeTab === "construction-projects" ? "active" : ""
-            }`}
-            onClick={() => {
-              setActiveTab("construction-projects");
-              setSearch("");
-              setStatusFilter("all");
-            }}
-            style={{ position: 'relative' }}
-          >
-            Construction Projects ({data.data.constructionProjects?.length ?? 0})
-            {Object.keys(unviewedComplaints).length > 0 && (
-              <span style={{
-                position: 'absolute',
-                top: '5px',
-                right: '5px',
-                backgroundColor: '#dc3545',
-                color: 'white',
-                borderRadius: '50%',
-                width: '10px',
-                height: '10px',
-                border: '2px solid white'
-              }} />
-            )}
-          </button>
-          <button
-            className={`tab-btn ${
-              activeTab === "design-requests" ? "active" : ""
-            }`}
-            onClick={() => {
-              setActiveTab("design-requests");
-              setSearch("");
-              setStatusFilter("all");
-            }}
-          >
-            Design Requests ({data.data.designRequests?.length ?? 0})
-          </button>
-          <button
-            className={`tab-btn ${activeTab === "bids" ? "active" : ""}`}
-            onClick={() => {
-              setActiveTab("bids");
-              setSearch("");
-              setStatusFilter("all");
-            }}
-          >
-            Bids ({data.data.bids?.length ?? 0})
-          </button>
-          <button
-            className={`tab-btn ${
-              activeTab === "job-applications" ? "active" : ""
-            }`}
-            onClick={() => {
-              setActiveTab("job-applications");
-              setSearch("");
-              setStatusFilter("all");
-            }}
-          >
-            Job Applications ({data.data.jobApplications?.length ?? 0})
-          </button>
-        </div>
-      </div>
-
-      <div className="content-section">
-        <div className="section-header">
-          <h2>
-            {activeTab
-              .split("-")
-              .map((s) => s[0]?.toUpperCase() + s.slice(1))
-              .join(" ")}
-          </h2>
-          <div className="search-filter">
-            <input
-              className="search-box"
-              placeholder={`Search ${activeTab}...`}
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
+    <AdminLayout>
+      <div className="dashboard-content">
+        {/* Page Header */}
+        <PageHeader
+          title="Admin Dashboard"
+          subtitle="Monitor and manage platform activities"
+          actions={
+            <ActionButton
+              label="Refresh"
+              icon={RefreshCw}
+              variant="primary"
+              onClick={fetchDashboard}
             />
-            <select
-              className="filter-select"
-              value={statusFilter}
-              onChange={(e) => setStatusFilter(e.target.value)}
-            >
-              <option value="all">All Status</option>
-              <option value="pending">Pending</option>
-              <option value="Pending">Pending (case)</option>
-              <option value="accepted">Accepted</option>
-              <option value="Accepted">Accepted (case)</option>
-              <option value="rejected">Rejected</option>
-              <option value="open">Open</option>
-              <option value="available">Available</option>
-              <option value="busy">Busy</option>
-              <option value="unavailable">Unavailable</option>
-            </select>
+          }
+        />
+
+        {/* Statistics Cards */}
+        <Section title="Overview" className="stats-section">
+          <div className="stats-grid">
+            <StatCard
+              title="Total Customers"
+              value={counts?.customers ?? 0}
+              icon={Users}
+              color="blue"
+            />
+            <StatCard
+              title="Total Companies"
+              value={counts?.companies ?? 0}
+              icon={Building2}
+              color="purple"
+            />
+            <StatCard
+              title="Total Workers"
+              value={counts?.workers ?? 0}
+              icon={Briefcase}
+              color="green"
+            />
+            <StatCard
+              title="Active Projects"
+              value={stats?.activeProjects ?? 0}
+              icon={BarChart3}
+              color="orange"
+            />
+            <StatCard
+              title="Pending Requests"
+              value={stats?.pendingRequests ?? 0}
+              icon={BarChart3}
+              color="red"
+            />
+            <StatCard
+              title="Open Bids"
+              value={stats?.openBids ?? 0}
+              icon={BarChart3}
+              color="indigo"
+            />
           </div>
-        </div>
+        </Section>
 
-        <div className="table-container">
-          {/* Render tables per tab */}
-          {activeTab === "customers" &&
-            (filteredData.length > 0 ? (
-              <table>
-                <thead>
-                  <tr>
-                    <th>Name</th>
-                    <th>Email</th>
-                    <th>Phone</th>
-                    <th>Date of Birth</th>
-                    <th>Joined Date</th>
-                    <th>Actions</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {filteredData.map((c) => (
-                    <tr key={c._id}>
-                      <td>{c.name}</td>
-                      <td>{c.email}</td>
-                      <td>{c.phone}</td>
-                      <td>
-                        {c.dob ? new Date(c.dob).toLocaleDateString() : "—"}
-                      </td>
-                      <td>
-                        {c.createdAt
-                          ? new Date(c.createdAt).toLocaleDateString()
-                          : "—"}
-                      </td>
-                      <td>
-                        <button
-                          className="action-btn view"
-                          onClick={() => navigate(`/admin/customer/${c._id}`)}
-                        >
-                          View
-                        </button>
-                        <button
-                          className="action-btn delete"
-                          onClick={() => handleDelete("customer", c._id)}
-                        >
-                          Delete
-                        </button>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            ) : (
-              <div className="empty-state">
-                <h3>No Customers Found</h3>
-              </div>
-            ))}
+        {/* Tabs Section */}
+        <Section title="Data Management" className="tabs-section">
+          <div className="tabs-container">
+            <div className="tab-list">
+              {[
+                {
+                  id: "customers",
+                  label: "Customers",
+                  count: data.data.customers?.length ?? 0,
+                },
+                {
+                  id: "companies",
+                  label: "Companies",
+                  count: data.data.companies?.length ?? 0,
+                  pending: hasPendingCompanies,
+                },
+                {
+                  id: "workers",
+                  label: "Workers",
+                  count: data.data.workers?.length ?? 0,
+                  pending: hasPendingWorkers,
+                },
+                {
+                  id: "architect-hirings",
+                  label: "Architect Hirings",
+                  count: data.data.architectHirings?.length ?? 0,
+                },
+                {
+                  id: "construction-projects",
+                  label: "Projects",
+                  count: data.data.constructionProjects?.length ?? 0,
+                },
+                {
+                  id: "design-requests",
+                  label: "Design Requests",
+                  count: data.data.designRequests?.length ?? 0,
+                },
+                {
+                  id: "bids",
+                  label: "Bids",
+                  count: data.data.bids?.length ?? 0,
+                },
+                {
+                  id: "job-applications",
+                  label: "Job Applications",
+                  count: data.data.jobApplications?.length ?? 0,
+                },
+              ].map((tab) => (
+                <button
+                  key={tab.id}
+                  className={`tab-item ${activeTab === tab.id ? "active" : ""}`}
+                  onClick={() => {
+                    setActiveTab(tab.id);
+                    setSearch("");
+                    setStatusFilter("all");
+                  }}
+                >
+                  <span>
+                    {tab.label}
+                    <span className="tab-count">{tab.count}</span>
+                  </span>
+                  {tab.pending && <span className="tab-badge"></span>}
+                </button>
+              ))}
+            </div>
 
-          {activeTab === "companies" &&
-            (filteredData.length > 0 ? (
-              <table>
-                <thead>
-                  <tr>
-                    <th>Company Name</th>
-                    <th>Contact Person</th>
-                    <th>Email</th>
-                    <th>Phone</th>
-                    <th>Location</th>
-                    <th>Size</th>
-                    <th>Projects Completed</th>
-                    <th>Status</th>
-                    <th>Actions</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {filteredData.map((c) => (
-                    <tr key={c._id}>
-                      <td>{c.companyName}</td>
-                      <td>{c.contactPerson}</td>
-                      <td>{c.email}</td>
-                      <td>{c.phone}</td>
-                      <td>{c.location?.city || "N/A"}</td>
-                      <td>{c.size || "N/A"}</td>
-                      <td>{c.projectsCompleted || 0}</td>
-                      <td>
-                        <span className={`badge ${c.status}`}>{c.status}</span>
-                      </td>
-                      <td>
-                        <button
-                          className="action-btn view"
-                          onClick={() => navigate(`/admin/company/${c._id}`)}
-                        >
-                          View
-                        </button>
-                        {c.status === 'pending' && (
-                          <>
-                            <button
-                              className="action-btn verify"
-                              style={{ background: '#28a745', color: 'white', marginLeft: 4 }}
-                              onClick={() => handleVerifyReject('company', c._id, 'verify')}
-                            >
-                              Verify
-                            </button>
-                            <button
-                              className="action-btn reject"
-                              style={{ background: '#dc3545', color: 'white', marginLeft: 4 }}
-                              onClick={() => handleVerifyReject('company', c._id, 'reject')}
-                            >
-                              Reject
-                            </button>
-                          </>
-                        )}
-                        <button
-                          className="action-btn delete"
-                          onClick={() => handleDelete("company", c._id)}
-                        >
-                          Delete
-                        </button>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            ) : (
-              <div className="empty-state">
-                <h3>No Companies Found</h3>
+            {/* Search and Filter */}
+            <div className="search-filter-container">
+              <div className="search-input-wrapper">
+                <input
+                  type="text"
+                  className="search-input"
+                  placeholder={`Search ${activeTab}...`}
+                  value={search}
+                  onChange={(e) => setSearch(e.target.value)}
+                />
               </div>
-            ))}
+              <select
+                className="filter-select"
+                value={statusFilter}
+                onChange={(e) => setStatusFilter(e.target.value)}
+              >
+                <option value="all">All Status</option>
+                <option value="pending">Pending</option>
+                <option value="Pending">Pending (case)</option>
+                <option value="accepted">Accepted</option>
+                <option value="Accepted">Accepted (case)</option>
+                <option value="rejected">Rejected</option>
+                <option value="open">Open</option>
+                <option value="available">Available</option>
+                <option value="busy">Busy</option>
+                <option value="unavailable">Unavailable</option>
+              </select>
+            </div>
 
-          {activeTab === "workers" &&
-            (filteredData.length > 0 ? (
-              <table>
-                <thead>
-                  <tr>
-                    <th>Name</th>
-                    <th>Email</th>
-                    <th>Specialization</th>
-                    <th>Experience</th>
-                    <th>Rating</th>
-                    <th>Availability</th>
-                    <th>Is Architect</th>
-                    <th>Status</th>
-                    <th>Actions</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {filteredData.map((w) => (
-                    <tr key={w._id} data-status={w.availability}>
-                      <td>{w.name}</td>
-                      <td>{w.email}</td>
-                      <td>{w.specialization}</td>
-                      <td>{w.experience ?? "0"} years</td>
-                      <td>
-                        <span className="rating">
-                          ⭐ {Number(w.rating ?? 0).toFixed(1)}
-                        </span>
-                      </td>
-                      <td>
-                        <span className={`badge ${w.availability}`}>
-                          {w.availability}
-                        </span>
-                      </td>
-                      <td>{w.isArchitect ? "Yes" : "No"}</td>
-                      <td>
-                        <span className={`badge ${w.status}`}>{w.status}</span>
-                      </td>
-                      <td>
-                        <button
-                          className="action-btn view"
-                          onClick={() => navigate(`/admin/worker/${w._id}`)}
-                        >
-                          View
-                        </button>
-                        {w.status === 'pending' && (
-                          <>
-                            <button
-                              className="action-btn verify"
-                              style={{ background: '#28a745', color: 'white', marginLeft: 4 }}
-                              onClick={() => handleVerifyReject('worker', w._id, 'verify')}
-                            >
-                              Verify
-                            </button>
-                            <button
-                              className="action-btn reject"
-                              style={{ background: '#dc3545', color: 'white', marginLeft: 4 }}
-                              onClick={() => handleVerifyReject('worker', w._id, 'reject')}
-                            >
-                              Reject
-                            </button>
-                          </>
-                        )}
-                        <button
-                          className="action-btn delete"
-                          onClick={() => handleDelete("worker", w._id)}
-                        >
-                          Delete
-                        </button>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            ) : (
-              <div className="empty-state">
-                <h3>No Workers Found</h3>
-              </div>
-            ))}
-
-          {activeTab === "architect-hirings" &&
-            (filteredData.length > 0 ? (
-              <table>
-                <thead>
-                  <tr>
-                    <th>Project Name</th>
-                    <th>Customer</th>
-                    <th>Design Type</th>
-                    <th>Plot Size</th>
-                    <th>Budget</th>
-                    <th>Status</th>
-                    <th>Created</th>
-                    <th>Actions</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {filteredData.map((h) => (
-                    <tr key={h._id} data-status={h.status}>
-                      <td>{h.projectName}</td>
-                      <td>
-                        {h.customer?.name || h.customerDetails?.fullName || "—"}
-                      </td>
-                      <td>{h.designRequirements?.designType || "—"}</td>
-                      <td>{h.plotInformation?.plotSize || "—"}</td>
-                      <td>{h.additionalDetails?.budget ?? "N/A"}</td>
-                      <td>
-                        <span className={`badge ${h.status}`}>{h.status}</span>
-                      </td>
-                      <td>
-                        {h.createdAt
-                          ? new Date(h.createdAt).toLocaleDateString()
-                          : "—"}
-                      </td>
-                      <td>
-                        <button
-                          className="action-btn view"
-                          onClick={() =>
-                            navigate(`/admin/architect-hiring/${h._id}`)
-                          }
-                        >
-                          View
-                        </button>
-                        <button
-                          className="action-btn delete"
-                          onClick={() => handleDelete("architectHiring", h._id)}
-                        >
-                          Delete
-                        </button>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            ) : (
-              <div className="empty-state">
-                <h3>No Architect Hirings Found</h3>
-              </div>
-            ))}
-
-          {activeTab === "construction-projects" &&
-            (filteredData.length > 0 ? (
-              <table>
-                <thead>
-                  <tr>
-                    <th>Project</th>
-                    <th>Customer</th>
-                    <th>Building Type</th>
-                    <th>Total Area</th>
-                    <th>Budget</th>
-                    <th>Progress</th>
-                    <th>Status</th>
-                    <th>Actions</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {filteredData.map((p) => (
-                    <tr key={p._id} data-status={p.status}>
-                      <td>
-                        {p.projectName}
-                        {unviewedComplaints[p._id] && (
-                          <span style={{
-                            marginLeft: '8px',
-                            backgroundColor: '#dc3545',
-                            color: 'white',
-                            borderRadius: '50%',
-                            width: '20px',
-                            height: '20px',
-                            display: 'inline-flex',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            fontSize: '11px',
-                            fontWeight: 'bold',
-                            verticalAlign: 'middle'
-                          }}>
-                            {unviewedComplaints[p._id]}
-                          </span>
-                        )}
-                      </td>
-                      <td>{p.customerName || p.customerId?.name}</td>
-                      <td>{p.buildingType}</td>
-                      <td>{p.totalArea} sq ft</td>
-                      <td>₹{p.estimatedBudget?.toLocaleString() || "N/A"}</td>
-                      <td>
-                        <div className="progress-bar">
-                          <div
-                            className="progress-fill"
-                            style={{ width: `${p.completionPercentage ?? 0}%` }}
-                          />
-                        </div>
-                        {p.completionPercentage ?? 0}%
-                      </td>
-                      <td>
-                        <span className={`badge ${p.status}`}>{p.status}</span>
-                      </td>
-                      <td>
-                        <button
-                          className="action-btn view"
-                          onClick={() =>
-                            navigate(`/admin/construction-project/${p._id}`)
-                          }
-                        >
-                          View
-                        </button>
-                        <button
-                          className="action-btn delete"
-                          onClick={() =>
-                            handleDelete("constructionProject", p._id)
-                          }
-                        >
-                          Delete
-                        </button>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            ) : (
-              <div className="empty-state">
-                <h3>No Construction Projects Found</h3>
-              </div>
-            ))}
-
-          {activeTab === "design-requests" &&
-            (filteredData.length > 0 ? (
-              <table>
-                <thead>
-                  <tr>
-                    <th>Project</th>
-                    <th>Customer</th>
-                    <th>Room Type</th>
-                    <th>Room Size</th>
-                    <th>Preference</th>
-                    <th>Status</th>
-                    <th>Created</th>
-                    <th>Actions</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {filteredData.map((r) => (
-                    <tr key={r._id} data-status={r.status}>
-                      <td>{r.projectName}</td>
-                      <td>{r.fullName || r.customerId?.name}</td>
-                      <td>{r.roomType}</td>
-                      <td>
-                        {r.roomSize
-                          ? `${r.roomSize.length} x ${r.roomSize.width} ${r.roomSize.unit}`
-                          : "—"}
-                      </td>
-                      <td>{r.designPreference || "N/A"}</td>
-                      <td>
-                        <span className={`badge ${r.status}`}>{r.status}</span>
-                      </td>
-                      <td>
-                        {r.createdAt
-                          ? new Date(r.createdAt).toLocaleDateString()
-                          : "—"}
-                      </td>
-                      <td>
-                        <button
-                          className="action-btn view"
-                          onClick={() =>
-                            navigate(`/admin/design-request/${r._id}`)
-                          }
-                        >
-                          View
-                        </button>
-                        <button
-                          className="action-btn delete"
-                          onClick={() => handleDelete("designRequest", r._id)}
-                        >
-                          Delete
-                        </button>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            ) : (
-              <div className="empty-state">
-                <h3>No Design Requests Found</h3>
-              </div>
-            ))}
-
-          {activeTab === "bids" &&
-            (filteredData.length > 0 ? (
-              <table>
-                <thead>
-                  <tr>
-                    <th>Customer</th>
-                    <th>Building Type</th>
-                    <th>Total Area</th>
-                    <th>Budget</th>
-                    <th>Total Bids</th>
-                    <th>Status</th>
-                    <th>Created</th>
-                    <th>Actions</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {filteredData.map((b) => (
-                    <tr key={b._id} data-status={b.status}>
-                      <td>{b.customerName}</td>
-                      <td>{b.buildingType}</td>
-                      <td>{b.totalArea} sq ft</td>
-                      <td>₹{b.estimatedBudget?.toLocaleString() || "N/A"}</td>
-                      <td>{b.companyBids?.length ?? 0}</td>
-                      <td>
-                        <span className={`badge ${b.status}`}>{b.status}</span>
-                      </td>
-                      <td>
-                        {b.createdAt
-                          ? new Date(b.createdAt).toLocaleDateString()
-                          : "—"}
-                      </td>
-                      <td>
-                        <button
-                          className="action-btn view"
-                          onClick={() => navigate(`/admin/bid/${b._id}`)}
-                        >
-                          View
-                        </button>
-                        <button
-                          className="action-btn delete"
-                          onClick={() => handleDelete("bid", b._id)}
-                        >
-                          Delete
-                        </button>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            ) : (
-              <div className="empty-state">
-                <h3>No Bids Found</h3>
-              </div>
-            ))}
-
-          {activeTab === "job-applications" &&
-            (filteredData.length > 0 ? (
-              <table>
-                <thead>
-                  <tr>
-                    <th>Applicant</th>
-                    <th>Email</th>
-                    <th>Position</th>
-                    <th>Company</th>
-                    <th>Experience</th>
-                    <th>Expected Salary</th>
-                    <th>Status</th>
-                    <th>Applied</th>
-                    <th>Actions</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {filteredData.map((a) => (
-                    <tr key={a._id} data-status={a.status}>
-                      <td>{a.fullName}</td>
-                      <td>{a.email}</td>
-                      <td>{a.positionApplying}</td>
-                      <td>{a.compName}</td>
-                      <td>{a.experience} years</td>
-                      <td>₹{Number(a.expectedSalary || 0).toLocaleString()}</td>
-                      <td>
-                        <span className={`badge ${a.status}`}>{a.status}</span>
-                      </td>
-                      <td>
-                        {a.createdAt
-                          ? new Date(a.createdAt).toLocaleDateString()
-                          : "—"}
-                      </td>
-                      <td>
-                        <button
-                          className="action-btn view"
-                          onClick={() =>
-                            navigate(`/admin/job-application/${a._id}`)
-                          }
-                        >
-                          View
-                        </button>
-                        <button
-                          className="action-btn delete"
-                          onClick={() => handleDelete("jobApplication", a._id)}
-                        >
-                          Delete
-                        </button>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            ) : (
-              <div className="empty-state">
-                <h3>No Job Applications Found</h3>
-              </div>
-            ))}
-        </div>
+            {/* Table */}
+            <div className="table-section">
+              {filteredData.length > 0 ? (
+                renderTableByTab()
+              ) : (
+                <div className="no-data-state">
+                  <p>No {activeTab} found</p>
+                </div>
+              )}
+            </div>
+          </div>
+        </Section>
       </div>
-    </div>
+    </AdminLayout>
   );
 };
 

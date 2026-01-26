@@ -1,5 +1,13 @@
 import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
+import AdminLayout from "../../../components/admin/AdminLayout";
+import {
+  Card, Section, DataRow, Badge, ActionButton, PageHeader, Spinner,
+} from "../../../components/admin/AdminUIComponents";
+import {
+  ArrowLeft, Trash2, User, Mail, Phone, MapPin, Calendar, Clock,
+  Home, Compass, Ruler, Layers, PenTool, IndianRupee,
+} from "lucide-react";
 import "./ArchitectHiringDetail.css";
 
 const ArchitectHiringDetail = () => {
@@ -27,11 +35,7 @@ const ArchitectHiringDetail = () => {
   }, [id]);
 
   const handleDelete = async () => {
-    if (
-      !window.confirm(
-        "Delete this architect hiring request? This cannot be undone."
-      )
-    )
+    if (!window.confirm("Delete this architect hiring request? This cannot be undone."))
       return;
     try {
       const res = await fetch(`/api/admin/delete-architectHiring/${id}`, {
@@ -47,216 +51,165 @@ const ArchitectHiringDetail = () => {
     }
   };
 
-  if (loading)
-    return <div className="ahd-loading">Loading architect hiring…</div>;
-  if (error) return <div className="ahd-error">Error: {error}</div>;
-  if (!hiring)
-    return <div className="ahd-empty">Architect hiring not found.</div>;
+  if (loading) return <AdminLayout><div className="detail-loading"><Spinner size="lg" /><p>Loading...</p></div></AdminLayout>;
+  if (error) return <AdminLayout><div className="detail-error"><p>Error: {error}</p></div></AdminLayout>;
+  if (!hiring) return <AdminLayout><div className="detail-empty"><p>Architect hiring not found.</p></div></AdminLayout>;
 
-  const fmtDate = (d) =>
-    d ? new Date(d).toLocaleDateString() : "Not specified";
-  const fmtDateTime = (d) =>
-    d ? new Date(d).toLocaleString() : "Not specified";
+  const fmtDate = (d) => d ? new Date(d).toLocaleDateString() : "Not specified";
+  const fmtDateTime = (d) => d ? new Date(d).toLocaleString() : "Not specified";
+
+  const getStatusVariant = (s) => {
+    const st = String(s).toLowerCase();
+    if (st === "completed") return "success";
+    if (st === "accepted" || st === "in-progress") return "info";
+    if (st === "pending") return "warning";
+    return "default";
+  };
 
   return (
-    <div className="ahd-container">
-      <header className="ahd-header">
-        <h1 className="ahd-title">🏗️ Architect Hiring Details</h1>
-        <div className="ahd-actions">
-          <button
-            className="ahd-btn ahd-back"
-            onClick={() => navigate("/admin/admindashboard")}
-          >
-            ← Back to Dashboard
-          </button>
-          <button className="ahd-btn ahd-delete" onClick={handleDelete}>
-            🗑️ Delete
-          </button>
-        </div>
-      </header>
+    <AdminLayout>
+      <div className="admin-detail-page">
+        <PageHeader
+          title={hiring.projectName || "Architect Hiring"}
+          subtitle={`Request ID: ${hiring._id}`}
+          actions={
+            <div className="detail-header-actions">
+              <ActionButton label="Back to Dashboard" icon={ArrowLeft} variant="secondary" onClick={() => navigate("/admin/admindashboard")} />
+              <ActionButton label="Delete" icon={Trash2} variant="danger" onClick={handleDelete} />
+            </div>
+          }
+        />
 
-      <main className="ahd-card">
-        <section className="ahd-section-header">
-          <h2 className="ahd-section-title">
-            {hiring.projectName || "Project"}
-          </h2>
-          <p className="ahd-subtitle">Request ID: {hiring._id}</p>
-        </section>
-
-        <h3 className="ahd-section-heading">Status & Basic Info</h3>
-        <div className="ahd-grid">
-          <div className="ahd-item">
-            <label className="ahd-label">Status</label>
-            <div className="ahd-value">
-              <span className={`ahd-badge ${String(hiring.status)}`}>
-                {hiring.status}
-              </span>
+        <div className="detail-kpi-row">
+          <div className="detail-kpi-card kpi-blue">
+            <PenTool size={20} />
+            <div>
+              <span className="kpi-val">{hiring.designRequirements?.designType ?? "—"}</span>
+              <span className="kpi-lbl">Design Type</span>
             </div>
           </div>
-          <div className="ahd-item">
-            <label className="ahd-label">Created Date</label>
-            <div className="ahd-value">{fmtDate(hiring.createdAt)}</div>
-          </div>
-          <div className="ahd-item">
-            <label className="ahd-label">Budget</label>
-            <div className="ahd-value">
-              {hiring.additionalDetails?.budget ?? "Not specified"}
+          <div className="detail-kpi-card kpi-green">
+            <Badge variant={getStatusVariant(hiring.status)}>
+              {hiring.status}
+            </Badge>
+            <div>
+              <span className="kpi-lbl">Status</span>
             </div>
           </div>
-          <div className="ahd-item">
-            <label className="ahd-label">Target Completion</label>
-            <div className="ahd-value">
-              {hiring.additionalDetails?.completionDate
-                ? fmtDate(hiring.additionalDetails.completionDate)
-                : "Not specified"}
+          <div className="detail-kpi-card kpi-purple">
+            <IndianRupee size={20} />
+            <div>
+              <span className="kpi-val">{hiring.additionalDetails?.budget ?? "N/A"}</span>
+              <span className="kpi-lbl">Budget</span>
+            </div>
+          </div>
+          <div className="detail-kpi-card kpi-orange">
+            <Calendar size={20} />
+            <div>
+              <span className="kpi-val">{fmtDate(hiring.createdAt)}</span>
+              <span className="kpi-lbl">Created</span>
             </div>
           </div>
         </div>
 
-        <h3 className="ahd-section-heading">Customer Details</h3>
-        <div className="ahd-grid">
-          <div className="ahd-item">
-            <label className="ahd-label">Full Name</label>
-            <div className="ahd-value">
-              {hiring.customerDetails?.fullName ?? "—"}
+        <Section title="Status & Basic Info">
+          <Card>
+            <div className="detail-grid">
+              <DataRow label="Status">
+                <Badge variant={getStatusVariant(hiring.status)}>{hiring.status}</Badge>
+              </DataRow>
+              <DataRow label="Created Date">{fmtDate(hiring.createdAt)}</DataRow>
+              <DataRow label="Budget">{hiring.additionalDetails?.budget ?? "Not specified"}</DataRow>
+              <DataRow label="Target Completion">
+                {hiring.additionalDetails?.completionDate
+                  ? fmtDate(hiring.additionalDetails.completionDate)
+                  : "Not specified"}
+              </DataRow>
             </div>
-          </div>
-          <div className="ahd-item">
-            <label className="ahd-label">Email</label>
-            <div className="ahd-value">
-              {hiring.customerDetails?.email ?? "—"}
-            </div>
-          </div>
-          <div className="ahd-item">
-            <label className="ahd-label">Contact Number</label>
-            <div className="ahd-value">
-              {hiring.customerDetails?.contactNumber ?? "—"}
-            </div>
-          </div>
-        </div>
+          </Card>
+        </Section>
 
-        <h3 className="ahd-section-heading">Customer Address</h3>
-        <div className="ahd-grid">
-          <div className="ahd-item">
-            <label className="ahd-label">Street Address</label>
-            <div className="ahd-value">
-              {hiring.customerAddress?.streetAddress ?? "—"}
+        <Section title="Customer Details">
+          <Card>
+            <div className="detail-grid">
+              <DataRow label="Full Name">{hiring.customerDetails?.fullName ?? "—"}</DataRow>
+              <DataRow label="Email">{hiring.customerDetails?.email ?? "—"}</DataRow>
+              <DataRow label="Contact Number">{hiring.customerDetails?.contactNumber ?? "—"}</DataRow>
             </div>
-          </div>
-          <div className="ahd-item">
-            <label className="ahd-label">City</label>
-            <div className="ahd-value">
-              {hiring.customerAddress?.city ?? "—"}
-            </div>
-          </div>
-          <div className="ahd-item">
-            <label className="ahd-label">State</label>
-            <div className="ahd-value">
-              {hiring.customerAddress?.state ?? "—"}
-            </div>
-          </div>
-          <div className="ahd-item">
-            <label className="ahd-label">Zip Code</label>
-            <div className="ahd-value">
-              {hiring.customerAddress?.zipCode ?? "—"}
-            </div>
-          </div>
-        </div>
+          </Card>
+        </Section>
 
-        <h3 className="ahd-section-heading">Plot Information</h3>
-        <div className="ahd-grid">
-          <div className="ahd-item">
-            <label className="ahd-label">Plot Location</label>
-            <div className="ahd-value">
-              {hiring.plotInformation?.plotLocation ?? "—"}
+        <Section title="Customer Address">
+          <Card>
+            <div className="detail-grid">
+              <DataRow label="Street Address">{hiring.customerAddress?.streetAddress ?? "—"}</DataRow>
+              <DataRow label="City">{hiring.customerAddress?.city ?? "—"}</DataRow>
+              <DataRow label="State">{hiring.customerAddress?.state ?? "—"}</DataRow>
+              <DataRow label="Zip Code">{hiring.customerAddress?.zipCode ?? "—"}</DataRow>
             </div>
-          </div>
-          <div className="ahd-item">
-            <label className="ahd-label">Plot Size</label>
-            <div className="ahd-value">
-              {hiring.plotInformation?.plotSize ?? "—"}
-            </div>
-          </div>
-          <div className="ahd-item">
-            <label className="ahd-label">Plot Orientation</label>
-            <div className="ahd-value">
-              {hiring.plotInformation?.plotOrientation ?? "—"}
-            </div>
-          </div>
-        </div>
+          </Card>
+        </Section>
 
-        <h3 className="ahd-section-heading">Design Requirements</h3>
-        <div className="ahd-grid">
-          <div className="ahd-item">
-            <label className="ahd-label">Design Type</label>
-            <div className="ahd-value">
-              {hiring.designRequirements?.designType ?? "—"}
+        <Section title="Plot Information">
+          <Card>
+            <div className="detail-grid">
+              <DataRow label="Plot Location">{hiring.plotInformation?.plotLocation ?? "—"}</DataRow>
+              <DataRow label="Plot Size">{hiring.plotInformation?.plotSize ?? "—"}</DataRow>
+              <DataRow label="Plot Orientation">{hiring.plotInformation?.plotOrientation ?? "—"}</DataRow>
             </div>
-          </div>
-          <div className="ahd-item">
-            <label className="ahd-label">Architectural Style</label>
-            <div className="ahd-value">
-              {hiring.designRequirements?.architecturalStyle ?? "—"}
+          </Card>
+        </Section>
+
+        <Section title="Design Requirements">
+          <Card>
+            <div className="detail-grid">
+              <DataRow label="Design Type">{hiring.designRequirements?.designType ?? "—"}</DataRow>
+              <DataRow label="Architectural Style">{hiring.designRequirements?.architecturalStyle ?? "—"}</DataRow>
+              <DataRow label="Number of Floors">{hiring.designRequirements?.numFloors ?? "—"}</DataRow>
+              {hiring.designRequirements?.specialFeatures && (
+                <DataRow label="Special Features">{hiring.designRequirements.specialFeatures}</DataRow>
+              )}
             </div>
-          </div>
-          <div className="ahd-item">
-            <label className="ahd-label">Number of Floors</label>
-            <div className="ahd-value">
-              {hiring.designRequirements?.numFloors ?? "—"}
-            </div>
-          </div>
-          {hiring.designRequirements?.specialFeatures && (
-            <div className="ahd-item ahd-full">
-              <label className="ahd-label">Special Features</label>
-              <div className="ahd-value">
-                {hiring.designRequirements.specialFeatures}
-              </div>
-            </div>
-          )}
-        </div>
+          </Card>
+        </Section>
 
         {Array.isArray(hiring.designRequirements?.floorRequirements) &&
           hiring.designRequirements.floorRequirements.length > 0 && (
-            <>
-              <h3 className="ahd-section-heading">Floor Requirements</h3>
+          <Section title="Floor Requirements">
+            <div className="detail-items-grid">
               {hiring.designRequirements.floorRequirements.map((floor, i) => (
-                <div className="ahd-floor-card" key={i}>
-                  <strong>Floor {floor.floorNumber}:</strong>{" "}
-                  {floor.details || "No details provided"}
-                </div>
+                <Card key={i} className="detail-floor-card">
+                  <div className="floor-header">
+                    <Badge variant="info">Floor {floor.floorNumber}</Badge>
+                  </div>
+                  <p className="floor-desc">{floor.details || "No details provided"}</p>
+                </Card>
               ))}
-            </>
-          )}
-
-        {hiring.worker && (
-          <>
-            <h3 className="ahd-section-heading">Assigned Worker</h3>
-            <div className="ahd-grid">
-              <div className="ahd-item">
-                <label className="ahd-label">Worker Name</label>
-                <div className="ahd-value">{hiring.worker.name}</div>
-              </div>
-              <div className="ahd-item">
-                <label className="ahd-label">Worker Email</label>
-                <div className="ahd-value">{hiring.worker.email}</div>
-              </div>
             </div>
-          </>
+          </Section>
         )}
 
-        <h3 className="ahd-section-heading">Timestamps</h3>
-        <div className="ahd-grid">
-          <div className="ahd-item">
-            <label className="ahd-label">Created At</label>
-            <div className="ahd-value">{fmtDateTime(hiring.createdAt)}</div>
-          </div>
-          <div className="ahd-item">
-            <label className="ahd-label">Last Updated</label>
-            <div className="ahd-value">{fmtDateTime(hiring.updatedAt)}</div>
-          </div>
-        </div>
-      </main>
-    </div>
+        {hiring.worker && (
+          <Section title="Assigned Worker">
+            <Card>
+              <div className="detail-grid">
+                <DataRow label="Worker Name">{hiring.worker.name}</DataRow>
+                <DataRow label="Worker Email">{hiring.worker.email}</DataRow>
+              </div>
+            </Card>
+          </Section>
+        )}
+
+        <Section title="Timestamps">
+          <Card>
+            <div className="detail-grid">
+              <DataRow label="Created At">{fmtDateTime(hiring.createdAt)}</DataRow>
+              <DataRow label="Last Updated">{fmtDateTime(hiring.updatedAt)}</DataRow>
+            </div>
+          </Card>
+        </Section>
+      </div>
+    </AdminLayout>
   );
 };
 

@@ -1,5 +1,17 @@
 import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
+import { ArrowLeft, Trash2, Star } from "lucide-react";
+import AdminLayout from "../../../components/admin/AdminLayout";
+import {
+  Card,
+  PageHeader,
+  Section,
+  DataRow,
+  Badge,
+  ActionButton,
+  Spinner,
+  KPICard,
+} from "../../../components/admin/AdminUIComponents";
 import "./AdminWorkerDetail.css";
 
 const AdminWorkerDetail = () => {
@@ -8,7 +20,6 @@ const AdminWorkerDetail = () => {
   const [worker, setWorker] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const apiBase = ""; 
 
   useEffect(() => {
     const fetchWorker = async () => {
@@ -42,223 +53,267 @@ const AdminWorkerDetail = () => {
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Delete failed");
       alert(data.message || "Worker deleted");
-      navigate("/admindashboard");
+      navigate("/admin/admindashboard");
     } catch (err) {
       alert("Error deleting worker: " + err.message);
     }
   };
 
-  if (loading) return <div className="awd-loading">Loading worker…</div>;
-  if (error) return <div className="awd-error">Error: {error}</div>;
-  if (!worker) return <div className="awd-empty">Worker not found.</div>;
-
   const fmtDate = (d) =>
     d ? new Date(d).toLocaleDateString() : "Not specified";
 
-  return (
-    <div className="awd-container">
-      <header className="awd-header">
-        <h1 className="awd-title">Worker Details</h1>
-        <div className="awd-actions">
-          <button
-            className="awd-btn awd-back"
+  if (loading) {
+    return (
+      <AdminLayout>
+        <div className="loading-container">
+          <Spinner size="lg" />
+          <p>Loading worker details...</p>
+        </div>
+      </AdminLayout>
+    );
+  }
+
+  if (error) {
+    return (
+      <AdminLayout>
+        <div className="error-container">
+          <h2>Error Loading Worker</h2>
+          <p>{error}</p>
+        </div>
+      </AdminLayout>
+    );
+  }
+
+  if (!worker) {
+    return (
+      <AdminLayout>
+        <div className="error-container">
+          <h2>Worker Not Found</h2>
+          <ActionButton
+            label="Back to Dashboard"
+            variant="primary"
             onClick={() => navigate("/admin/admindashboard")}
-          >
-            ← Back to Dashboard
-          </button>
-          <button className="awd-btn awd-delete" onClick={handleDelete}>
-            🗑️ Delete
-          </button>
+          />
         </div>
-      </header>
+      </AdminLayout>
+    );
+  }
 
-      <main className="awd-card">
-        <section className="awd-section awd-section-header">
-          <h2 className="awd-section-title">{worker.name || "Worker"}</h2>
-          <p className="awd-subtitle">
-            Worker ID: {worker._id}{" "}
-            {worker.role ? `| Role: ${worker.role}` : ""}{" "}
-            {worker.availability
-              ? `| Availability: ${worker.availability}`
-              : ""}
-          </p>
-        </section>
-
-        <h3 className="awd-section-heading">Personal Information</h3>
-        <div className="awd-grid">
-          <div className="awd-item">
-            <label className="awd-label">Email</label>
-            <div className="awd-value">{worker.email || "—"}</div>
-          </div>
-
-          <div className="awd-item">
-            <label className="awd-label">Phone</label>
-            <div className="awd-value">{worker.phone || "—"}</div>
-          </div>
-
-          <div className="awd-item">
-            <label className="awd-label">Date of Birth</label>
-            <div className="awd-value">
-              {worker.dob ? fmtDate(worker.dob) : "—"}
+  return (
+    <AdminLayout>
+      <div className="detail-page">
+        {/* Page Header */}
+        <PageHeader
+          title={worker.name || "Worker"}
+          subtitle={`Worker ID: ${worker._id}`}
+          actions={
+            <div className="header-actions">
+              <ActionButton
+                label="Back"
+                icon={ArrowLeft}
+                variant="secondary"
+                onClick={() => navigate("/admin/admindashboard")}
+              />
+              <ActionButton
+                label="Delete"
+                icon={Trash2}
+                variant="danger"
+                onClick={handleDelete}
+              />
             </div>
-          </div>
+          }
+        />
 
-          <div className="awd-item">
-            <label className="awd-label">Aadhaar Number</label>
-            <div className="awd-value">
-              {worker.aadharNumber || worker.aadhaarNumber || "—"}
-            </div>
+        {/* Worker Overview */}
+        <Section title="Worker Overview">
+          <div className="overview-grid">
+            <KPICard
+              title="Rating"
+              value={Number(worker.rating || 0).toFixed(1)}
+              unit="⭐"
+              icon={Star}
+              color="orange"
+            />
+            <KPICard
+              title="Experience"
+              value={worker.experience || 0}
+              unit="years"
+              color="blue"
+            />
+            {worker.isArchitect && (
+              <Card style={{ padding: "16px" }}>
+                <Badge variant="primary">Architect</Badge>
+              </Card>
+            )}
           </div>
+        </Section>
 
-          {worker.profileImage && (
-            <div className="awd-item awd-full">
-              <label className="awd-label">Profile Image</label>
-              <div className="awd-value">
-                <img
-                  className="awd-img"
-                  src={worker.profileImage}
-                  alt="Profile"
-                />
+        {/* Personal Information */}
+        <Section title="Personal Information">
+          <Card>
+            <DataRow label="Email">{worker.email || "—"}</DataRow>
+            <DataRow label="Phone">{worker.phone || "—"}</DataRow>
+            <DataRow label="Date of Birth">{fmtDate(worker.dob)}</DataRow>
+            <DataRow label="Address">
+              {worker.address || "—"}
+            </DataRow>
+            <DataRow label="City">
+              {worker.city || "—"}
+            </DataRow>
+          </Card>
+        </Section>
+
+        {/* Professional Information */}
+        <Section title="Professional Information">
+          <Card>
+            <DataRow label="Specialization">
+              {worker.specialization || "—"}
+            </DataRow>
+            <DataRow label="Availability">
+              <Badge variant={worker.availability || "unavailable"}>
+                {worker.availability || "Unavailable"}
+              </Badge>
+            </DataRow>
+            <DataRow label="Status">
+              <Badge variant={worker.status || "pending"}>
+                {worker.status || "Pending"}
+              </Badge>
+            </DataRow>
+            {worker.bio && (
+              <div style={{ marginTop: "16px", paddingTop: "16px", borderTop: "1px solid rgba(0,0,0,0.1)" }}>
+                <p style={{ fontSize: "12px", color: "#6b7280", margin: "0 0 8px 0" }}>
+                  BIO
+                </p>
+                <p style={{ fontSize: "14px", color: "#1f2937", lineHeight: "1.6", margin: "0" }}>
+                  {worker.bio}
+                </p>
               </div>
-            </div>
-          )}
-        </div>
+            )}
+          </Card>
+        </Section>
 
-        <h3 className="awd-section-heading">Professional Information</h3>
-        <div className="awd-grid">
-          <div className="awd-item">
-            <label className="awd-label">Specialization</label>
-            <div className="awd-value">{worker.specialization || "—"}</div>
+        {/* Skills and Certifications */}
+        <Section title="Skills & Certifications">
+          <div className="skills-grid">
+            {worker.skills && worker.skills.length > 0 ? (
+              worker.skills.map((skill, i) => (
+                <Card key={i} style={{ padding: "12px" }}>
+                  <p style={{ margin: "0", color: "#1f2937", fontWeight: "600" }}>
+                    {skill}
+                  </p>
+                </Card>
+              ))
+            ) : (
+              <Card style={{ padding: "16px", textAlign: "center" }}>
+                <p style={{ color: "#6b7280", margin: "0" }}>No skills listed</p>
+              </Card>
+            )}
           </div>
+        </Section>
 
-          <div className="awd-item">
-            <label className="awd-label">Experience (Years)</label>
-            <div className="awd-value">{worker.experience ?? "—"}</div>
-          </div>
-
-          <div className="awd-item">
-            <label className="awd-label">Professional Title</label>
-            <div className="awd-value">{worker.professionalTitle || "N/A"}</div>
-          </div>
-
-          <div className="awd-item">
-            <label className="awd-label">Rating</label>
-            <div className="awd-value">
-              {worker.rating ?? "—"}
-              {worker.rating ? " / 5" : ""}
-            </div>
-          </div>
-
-          <div className="awd-item">
-            <label className="awd-label">Is Architect</label>
-            <div className="awd-value">{worker.isArchitect ? "Yes" : "No"}</div>
-          </div>
-
-          <div className="awd-item awd-full">
-            <label className="awd-label">About</label>
-            <div className="awd-value">{worker.about || "N/A"}</div>
-          </div>
-        </div>
-
-        <h3 className="awd-section-heading">Specialties & Services</h3>
-        <div className="awd-grid">
-          <div className="awd-item awd-full">
-            <label className="awd-label">Specialties</label>
-            <div className="awd-value">
-              {Array.isArray(worker.specialties) &&
-              worker.specialties.length > 0 ? (
-                <ul style={{ listStyle: "none", padding: 0, margin: 0 }}>
-                  {worker.specialties.map((s, i) => (
-                    <li key={i} className="awd-list-item">
-                      • {s}
-                    </li>
-                  ))}
-                </ul>
-              ) : (
-                "None"
+        {/* Documents and Media */}
+        {(worker.profileImage || worker.documents) && (
+          <Section title="Documents">
+            <div className="documents-grid">
+              {worker.profileImage && (
+                <Card style={{ padding: "16px", textAlign: "center" }}>
+                  <p style={{ fontSize: "12px", color: "#6b7280", margin: "0 0 8px 0" }}>
+                    PROFILE IMAGE
+                  </p>
+                  <img
+                    src={worker.profileImage}
+                    alt="Profile"
+                    style={{ maxWidth: "100%", borderRadius: "8px", maxHeight: "200px" }}
+                  />
+                </Card>
               )}
-            </div>
-          </div>
-
-          <div className="awd-item awd-full">
-            <label className="awd-label">Services Offered</label>
-            <div className="awd-value">
-              {Array.isArray(worker.servicesOffered) &&
-              worker.servicesOffered.length > 0 ? (
-                <ul style={{ listStyle: "none", padding: 0, margin: 0 }}>
-                  {worker.servicesOffered.map((s, i) => (
-                    <li key={i} className="awd-list-item">
-                      • {s}
-                    </li>
-                  ))}
-                </ul>
-              ) : (
-                "None"
-              )}
-            </div>
-          </div>
-        </div>
-
-        <h3 className="awd-section-heading">Projects</h3>
-        <div className="awd-projects-list">
-          {Array.isArray(worker.projects) && worker.projects.length > 0 ? (
-            worker.projects.map((p, idx) => (
-              <div className="awd-project-card" key={idx}>
-                <div className="awd-item">
-                  <label className="awd-label">Project Name</label>
-                  <div className="awd-value">{p.name || "—"}</div>
-                </div>
-                <div className="awd-item">
-                  <label className="awd-label">Year</label>
-                  <div className="awd-value">{p.year || "—"}</div>
-                </div>
-                <div className="awd-item">
-                  <label className="awd-label">Location</label>
-                  <div className="awd-value">{p.location || "—"}</div>
-                </div>
-                <div className="awd-item awd-full">
-                  <label className="awd-label">Description</label>
-                  <div className="awd-value">{p.description || "—"}</div>
-                </div>
-                {p.image && (
-                  <div className="awd-item">
-                    <label className="awd-label">Image</label>
-                    <div className="awd-value">
-                      <img className="awd-img" src={p.image} alt="Project" />
-                    </div>
-                  </div>
-                )}
-              </div>
-            ))
-          ) : (
-            <div className="awd-empty">No projects added.</div>
-          )}
-        </div>
-
-        <h3 className="awd-section-heading">Certificates</h3>
-        <div className="awd-grid">
-          <div className="awd-item awd-full">
-            <label className="awd-label">Certificate Files</label>
-            <div className="awd-value">
-              {Array.isArray(worker.certificateFiles) &&
-              worker.certificateFiles.length > 0 ? (
-                <ul style={{ listStyle: "none", padding: 0, margin: 0 }}>
-                  {worker.certificateFiles.map((f, i) => (
-                    <li key={i} className="awd-list-item">
-                      <a href={f} target="_blank" rel="noreferrer">
-                        View Certificate
+              {worker.documents && Array.isArray(worker.documents) && worker.documents.length > 0 && (
+                <Card style={{ padding: "16px" }}>
+                  <p style={{ fontSize: "12px", color: "#6b7280", margin: "0 0 12px 0" }}>
+                    DOCUMENTS ({worker.documents.length})
+                  </p>
+                  {worker.documents.map((doc, i) => (
+                    <div key={i} style={{ marginBottom: "8px" }}>
+                      <a
+                        href={doc}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        style={{
+                          color: "#3b82f6",
+                          textDecoration: "none",
+                          fontSize: "13px",
+                          wordBreak: "break-all",
+                        }}
+                      >
+                        Document {i + 1}
                       </a>
-                    </li>
+                    </div>
                   ))}
-                </ul>
-              ) : (
-                "None"
+                </Card>
               )}
             </div>
-          </div>
-        </div>
-      </main>
-    </div>
+          </Section>
+        )}
+
+        {/* Projects Worked On */}
+        {worker.projectsWorked && worker.projectsWorked.length > 0 && (
+          <Section title={`Projects Worked On (${worker.projectsWorked.length})`}>
+            <div className="projects-grid">
+              {worker.projectsWorked.map((project, i) => (
+                <Card key={i} style={{ padding: "16px" }}>
+                  <h4 style={{ marginTop: "0", color: "#1f2937" }}>
+                    {project.name || project.projectName || "Project"}
+                  </h4>
+                  <DataRow label="Status">
+                    <Badge variant={project.status || "completed"}>
+                      {project.status || "Completed"}
+                    </Badge>
+                  </DataRow>
+                  {project.description && (
+                    <p style={{ fontSize: "13px", color: "#6b7280", marginTop: "8px" }}>
+                      {project.description}
+                    </p>
+                  )}
+                </Card>
+              ))}
+            </div>
+          </Section>
+        )}
+
+        {/* Reviews */}
+        {worker.reviews && worker.reviews.length > 0 && (
+          <Section title={`Reviews (${worker.reviews.length})`}>
+            <div className="reviews-grid">
+              {worker.reviews.map((review, i) => (
+                <Card key={i} style={{ padding: "16px" }}>
+                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "start", marginBottom: "12px" }}>
+                    <h4 style={{ margin: "0", color: "#1f2937" }}>
+                      {review.reviewer || "Anonymous"}
+                    </h4>
+                    <span style={{ color: "#f59e0b" }}>⭐ {review.rating || 0}</span>
+                  </div>
+                  <p style={{ fontSize: "13px", color: "#6b7280", margin: "0", lineHeight: "1.5" }}>
+                    {review.comment || "No comment"}
+                  </p>
+                </Card>
+              ))}
+            </div>
+          </Section>
+        )}
+
+        {/* Timestamps */}
+        <Section title="Timestamps">
+          <Card>
+            <DataRow label="Created At">
+              {new Date(worker.createdAt).toLocaleString()}
+            </DataRow>
+            <DataRow label="Last Updated">
+              {new Date(worker.updatedAt).toLocaleString()}
+            </DataRow>
+          </Card>
+        </Section>
+      </div>
+    </AdminLayout>
   );
 };
 
