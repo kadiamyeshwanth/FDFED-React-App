@@ -11,6 +11,7 @@ const CustomerOngoing = () => {
   const [expandedMilestones, setExpandedMilestones] = useState({});
   const [expandedUpdates, setExpandedUpdates] = useState({});
   const [loading, setLoading] = useState(true);
+  const [expandedProposal, setExpandedProposal] = useState({});
   const [revisionFeedback, setRevisionFeedback] = useState({});
   const [showRevisionModal, setShowRevisionModal] = useState(null);
   const [showReviewModal, setShowReviewModal] = useState(null);
@@ -23,6 +24,59 @@ const CustomerOngoing = () => {
   const [complaintSuccess, setComplaintSuccess] = useState(false);
   const [complaintError, setComplaintError] = useState(null);
   const [unviewedMessages, setUnviewedMessages] = useState({}); // { projectId: count }
+
+  const getProposalPhases = (project) => (Array.isArray(project?.proposal?.phases) ? project.proposal.phases : []);
+
+  const getPhaseForMilestone = (project, milestonePercentage) => {
+    const phases = getProposalPhases(project);
+    if (phases.length === 0) return null;
+    const index = Math.min(
+      Math.max(Math.floor(milestonePercentage / 25) - 1, 0),
+      phases.length - 1
+    );
+    return phases[index] || null;
+  };
+
+  const getCurrentPhaseLabel = (project) => {
+    const phases = getProposalPhases(project);
+    if (phases.length === 0) return project.currentPhase || "Not specified";
+    const progress = project.completionPercentage || 0;
+    const index = Math.min(Math.max(Math.ceil(progress / 25) - 1, 0), phases.length - 1);
+    return phases[index]?.name || project.currentPhase || "Not specified";
+  };
+
+  const formatCurrency = (value) => {
+    if (value === undefined || value === null || value === '') return "N/A";
+    return `₹${Number(value).toLocaleString('en-IN')}`;
+  };
+
+  // Get payment breakdown for a milestone phase
+  const getPaymentScheduleForMilestone = (project, milestone) => {
+    const phase = getPhaseForMilestone(project, milestone.percentage);
+    if (!phase) return null;
+    
+    const isFinalPhase = phase.isFinal === true;
+    const baseAmount = project?.paymentDetails?.totalAmount || project?.proposal?.price || 0;
+    const phaseAmount = parseFloat(phase.amount) || (baseAmount * ((phase.percentage || 0) / 100)) || 0;
+    
+    if (isFinalPhase) {
+      return {
+        upfront: { amount: 0, status: 'not_applicable', label: 'N/A' },
+        completion: { amount: phaseAmount, status: milestone.payments?.completion?.status || 'pending', label: `Final: ₹${formatCurrency(phaseAmount)}` },
+        final: { amount: 0, status: 'not_applicable', label: 'N/A' }
+      };
+    } else {
+      // Work phases: 40% upfront, 60% completion
+      const upfrontAmount = (phaseAmount * 0.40);
+      const completionAmount = (phaseAmount * 0.60);
+      
+      return {
+        upfront: { amount: upfrontAmount, status: milestone.payments?.upfront?.status || 'pending', label: `Upfront: ₹${formatCurrency(upfrontAmount)}` },
+        completion: { amount: completionAmount, status: milestone.payments?.completion?.status || 'pending', label: `Completion: ₹${formatCurrency(completionAmount)}` },
+        final: { amount: 0, status: 'not_applicable', label: 'N/A' }
+      };
+    }
+  };
 
   // Fetch projects from API
   useEffect(() => {
@@ -108,6 +162,39 @@ const CustomerOngoing = () => {
     setExpandedMilestones((prev) => ({ ...prev, [id]: false }));
   };
 
+  const toggleProposal = (id) => {
+    setExpandedProposal((prev) => ({
+      ...prev,
+      [id]: !prev[id],
+    }));
+  };
+
+  const handleAcceptProposal = async (projectId) => {
+    if (!window.confirm('Accept the proposal from the company?')) {
+      return;
+    }
+
+    try {
+      const res = await axios.post(
+        '/api/customer/accept-proposal',
+        { projectId },
+        { withCredentials: true }
+      );
+
+      if (res.data.success) {
+        alert('Proposal accepted successfully!');
+        // Refresh projects
+        const projectsRes = await axios.get('/api/ongoing_projects', {
+          withCredentials: true,
+        });
+        setProjects(projectsRes.data.projects || []);
+      }
+    } catch (err) {
+      console.error('Error accepting proposal:', err);
+      alert(err.response?.data?.error || 'Failed to accept proposal');
+    }
+  };
+
   const handleApproveMilestone = async (projectId, milestonePercentage) => {
     if (!window.confirm(`Are you satisfied with the ${milestonePercentage}% milestone progress?`)) {
       return;
@@ -131,6 +218,38 @@ const CustomerOngoing = () => {
     } catch (err) {
       console.error("Error approving milestone:", err);
       alert(err.response?.data?.error || "Failed to approve milestone");
+    }
+  };
+
+  const handlePayMilestone = async (projectId, milestonePercentage, paymentStage) => {
+    // paymentStage: 'upfront', 'completion', or 'final'
+    const stageLabels = {
+      upfront: '40% Upfront Payment',
+      completion: '60% Completion Payment',
+      final: '10% Final Payment'
+    };
+    
+    if (!window.confirm(`Release ${stageLabels[paymentStage]}?`)) {
+      return;
+    }
+
+    try {
+      const res = await axios.post(
+        "/api/customer/pay-milestone",
+        { projectId, milestonePercentage, paymentStage },
+        { withCredentials: true }
+      );
+
+      if (res.data.success) {
+        alert(res.data.message || `${stageLabels[paymentStage]} released successfully`);
+        const projectsRes = await axios.get("/api/ongoing_projects", {
+          withCredentials: true,
+        });
+        setProjects(projectsRes.data.projects || []);
+      }
+    } catch (err) {
+      console.error("Error releasing milestone payment:", err);
+      alert(err.response?.data?.error || "Failed to release payment");
     }
   };
 
@@ -365,7 +484,7 @@ const CustomerOngoing = () => {
                       </div>
 
                       <p>
-                        Current phase: {project.currentPhase || "Not specified"}
+                        Current phase: {getCurrentPhaseLabel(project)}
                       </p>
 
                       <div className="co-action-buttons" style={{
@@ -436,7 +555,145 @@ const CustomerOngoing = () => {
                         </button>
                       </div>
 
-                      {/* Review Section for Completed & Approved Projects */}
+                      {/* PROPOSAL FROM COMPANY SECTION */}
+                      {project.proposal && project.status === 'proposal_sent' && (
+                        <div style={{
+                          marginTop: "20px",
+                          padding: "15px",
+                          backgroundColor: "#fff3e0",
+                          border: "2px solid #ff9800",
+                          borderRadius: "8px"
+                        }}>
+                          <div style={{
+                            display: "flex",
+                            justifyContent: "space-between",
+                            alignItems: "center",
+                            marginBottom: "15px"
+                          }}>
+                            <h3 style={{ color: "#e65100", margin: "0", fontSize: "18px" }}>
+                              📋 Proposal from Company
+                            </h3>
+                            <button
+                              onClick={() => toggleProposal(project._id)}
+                              style={{
+                                backgroundColor: "#ff9800",
+                                color: "white",
+                                border: "none",
+                                padding: "8px 16px",
+                                borderRadius: "6px",
+                                cursor: "pointer",
+                                fontWeight: "500",
+                                fontSize: "13px"
+                              }}
+                            >
+                              {expandedProposal[project._id] ? "Hide Details" : "View Details"}
+                            </button>
+                          </div>
+
+                          {expandedProposal[project._id] && (
+                            <div style={{
+                              backgroundColor: "#fff",
+                              padding: "15px",
+                              borderRadius: "6px",
+                              border: "1px solid #ffe0b2",
+                              marginBottom: "15px"
+                            }}>
+                              <p style={{ marginTop: "0" }}>
+                                <strong>Proposal Price:</strong> {formatCurrency(project.proposal.price)}
+                              </p>
+                              <p>
+                                <strong>Description:</strong>
+                              </p>
+                              <p style={{ color: "#666", fontStyle: "italic", padding: "10px", backgroundColor: "#f5f5f5", borderRadius: "4px" }}>
+                                {project.proposal.description || "No description provided"}
+                              </p>
+                              <p>
+                                <strong>Submitted:</strong> {new Date(project.proposal.sentAt).toLocaleDateString("en-IN", {
+                                  day: "numeric",
+                                  month: "long",
+                                  year: "numeric",
+                                  hour: "2-digit",
+                                  minute: "2-digit"
+                                })}
+                              </p>
+
+                              {/* PHASES BREAKDOWN */}
+                              {project.proposal.phases && project.proposal.phases.length > 0 && (
+                                <div style={{ marginTop: "15px", borderTop: "1px solid #ffe0b2", paddingTop: "15px" }}>
+                                  <p style={{ fontWeight: "bold", marginBottom: "12px" }}>
+                                    🎯 Project Phases ({project.proposal.phases.length})
+                                  </p>
+                                  {project.proposal.phases.map((phase, idx) => (
+                                    <div
+                                      key={idx}
+                                      style={{
+                                        backgroundColor: phase.isFinal ? "#fff3e0" : "#f5f5f5",
+                                        padding: "12px",
+                                        borderRadius: "6px",
+                                        marginBottom: "10px",
+                                        borderLeft: phase.isFinal ? "4px solid #d32f2f" : "4px solid #1a73e8"
+                                      }}
+                                    >
+                                      <p style={{ margin: "0 0 8px 0", fontWeight: "bold", color: phase.isFinal ? "#d32f2f" : "#1a73e8" }}>
+                                        {phase.isFinal ? "🎯 " : ""}{phase.name}
+                                      </p>
+                                      <div style={{ fontSize: "13px", color: "#666" }}>
+                                        <p style={{ margin: "4px 0" }}>
+                                          <strong>Percentage:</strong> {phase.percentage}%
+                                        </p>
+                                        <p style={{ margin: "4px 0" }}>
+                                          <strong>Amount:</strong> {formatCurrency(phase.amount)}
+                                        </p>
+                                        {!phase.isFinal && (
+                                          <p style={{ margin: "4px 0" }}>
+                                            <strong>Duration:</strong> {phase.requiredMonths} months
+                                          </p>
+                                        )}
+
+                                        {/* Work Items */}
+                                        {phase.subdivisions && phase.subdivisions.length > 0 && (
+                                          <div style={{ marginTop: "8px", paddingTop: "8px", borderTop: "1px dashed #ddd" }}>
+                                            <p style={{ margin: "0 0 6px 0", fontWeight: "bold", fontSize: "12px" }}>Work Items:</p>
+                                            {phase.subdivisions.map((sub, sIdx) => (
+                                              <p key={sIdx} style={{ margin: "3px 0", fontSize: "12px", paddingLeft: "10px" }}>
+                                                • <strong>{sub.category}:</strong> {sub.description} {sub.amount ? `- ${formatCurrency(sub.amount)}` : ""}
+                                              </p>
+                                            ))}
+                                          </div>
+                                        )}
+                                      </div>
+                                    </div>
+                                  ))}
+                                </div>
+                              )}
+                            </div>
+                          )}
+
+                          <div style={{
+                            display: "flex",
+                            gap: "10px",
+                            justifyContent: "flex-end"
+                          }}>
+                            <button
+                              onClick={() => handleAcceptProposal(project._id)}
+                              style={{
+                                backgroundColor: "#4CAF50",
+                                color: "white",
+                                border: "none",
+                                padding: "12px 30px",
+                                borderRadius: "6px",
+                                cursor: "pointer",
+                                fontWeight: "600",
+                                fontSize: "14px",
+                                boxShadow: "0 2px 4px rgba(0,0,0,0.2)"
+                              }}
+                            >
+                              ✓ Accept Proposal
+                            </button>
+                          </div>
+                        </div>
+                      )}
+                    </div>
                       {project.completionPercentage === 100 && project.milestones?.find(m => m.percentage === 100 && m.isApprovedByCustomer) && (
                         <div style={{
                           marginTop: "20px",
@@ -543,7 +800,6 @@ const CustomerOngoing = () => {
                         </div>
                       )}
                     </div>
-                  </div>
 
                     {/* EXPANDABLE RECENT UPDATES */}
                   <div
@@ -659,7 +915,7 @@ const CustomerOngoing = () => {
                     }}
                   >
                     {/* Milestone Progress Section */}
-                    {project.milestones && project.milestones.length > 0 ? (
+                    {project.milestones ? (
                       <>
                         <h3 style={{ 
                           color: "#333", 
@@ -669,13 +925,29 @@ const CustomerOngoing = () => {
                         }}>Project Milestones & Progress Reports</h3>
                         <div className="co-milestones-list" style={{ marginBottom: "20px" }}>
                           {(() => {
-  const nextPendingMilestone = project.milestones
-    .sort((a, b) => a.percentage - b.percentage)
-    .filter(m => m.isCheckpoint && !m.isApprovedByCustomer && !m.needsRevision)[0]?.percentage;
-  return project.milestones
-    .sort((a, b) => a.percentage - b.percentage)
+  const checkpoints = [25, 50, 75, 100];
+  const checkpointMilestones = project.milestones
     .filter((m) => m.isCheckpoint)
-    .map((milestone, idx) => (
+    .sort((a, b) => a.percentage - b.percentage);
+  const milestoneMap = new Map(checkpointMilestones.map((m) => [m.percentage, m]));
+  const displayMilestones = checkpoints.map((percentage) => (
+    milestoneMap.get(percentage) || {
+      percentage,
+      isCheckpoint: true,
+      isPlaceholder: true,
+      isApprovedByCustomer: false,
+      needsRevision: false,
+      submittedAt: project.createdAt,
+      companyMessage: null
+    }
+  ));
+
+  const nextPendingMilestone = displayMilestones
+    .filter(m => m.isCheckpoint && !m.isApprovedByCustomer && !m.needsRevision)
+    .map(m => m.percentage)
+    .sort((a, b) => a - b)[0];
+
+  return displayMilestones.map((milestone, idx) => (
                               <div key={idx} className="co-milestone-item" style={{
                                 backgroundColor: milestone.isApprovedByCustomer ? "#d4edda" : milestone.needsRevision ? "#ffe6e6" : "#fff3cd",
                                 border: `2px solid ${milestone.isApprovedByCustomer ? "#28a745" : milestone.needsRevision ? "#dc3545" : "#ffc107"}`,
@@ -683,7 +955,7 @@ const CustomerOngoing = () => {
                                 padding: "15px",
                                 marginBottom: "15px"
                               }}>
-                                {([25, 50, 75, 100].includes(milestone.percentage)) && (
+                                {([25, 50, 75, 100].includes(milestone.percentage)) && !milestone.isPlaceholder && (
                                   <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: 8 }}>
                                     <button
                                       className="co-view-details-btn"
@@ -709,7 +981,10 @@ const CustomerOngoing = () => {
                                 <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "10px" }}>
                                   <div>
                                     <h4 style={{ margin: 0, color: "#333" }}>
-                                      {milestone.percentage}% Milestone
+                                      {getPhaseForMilestone(project, milestone.percentage)?.name || `${milestone.percentage}% Milestone`}
+                                      <span style={{ marginLeft: "6px", color: "#666", fontSize: "0.85em" }}>
+                                        ({milestone.percentage}%)
+                                      </span>
                                       {milestone.isApprovedByCustomer ? (
                                         <span style={{ marginLeft: "10px", color: "#28a745", fontSize: "0.9em" }}>
                                           ✓ Approved by You
@@ -725,7 +1000,7 @@ const CustomerOngoing = () => {
                                       )}
                                     </h4>
                                     <div style={{ fontSize: "0.85em", color: "#666", marginTop: "5px" }}>
-                                      Submitted: {new Date(milestone.submittedAt).toLocaleDateString("en-IN", {
+                                      Submitted: {milestone.isPlaceholder ? "Not submitted yet" : new Date(milestone.submittedAt).toLocaleDateString("en-IN", {
                                         day: "numeric",
                                         month: "long",
                                         year: "numeric",
@@ -751,23 +1026,80 @@ const CustomerOngoing = () => {
                                   marginTop: "10px"
                                 }}>
                                   <strong style={{ display: "block", marginBottom: "8px", color: "#555" }}>Latest Company Progress Report:</strong>
-                                  <p style={{ margin: 0, lineHeight: "1.6", color: "#333" }}>{milestone.companyMessage}</p>
+                                  <p style={{ margin: 0, lineHeight: "1.6", color: "#333" }}>
+                                    {milestone.isPlaceholder ? "No update yet." : milestone.companyMessage}
+                                  </p>
                                 </div>
+
+                                {(() => {
+                                  const phase = getPhaseForMilestone(project, milestone.percentage);
+                                  if (!phase) return null;
+                                  return (
+                                    <div style={{
+                                      backgroundColor: "#f8f9fa",
+                                      padding: "12px",
+                                      borderRadius: "6px",
+                                      marginTop: "10px",
+                                      border: "1px solid #dee2e6"
+                                    }}>
+                                      <strong style={{ display: "block", marginBottom: "8px", color: "#555" }}>Company Proposed Details:</strong>
+                                      <p style={{ margin: "0 0 6px 0", color: "#333" }}><strong>Phase:</strong> {phase.name || "Phase"}</p>
+                                      <p style={{ margin: "0 0 6px 0", color: "#333" }}><strong>Required Months:</strong> {phase.requiredMonths || "N/A"}</p>
+                                      <p style={{ margin: "0 0 6px 0", color: "#333" }}><strong>Amount:</strong> {formatCurrency(phase.amount)}</p>
+                                      {phase.subdivisions && phase.subdivisions.length > 0 && (
+                                        <div style={{ marginTop: "10px" }}>
+                                          {phase.subdivisions.map((sub, sIdx) => (
+                                            <div key={sIdx} style={{
+                                              backgroundColor: "#fff",
+                                              padding: "8px",
+                                              borderRadius: "6px",
+                                              marginBottom: "6px",
+                                              borderLeft: "4px solid #6c757d"
+                                            }}>
+                                              <p style={{ margin: 0, color: "#333" }}>
+                                                <strong>{sub.category || "Work Item"}:</strong> {sub.description || ""}
+                                                {sub.amount ? ` - ${formatCurrency(sub.amount)}` : ""}
+                                              </p>
+                                            </div>
+                                          ))}
+                                        </div>
+                                      )}
+                                    </div>
+                                  );
+                                })()}
                                 
                                 {/* Conversation History */}
-                                {milestone.conversation && milestone.conversation.length > 0 && (
-                                  <div style={{
-                                    backgroundColor: "#f8f9fa",
-                                    padding: "12px",
-                                    borderRadius: "6px",
-                                    marginTop: "10px",
-                                    border: "1px solid #dee2e6"
-                                  }}>
-                                    <strong style={{ display: "block", marginBottom: "12px", color: "#555" }}>
-                                      💬 Full Conversation ({milestone.conversation.length} {milestone.conversation.length === 1 ? 'message' : 'messages'})
-                                    </strong>
-                                    <div style={{ maxHeight: "300px", overflowY: "auto" }}>
-                                      {milestone.conversation.map((msg, msgIdx) => (
+                                {(() => {
+                                  const conversation = (milestone.conversation && milestone.conversation.length > 0)
+                                    ? milestone.conversation
+                                    : [
+                                        milestone.companyMessage ? {
+                                          sender: 'company',
+                                          message: milestone.companyMessage,
+                                          timestamp: milestone.submittedAt || milestone.createdAt || new Date()
+                                        } : null,
+                                        milestone.customerFeedback ? {
+                                          sender: 'customer',
+                                          message: milestone.customerFeedback,
+                                          timestamp: milestone.updatedAt || milestone.approvedAt || new Date()
+                                        } : null
+                                      ].filter(Boolean);
+
+                                  if (!conversation.length) return null;
+
+                                  return (
+                                    <div style={{
+                                      backgroundColor: "#f8f9fa",
+                                      padding: "12px",
+                                      borderRadius: "6px",
+                                      marginTop: "10px",
+                                      border: "1px solid #dee2e6"
+                                    }}>
+                                      <strong style={{ display: "block", marginBottom: "12px", color: "#555" }}>
+                                        💬 Full Conversation ({conversation.length} {conversation.length === 1 ? 'message' : 'messages'})
+                                      </strong>
+                                      <div style={{ maxHeight: "300px", overflowY: "auto" }}>
+                                        {conversation.map((msg, msgIdx) => (
                                         <div key={msgIdx} style={{
                                           backgroundColor: msg.sender === 'company' ? "#e3f2fd" : "#fff3e0",
                                           padding: "10px",
@@ -796,10 +1128,11 @@ const CustomerOngoing = () => {
                                           </div>
                                           <p style={{ margin: 0, lineHeight: "1.5", color: "#333" }}>{msg.message}</p>
                                         </div>
-                                      ))}
+                                        ))}
+                                      </div>
                                     </div>
-                                  </div>
-                                )}
+                                  );
+                                })()}
                                 
                                 {milestone.needsRevision && milestone.customerFeedback && (
                                   <div style={{
@@ -815,7 +1148,7 @@ const CustomerOngoing = () => {
                                 )}
                                 
                                 {/* Action buttons for non-approved milestones (< 100%) */}
-                                {!milestone.isApprovedByCustomer && !milestone.needsRevision && milestone.percentage === nextPendingMilestone && (
+                                {!milestone.isPlaceholder && !milestone.isApprovedByCustomer && !milestone.needsRevision && milestone.percentage === nextPendingMilestone && (
                                   <div style={{ marginTop: "15px", display: "flex", gap: "10px", flexWrap: "wrap" }}>
                                     <button
                                       className="co-view-details-btn"
@@ -835,7 +1168,7 @@ const CustomerOngoing = () => {
                                 )}
                                 
                                 {/* Special handling for 100% milestone - Show Approve First, Then Review */}
-                                {!milestone.isApprovedByCustomer && !milestone.needsRevision && milestone.percentage === 100 && (
+                                {!milestone.isPlaceholder && !milestone.isApprovedByCustomer && !milestone.needsRevision && milestone.percentage === 100 && (
                                   <div style={{ marginTop: "15px", display: "flex", gap: "10px", flexWrap: "wrap" }}>
                                     <button
                                       className="co-view-details-btn"
@@ -851,6 +1184,117 @@ const CustomerOngoing = () => {
                                     >
                                       📝 Request Changes
                                     </button>
+                                  </div>
+                                )}
+
+                                {/* Payment Section - Always show for non-paid milestones */}
+                                {!milestone.isPaid && (
+                                  <div style={{ marginTop: "15px", padding: "15px", backgroundColor: "#f0f4ff", borderRadius: "8px", border: "2px solid #1a73e8" }}>
+                                    <h5 style={{ color: "#1a73e8", marginTop: 0 }}>💰 Payment Schedule</h5>
+                                    {(() => {
+                                      const schedule = getPaymentScheduleForMilestone(project, milestone);
+                                      if (!schedule) return null;
+                                      
+                                      const isFinal = Object.values(schedule).some(s => s.status !== 'not_applicable' && s.amount === 0);
+                                      const upfrontPaid = schedule.upfront.status === 'released' || schedule.upfront.status === 'paid';
+                                      
+                                      return (
+                                        <>
+                                          {/* Work Phases: 40% upfront + 60% completion */}
+                                          {!isFinal && (
+                                            <>
+                                              {/* STEP 1: Upfront Payment - Always show first if not paid */}
+                                              {!upfrontPaid && (
+                                                <div style={{ marginBottom: "10px" }}>
+                                                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "8px" }}>
+                                                    <span>📌 40% Upfront (Before Work Start)</span>
+                                                    <span style={{ fontWeight: "600", color: "#1a73e8" }}>
+                                                      {formatCurrency(schedule.upfront.amount)}
+                                                    </span>
+                                                  </div>
+                                                  {schedule.upfront.status === 'pending' && (
+                                                    <button
+                                                      className="co-view-details-btn"
+                                                      style={{ backgroundColor: "#1a73e8", color: "white", border: "none", padding: "8px 15px", borderRadius: "4px", cursor: "pointer", fontWeight: "600", width: "100%" }}
+                                                      onClick={() => handlePayMilestone(project._id, milestone.percentage, 'upfront')}
+                                                    >
+                                                      💳 Pay 40% Upfront to Start
+                                                    </button>
+                                                  )}
+                                                </div>
+                                              )}
+                                              
+                                              {/* Show upfront status if paid */}
+                                              {upfrontPaid && (
+                                                <div style={{ marginBottom: "10px", padding: "10px", backgroundColor: "#e8f5e9", borderRadius: "6px" }}>
+                                                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                                                    <span>📌 40% Upfront Payment</span>
+                                                    <span style={{ fontWeight: "600", color: "#2e7d32" }}>
+                                                      {formatCurrency(schedule.upfront.amount)}
+                                                    </span>
+                                                  </div>
+                                                  <div style={{ color: "#2e7d32", fontWeight: "600", fontSize: "14px", marginTop: "5px" }}>
+                                                    ✅ Paid
+                                                  </div>
+                                                </div>
+                                              )}
+                                              
+                                              {/* STEP 2: Completion Payment - Only show after milestone approved AND upfront paid */}
+                                              {milestone.isApprovedByCustomer && upfrontPaid && !milestone.isPlaceholder && (
+                                                <div style={{ marginBottom: "10px", borderTop: "1px solid #ddd", paddingTop: "10px" }}>
+                                                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "8px" }}>
+                                                    <span>✅ 60% Completion (After Approval)</span>
+                                                    <span style={{ fontWeight: "600", color: "#28a745" }}>
+                                                      {formatCurrency(schedule.completion.amount)}
+                                                    </span>
+                                                  </div>
+                                                  {schedule.completion.status === 'pending' && (
+                                                    <button
+                                                      className="co-view-details-btn"
+                                                      style={{ backgroundColor: "#28a745", color: "white", border: "none", padding: "8px 15px", borderRadius: "4px", cursor: "pointer", fontWeight: "600", width: "100%" }}
+                                                      onClick={() => handlePayMilestone(project._id, milestone.percentage, 'completion')}
+                                                    >
+                                                      💳 Pay Remaining 60%
+                                                    </button>
+                                                  )}
+                                                  {schedule.completion.status === 'released' && (
+                                                    <div style={{ color: "#2e7d32", fontWeight: "600", fontSize: "14px" }}>
+                                                      ✅ Completion Payment Released
+                                                    </div>
+                                                  )}
+                                                </div>
+                                              )}
+                                            </>
+                                          )}
+                                          
+                                          {/* Final Phase: 10% of total at end */}
+                                          {isFinal && milestone.isApprovedByCustomer && (
+                                            <div>
+                                              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "8px" }}>
+                                                <span>🎯 Final Payment (10% of Total)</span>
+                                                <span style={{ fontWeight: "600", color: "#d32f2f" }}>
+                                                  {formatCurrency(schedule.completion.amount)}
+                                                </span>
+                                              </div>
+                                              {schedule.completion.status === 'pending' && (
+                                                <button
+                                                  className="co-view-details-btn"
+                                                  style={{ backgroundColor: "#d32f2f", color: "white", border: "none", padding: "8px 15px", borderRadius: "4px", cursor: "pointer", fontWeight: "600", width: "100%" }}
+                                                  onClick={() => handlePayMilestone(project._id, milestone.percentage, 'completion')}
+                                                >
+                                                  💳 Release Final Payment
+                                                </button>
+                                              )}
+                                              {schedule.completion.status === 'released' && (
+                                                <div style={{ color: "#2e7d32", fontWeight: "600", fontSize: "14px" }}>
+                                                  ✅ Final Payment Released
+                                                </div>
+                                              )}
+                                            </div>
+                                          )}
+                                        </>
+                                      );
+                                    })()}
                                   </div>
                                 )}
                                 
@@ -1170,9 +1614,39 @@ const CustomerOngoing = () => {
                             : "Standard"}
                         </p>
                       </div>
+
+                      {getProposalPhases(project).length > 0 && (
+                        <div className="co-section" style={{
+                          border: "1px solid #e0e0e0",
+                          borderRadius: "8px",
+                          padding: "15px",
+                          marginBottom: "15px",
+                          backgroundColor: "#fff"
+                        }}>
+                          <h4>Company Proposed Details (Phases)</h4>
+                          {getProposalPhases(project).map((phase, idx) => (
+                            <div key={idx} className="co-floor-plan">
+                              <p><strong>{phase.name || `Phase ${idx + 1}`}</strong></p>
+                              <p><strong>Percentage:</strong> {phase.percentage || 25}%</p>
+                              <p><strong>Required Months:</strong> {phase.requiredMonths || "N/A"}</p>
+                              <p><strong>Amount:</strong> {formatCurrency(phase.amount)}</p>
+                              {phase.subdivisions && phase.subdivisions.length > 0 && (
+                                <div style={{ marginTop: "8px" }}>
+                                  {phase.subdivisions.map((sub, sIdx) => (
+                                    <p key={sIdx} style={{ marginBottom: "6px" }}>
+                                      <strong>{sub.category || "Work Item"}:</strong> {sub.description || ""}
+                                      {sub.amount ? ` - ${formatCurrency(sub.amount)}` : ""}
+                                    </p>
+                                  ))}
+                                </div>
+                              )}
+                            </div>
+                          ))}
+                        </div>
+                      )}
                     </div>
                   </div>
-                </React.Fragment>
+              </React.Fragment>
               ))
             ) : (
               <div className="co-no-projects">
