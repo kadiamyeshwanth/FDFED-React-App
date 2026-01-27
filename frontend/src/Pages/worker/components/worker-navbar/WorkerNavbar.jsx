@@ -23,6 +23,8 @@ const WorkerNavbar = ({ user }) => {
       setActivePage('ongoing');
     } else if (path.includes('/my-company')) {
       setActivePage('my-company');
+    } else if (path.includes('/revenue')) {
+      setActivePage('revenue');
     } else {
       setActivePage('');
     }
@@ -92,22 +94,28 @@ const WorkerNavbar = ({ user }) => {
           New Jobs
         </button>
         <button
-          className={`wkb-nav-link ${activePage === 'join' ? 'active' : ''}`}
-          onClick={() => handleNavigation('/workerdashboard/join_company')}
-        >
-          Join a Company
-        </button>
-        <button
           className={`wkb-nav-link ${activePage === 'ongoing' ? 'active' : ''}`}
           onClick={() => handleNavigation('/workerdashboard/ongoing-projects')}
         >
           Ongoing Projects
         </button>
         <button
+          className={`wkb-nav-link ${activePage === 'join' ? 'active' : ''}`}
+          onClick={() => handleNavigation('/workerdashboard/join_company')}
+        >
+          Join a Company
+        </button>
+        <button
           className={`wkb-nav-link ${activePage === 'my-company' ? 'active' : ''}`}
           onClick={() => handleNavigation('/workerdashboard/my-company')}
         >
           My Company
+        </button>
+        <button
+          className={`wkb-nav-link ${activePage === 'revenue' ? 'active' : ''}`}
+          onClick={() => handleNavigation('/workerdashboard/revenue')}
+        >
+          Revenue
         </button>
       </div>
 
