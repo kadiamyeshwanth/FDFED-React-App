@@ -4,6 +4,8 @@ import React from 'react';
 const ProjectDetails = ({ project, expandedDetails }) => {
   if (!expandedDetails[project._id]) return null;
 
+  const phases = project?.proposal?.phases || [];
+
   return (
     <div className="ongoing-view-details ongoing-active">
       <h3>Project Submission Details</h3>
@@ -79,6 +81,37 @@ const ProjectDetails = ({ project, expandedDetails }) => {
           </p>
         </div>
       </div>
+
+      {phases.length > 0 && (
+        <div className="ongoing-section">
+          <h4>Company Proposed Details (Phases) - 5 Phase System</h4>
+          {phases.map((phase, idx) => {
+            const isFinal = phase.isFinal === true;
+            return (
+              <div key={idx} className="ongoing-floor-plan" style={{ borderLeft: isFinal ? "4px solid #d32f2f" : "4px solid #1a73e8" }}>
+                <p><strong>{isFinal ? "🎯 " : ""}{phase.name || `Phase ${idx + 1}`}</strong></p>
+                <p><strong>Percentage of Total:</strong> {phase.percentage || 25}%</p>
+                {!isFinal && <p><strong>Required Months:</strong> {phase.requiredMonths || "N/A"}</p>}
+                <p><strong>Phase Amount:</strong> <span style={{ fontWeight: "bold", color: "#d32f2f" }}>₹{phase.amount ? Number(phase.amount).toLocaleString('en-IN') : "0"}</span></p>
+
+                {/* Work Items Breakdown */}
+                {phase.subdivisions && phase.subdivisions.length > 0 && (
+                  <div style={{ marginTop: "10px" }}>
+                    <p style={{ fontSize: "13px", fontWeight: "bold", color: "#333", marginBottom: "8px" }}>Work Items:</p>
+                    <div className="ongoing-details-grid">
+                      {phase.subdivisions.map((sub, sIdx) => (
+                        <p key={sIdx} style={{ fontSize: "12px", marginBottom: "5px" }}>
+                          <strong>{sub.category || "Work Item"}:</strong> {sub.description || ""} {sub.amount ? `- ₹${Number(sub.amount).toLocaleString('en-IN')}` : ""}
+                        </p>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+            );
+          })}
+        </div>
+      )}
     </div>
   );
 };
