@@ -1,3 +1,4 @@
+require('dotenv').config();
 const express = require("express");
 const bodyParser = require("body-parser");
 const cookieParser = require("cookie-parser");
@@ -17,7 +18,7 @@ const adminRoutes = require("./routes/adminRoutes");
 const chatRoutes = require("./routes/chatRoutes");
 const complaintRoutes = require("./routes/complaintRoutes");
 
-const { PORT, CLOUDINARY_CLOUD_NAME, CLOUDINARY_API_KEY, CLOUDINARY_API_SECRET } = require("./config/constants");
+const { PORT, CLOUDINARY_CLOUD_NAME, CLOUDINARY_API_KEY, CLOUDINARY_API_SECRET, FRONTEND_URL } = require("./config/constants");
 const { ChatRoom } = require("./models");
 const { authorizeChatAccess } = require("./controllers/chatController");
 
@@ -31,7 +32,7 @@ const app = express();
 const server = http.createServer(app);
 const io = new Server(server, {
   cors: {
-    origin: "http://localhost:5173",
+    origin: FRONTEND_URL,
     methods: ["GET", "POST"],
     credentials: true,
   },
@@ -122,7 +123,7 @@ app.use(express.static("Final Pages"));
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 app.use(
   cors({
-    origin: "http://localhost:5173",
+    origin: FRONTEND_URL,
     credentials: true,
   })
 );
