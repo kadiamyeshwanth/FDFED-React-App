@@ -1,15 +1,21 @@
-const jwt = require('jsonwebtoken');
-const { JWT_SECRET } = require('../config/constants');
+const jwt = require("jsonwebtoken");
+const { JWT_SECRET } = require("../config/constants");
 
 module.exports = (req, res, next) => {
   const token = req.cookies.token;
-  if (!token) return res.status(401).json({ message: 'Unauthorized. Please login.' });
+  if (!token) {
+    const err = new Error("Unauthorized. Please login.");
+    err.status = 401;
+    return next(err);
+  }
 
   try {
     const decoded = jwt.verify(token, JWT_SECRET);
     req.user = decoded;
     next();
   } catch (error) {
-    return res.status(401).json({ message: 'Invalid token. Please login again.' });
+    const err = new Error("Invalid token. Please login again.");
+    err.status = 401;
+    return next(err);
   }
 };

@@ -9,6 +9,8 @@ import AdminProtectedRoute from "./components/AdminProtectedRoute";
 import AdminLogin from "./Pages/admin/AdminLogin";
 import AdminDashboard from "./Pages/admin/AdminDashboard/AdminDashboard";
 import Admin from "./Pages/admin/Admin";
+import NotFound from "./Pages/NotFound";
+import Unauthorized from "./Pages/Unauthorized";
 
 import "./App.css";
 
@@ -18,13 +20,13 @@ const App = () => {
       <Route path="/" element={<LoginSignUp />} />
       <Route path="/admin-login" element={<AdminLogin />} />
       {/* Admin Routes - Protected */}
-      <Route 
-        path="/admin/*" 
+      <Route
+        path="/admin/*"
         element={
           <AdminProtectedRoute>
             <Admin />
           </AdminProtectedRoute>
-        } 
+        }
       />
 
       <Route
@@ -51,6 +53,9 @@ const App = () => {
           </ProtectedRoute>
         }
       />
+      <Route path="/not-found" element={<NotFound />} />
+      <Route path="/unauthorized" element={<Unauthorized />} />
+      <Route path="*" element={<NotFound />} />
       {/* Add other routes as needed, e.g., for sub-pages */}
     </Routes>
   );
