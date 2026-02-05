@@ -23,7 +23,11 @@ const {
   saveFavoriteDesign,
   removeFavoriteDesign,
   acceptProposal,
-  acceptCompanyBid,acceptCompanyProposal,updatePassword,
+  acceptCompanyBid,
+  acceptCompanyProposal,
+  acceptConstructionProposal,
+  rejectCompanyProposal,
+  updatePassword,
   approveMilestone,
   rejectMilestone,
   requestMilestoneRevision,
@@ -86,6 +90,8 @@ router.delete('/api/customer/favorites/:id', auth, removeFavoriteDesign);
 router.get('/customer/accept-proposal/:type/:id', auth, acceptProposal);
 router.get('/customer/accept-bid/:bidId/:companyBidId', auth, acceptCompanyBid);
 router.get('/customer/accept-company-proposal/:projectId', auth, acceptCompanyProposal);
+router.post('/customer/accept-proposal', auth, acceptConstructionProposal);
+router.post('/customer/reject-company-proposal/:projectId', auth, rejectCompanyProposal);
 router.post('/customer/password/update', auth, updatePassword);
 router.post('/customer/milestone/approve/:projectId/:milestoneId', auth, approveMilestone);
 router.post('/customer/milestone/reject/:projectId/:milestoneId', auth, rejectMilestone);

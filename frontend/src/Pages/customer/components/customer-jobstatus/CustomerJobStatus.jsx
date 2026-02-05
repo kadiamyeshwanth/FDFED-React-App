@@ -34,6 +34,19 @@ const CustomerJobStatus = () => {
     projectName: null,
     projectType: null
   });
+  const [phasesModal, setPhasesModal] = useState({
+    isOpen: false,
+    projectId: null,
+    projectType: null,
+    phases: [],
+    proposalData: null
+  });
+  const [proposalModal, setProposalModal] = useState({
+    isOpen: false,
+    projectId: null,
+    projectType: null,
+    proposal: null
+  });
 
   const fetchJobStatus = async () => {
     try {
@@ -458,15 +471,20 @@ const CustomerJobStatus = () => {
   };
 
   const handleAcceptProposal = async (projectId, type) => {
-    if (!confirm(`Are you sure you want to accept this proposal? You will be redirected to the payment page to complete the 25% deposit.`)) {
+    if (!confirm(`Are you sure you want to accept this proposal and mark payment as complete?`)) {
       return;
     }
 
     try {
-      const res = await axios.get(
-        `/api/customer/accept-proposal/${type}/${projectId}`,
-        { withCredentials: true }
-      );
+      let endpoint;
+      if (type === 'company') {
+        endpoint = `/api/customer/accept-company-proposal/${projectId}`;
+      } else {
+        endpoint = `/api/customer/accept-proposal/${type}/${projectId}`;
+      }
+
+      const res = await axios.get(endpoint, { withCredentials: true });
+      
       if (res.data.success) {
         alert(res.data.message || "Proposal accepted! Redirecting to payment...");
         
@@ -484,6 +502,30 @@ const CustomerJobStatus = () => {
     }
   };
 
+  const handleRejectProposal = async (projectId, type) => {
+    const reason = prompt("Please provide a reason for rejection (optional):");
+    if (reason === null) return;
+
+    try {
+      let endpoint;
+      if (type === 'company') {
+        endpoint = `/api/customer/reject-company-proposal/${projectId}`;
+      } else {
+        endpoint = `/api/customer/reject-proposal/${type}/${projectId}`;
+      }
+
+      const res = await axios.post(endpoint, { reason }, { withCredentials: true });
+      
+      if (res.data.success) {
+        alert("Proposal rejected successfully!");
+        fetchJobStatus();
+      }
+    } catch (error) {
+      console.error("Error rejecting proposal:", error);
+      alert(error.response?.data?.error || "Failed to reject proposal");
+    }
+  };
+
   const renderProposal = (app, type) => {
     const isProposalSent = ["proposal_sent", "Proposal Sent"].includes(
       app.status
@@ -496,12 +538,16 @@ const CustomerJobStatus = () => {
           <div className="cjs-proposal-price">
             ₹{app.proposal.price.toLocaleString("en-IN")}
           </div>
-          <p className="cjs-proposal-description">{app.proposal.description}</p>
           <button
-            onClick={() => handleAcceptProposal(app._id, type)}
+            onClick={() => setProposalModal({
+              isOpen: true,
+              projectId: app._id,
+              projectType: type,
+              proposal: app.proposal
+            })}
             className="cjs-btn-accept-pay"
           >
-            Accept & Pay
+            View Details
           </button>
         </div>
       );
@@ -1021,6 +1067,180 @@ const CustomerJobStatus = () => {
               </button>
               <button className="cjs-modal-btn cjs-modal-btn-submit" onClick={handleSubmitRevision}>
                 Send Revision Request
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Phases Modal */}
+      {phasesModal.isOpen && (
+        <div className="cjs-modal-overlay" onClick={() => setPhasesModal({ ...phasesModal, isOpen: false })}>
+          <div className="cjs-phases-modal-content" onClick={(e) => e.stopPropagation()}>
+            <div className="cjs-modal-header">
+              <h3>Project Phases Breakdown</h3>
+              <button className="cjs-modal-close" onClick={() => setPhasesModal({ ...phasesModal, isOpen: false })}>×</button>
+            </div>
+            <div className="cjs-phases-modal-body">
+              {phasesModal.phases && phasesModal.phases.length > 0 ? (
+                <div className="cjs-phases-list">
+                  {phasesModal.phases.map((phase, index) => (
+                    <div key={phase.id || index} className="cjs-phase-card">
+                      <div className="cjs-phase-header">
+                        <h4>{phase.name}</h4>
+                        <span className="cjs-phase-percentage">{phase.percentage}%</span>
+                      </div>
+                      <div className="cjs-phase-details">
+                        <p><strong>Amount:</strong> ₹{(phase.amount || 0).toLocaleString('en-IN')}</p>
+                        {phase.requiredMonths && (
+                          <p><strong>Required Months:</strong> {phase.requiredMonths} months</p>
+                        )}
+                      </div>
+                      {phase.subdivisions && phase.subdivisions.length > 0 && (
+                        <div className="cjs-subdivisions">
+                          <p className="cjs-subdivisions-title">Work Items:</p>
+                          <ul>
+                            {phase.subdivisions.map((sub, subIndex) => (
+                              <li key={subIndex}>
+                                <span className="cjs-sub-category">{sub.category}</span>
+                                {sub.description && <span className="cjs-sub-desc"> - {sub.description}</span>}
+                                <span className="cjs-sub-amount">₹{(sub.amount || 0).toLocaleString('en-IN')}</span>
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                  <div className="cjs-phases-summary">
+                    <div className="cjs-summary-item">
+                      <span>Total Project Cost:</span>
+                      <span className="cjs-summary-amount">₹{(phasesModal.proposalData?.price || 0).toLocaleString('en-IN')}</span>
+                    </div>
+                    <div className="cjs-summary-item">
+                      <span>Total Percentage:</span>
+                      <span className="cjs-summary-percentage">
+                        {phasesModal.phases.reduce((sum, p) => sum + (parseFloat(p.percentage) || 0), 0)}%
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              ) : (
+                <p>No phases information available.</p>
+              )}
+            </div>
+            <div className="cjs-modal-footer">
+              <button 
+                className="cjs-modal-btn cjs-modal-btn-cancel"
+                onClick={() => {
+                  handleRejectProposal(phasesModal.projectId, phasesModal.projectType);
+                  setPhasesModal({ ...phasesModal, isOpen: false });
+                }}
+              >
+                Reject
+              </button>
+              <button 
+                className="cjs-modal-btn cjs-modal-btn-submit" 
+                onClick={() => {
+                  handleAcceptProposal(phasesModal.projectId, phasesModal.projectType, true);
+                  setPhasesModal({ ...phasesModal, isOpen: false });
+                }}
+              >
+                Accept
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Proposal Details Modal */}
+      {proposalModal.isOpen && proposalModal.proposal && (
+        <div className="cjs-modal-overlay" onClick={() => setProposalModal({ isOpen: false, projectId: null, projectType: null, proposal: null })}>
+          <div className="cjs-modal-content" onClick={(e) => e.stopPropagation()}>
+            <div className="cjs-modal-header">
+              <h3>📋 Proposal Details</h3>
+              <button className="cjs-modal-close" onClick={() => setProposalModal({ isOpen: false, projectId: null, projectType: null, proposal: null })}>×</button>
+            </div>
+            <div className="cjs-modal-body" style={{ maxHeight: "600px", overflowY: "auto" }}>
+              {/* Proposal Price */}
+              <div style={{ marginBottom: "20px", paddingBottom: "15px", borderBottom: "2px solid #ddd" }}>
+                <p style={{ margin: "0", fontSize: "13px", color: "#666" }}>Proposal Price</p>
+                <p style={{ margin: "8px 0 0 0", fontSize: "28px", color: "#ff9800", fontWeight: "bold" }}>
+                  ₹{proposalModal.proposal.price.toLocaleString("en-IN")}
+                </p>
+              </div>
+
+              {/* Description */}
+              {proposalModal.proposal.description && (
+                <div style={{ marginBottom: "20px", paddingBottom: "15px", borderBottom: "2px solid #ddd" }}>
+                  <p style={{ margin: "0 0 8px 0", fontSize: "14px", fontWeight: "bold", color: "#333" }}>Description:</p>
+                  <p style={{ margin: "0", color: "#666", fontSize: "13px" }}>{proposalModal.proposal.description}</p>
+                </div>
+              )}
+
+              {/* Phases */}
+              {proposalModal.proposal.phases && proposalModal.proposal.phases.length > 0 && (
+                <div style={{ marginBottom: "20px" }}>
+                  <p style={{ margin: "0 0 12px 0", fontSize: "14px", fontWeight: "bold", color: "#333" }}>
+                    🎯 Project Phases ({proposalModal.proposal.phases.length}):
+                  </p>
+                  <div style={{ display: "grid", gap: "12px" }}>
+                    {proposalModal.proposal.phases.map((phase, idx) => (
+                      <div
+                        key={idx}
+                        style={{
+                          backgroundColor: phase.isFinal ? "#fff3e0" : "#f5f5f5",
+                          padding: "12px",
+                          borderRadius: "6px",
+                          borderLeft: phase.isFinal ? "4px solid #d32f2f" : "4px solid #1a73e8"
+                        }}
+                      >
+                        <p style={{ margin: "0 0 6px 0", fontWeight: "bold", color: phase.isFinal ? "#d32f2f" : "#1a73e8", fontSize: "13px" }}>
+                          {phase.isFinal ? "🎯 " : ""}{phase.name}
+                        </p>
+                        <div style={{ fontSize: "12px", color: "#666", lineHeight: "1.7" }}>
+                          <p style={{ margin: "3px 0" }}><strong>Percentage:</strong> {phase.percentage}%</p>
+                          <p style={{ margin: "3px 0" }}><strong>Amount:</strong> ₹{Number(phase.amount).toLocaleString('en-IN')}</p>
+                          {!phase.isFinal && <p style={{ margin: "3px 0" }}><strong>Duration:</strong> {phase.requiredMonths} months</p>}
+                          
+                          {/* Work Items */}
+                          {phase.subdivisions && phase.subdivisions.length > 0 && (
+                            <div style={{ marginTop: "8px", paddingTop: "8px", borderTop: "1px dashed #ddd" }}>
+                              <p style={{ margin: "0 0 4px 0", fontWeight: "bold", fontSize: "11px" }}>Work Items:</p>
+                              {phase.subdivisions.map((sub, sIdx) => (
+                                <p key={sIdx} style={{ margin: "2px 0", fontSize: "11px", paddingLeft: "8px" }}>
+                                  • <strong>{sub.category}:</strong> {sub.description} {sub.amount ? `- ₹${Number(sub.amount).toLocaleString('en-IN')}` : ""}
+                                </p>
+                              ))}
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+            <div className="cjs-modal-footer">
+              <button
+                className="cjs-modal-btn cjs-modal-btn-cancel"
+                onClick={() => {
+                  const reason = prompt("Please provide a reason for rejection (optional):");
+                  if (reason !== null) {
+                    handleRejectProposal(proposalModal.projectId, proposalModal.projectType);
+                  }
+                }}
+              >
+                Reject
+              </button>
+              <button
+                className="cjs-modal-btn cjs-modal-btn-submit"
+                onClick={() => {
+                  handleAcceptProposal(proposalModal.projectId, proposalModal.projectType);
+                  setProposalModal({ isOpen: false, projectId: null, projectType: null, proposal: null });
+                }}
+              >
+                Accept
               </button>
             </div>
           </div>

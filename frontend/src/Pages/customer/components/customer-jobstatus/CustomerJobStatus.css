@@ -1159,4 +1159,157 @@
   background: linear-gradient(135deg, #ffb07a 0%, #f97316 100%);
 }
 
+/* Phases Modal Styles */
+.cjs-phases-modal-content {
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+  max-width: 800px;
+  max-height: 85vh;
+  overflow-y: auto;
+  width: 90%;
+}
+
+.cjs-phases-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.cjs-phase-card {
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  padding: 16px;
+  background: #f8fafc;
+}
+
+.cjs-phase-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+  border-bottom: 2px solid #e2e8f0;
+  padding-bottom: 12px;
+}
+
+.cjs-phase-header h4 {
+  margin: 0;
+  color: #1e293b;
+  font-size: 1.1rem;
+}
+
+.cjs-phase-percentage {
+  background: linear-gradient(135deg, #ffb07a 0%, #f97316 100%);
+  color: white;
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-weight: 600;
+  font-size: 0.9rem;
+}
+
+.cjs-phase-details {
+  margin-bottom: 12px;
+  color: #475569;
+}
+
+.cjs-phase-details p {
+  margin: 8px 0;
+  font-size: 0.95rem;
+}
+
+.cjs-subdivisions {
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid #cbd5e1;
+}
+
+.cjs-subdivisions-title {
+  font-weight: 600;
+  color: #1e293b;
+  margin-bottom: 8px;
+}
+
+.cjs-subdivisions ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.cjs-subdivisions li {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 0;
+  border-bottom: 1px solid #e2e8f0;
+  font-size: 0.9rem;
+  color: #475569;
+}
+
+.cjs-subdivisions li:last-child {
+  border-bottom: none;
+}
+
+.cjs-sub-category {
+  font-weight: 500;
+  color: #1e293b;
+}
+
+.cjs-sub-desc {
+  color: #64748b;
+}
+
+.cjs-sub-amount {
+  font-weight: 600;
+  color: #f97316;
+}
+
+.cjs-phases-summary {
+  background: white;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  padding: 16px;
+  margin-top: 20px;
+}
+
+.cjs-summary-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 0;
+  font-size: 0.95rem;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.cjs-summary-item:last-child {
+  border-bottom: none;
+}
+
+.cjs-summary-item span:first-child {
+  font-weight: 500;
+  color: #475569;
+}
+
+.cjs-summary-amount,
+.cjs-summary-percentage {
+  font-weight: 700;
+  color: #f97316;
+  font-size: 1.05rem;
+}
+
+.cjs-btn-view-details {
+  background: linear-gradient(135deg, #ffb07a 0%, #f97316 100%);
+  color: white;
+  padding: 12px 24px;
+  border: none;
+  border-radius: 8px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+  box-shadow: 0 2px 8px rgba(249, 115, 22, 0.12);
+}
+
+.cjs-btn-view-details:hover {
+  background: linear-gradient(135deg, #ff9a5c 0%, #ea580c 100%);
+}
+
 /* Removed keyframes and animations entirely from this file */
