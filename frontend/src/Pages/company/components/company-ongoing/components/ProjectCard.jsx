@@ -2,6 +2,16 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 
+const getPhaseLabel = (project) => {
+  const phases = project?.proposal?.phases;
+  if (!Array.isArray(phases) || phases.length === 0) {
+    return project.currentPhase || "Not specified";
+  }
+  const progress = project.completionPercentage || 0;
+  const index = Math.min(Math.max(Math.ceil(progress / 25) - 1, 0), phases.length - 1);
+  return phases[index]?.name || project.currentPhase || "Not specified";
+};
+
 const ProjectCard = ({ 
   project, 
   unviewedComplaints, 
@@ -68,7 +78,7 @@ const ProjectCard = ({
         </div>
 
         <p>
-          Current phase: <span>{project.currentPhase}</span>
+          Current phase: <span>{getPhaseLabel(project)}</span>
         </p>
 
         {/* ACTION BUTTONS */}

@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import "./CompanyRevenue.css";
 import StatsCards from "./components/StatsCards";
 import ProjectsTable from "./components/ProjectsTable";
@@ -12,27 +12,68 @@ const CompanyRevenue = () => {
   const [error, setError] = useState(null);
   const [selectedProject, setSelectedProject] = useState(null);
   const [modalOpen, setModalOpen] = useState(false);
+  const [refreshing, setRefreshing] = useState(false);
 
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
+  const fetchData = useCallback(async (isRefresh = false) => {
+    const controller = new AbortController();
+    try {
+      if (isRefresh) {
+        setRefreshing(true);
+      } else {
         setLoading(true);
-        const res = await fetch("http://localhost:3000/api/companyrevenue", {
-          credentials: "include",
-        });
-        if (!res.ok) throw new Error("Failed to fetch revenue data");
-        const data = await res.json();
-        setProjects(data.projects || []);
-        setMetrics(data.metrics || null);
-      } catch (err) {
+      }
+      setError(null);
+      const res = await fetch("/api/companyrevenue", {
+        credentials: "include",
+        cache: "no-store",
+        signal: controller.signal,
+      });
+      if (!res.ok) throw new Error("Failed to fetch revenue data");
+      const data = await res.json();
+      setProjects(data.projects || []);
+      setMetrics(data.metrics || null);
+    } catch (err) {
+      if (err.name !== "AbortError") {
         console.error(err);
         setError(err.message || String(err));
-      } finally {
+      }
+    } finally {
+      if (isRefresh) {
+        setRefreshing(false);
+      } else {
         setLoading(false);
       }
-    };
-    fetchData();
+    }
+
+    return () => controller.abort();
   }, []);
+
+  useEffect(() => {
+    let cleanup;
+    const load = async () => {
+      cleanup = await fetchData(false);
+    };
+    load();
+
+    const handleFocus = () => fetchData(true);
+    const handleVisibility = () => {
+      if (document.visibilityState === "visible") fetchData(true);
+    };
+
+    window.addEventListener("focus", handleFocus);
+    document.addEventListener("visibilitychange", handleVisibility);
+
+    const intervalId = setInterval(() => {
+      fetchData(true);
+    }, 30000);
+
+    return () => {
+      if (cleanup) cleanup();
+      window.removeEventListener("focus", handleFocus);
+      document.removeEventListener("visibilitychange", handleVisibility);
+      clearInterval(intervalId);
+    };
+  }, [fetchData]);
 
   const handleViewDetails = (project) => {
     setSelectedProject(project);
@@ -85,24 +126,37 @@ const CompanyRevenue = () => {
 
   return (
     <div className="revenue-main-container">
-      <h1 className="revenue-page-title">Financial Dashboard</h1>
+      <div className="revenue-header">
+        <div>
+          <h1 className="revenue-page-title">💰 Revenue Analytics</h1>
+          <p className="revenue-subtitle">Track your earnings and project payments</p>
+        </div>
+        <button
+          className="revenue-refresh-btn"
+          onClick={() => fetchData(true)}
+          disabled={refreshing}
+          title="Refresh revenue data"
+        >
+          {refreshing ? "Refreshing..." : "Refresh"}
+        </button>
+      </div>
 
       <StatsCards metrics={metrics} formatCurrency={formatCurrency} />
 
-      {/* CONTENT WRAPPER */}
-      <div className="revenue-content-wrapper">
-        {/* MAIN SECTION */}
-        <div className="revenue-main-section">
-          <h2>All Projects</h2>
-          <ProjectsTable 
-            projects={projects}
-            formatCurrency={formatCurrency}
-            formatDate={formatDate}
-            onViewDetails={handleViewDetails}
-          />
+      {/* Projects Table */}
+      <div className="revenue-projects-section">
+        <div className="revenue-section-header">
+          <h2>📊 Projects Overview</h2>
+          <div className="revenue-project-count">
+            {projects.length} {projects.length === 1 ? 'Project' : 'Projects'}
+          </div>
         </div>
-
-        <SidebarStats metrics={metrics} formatCurrency={formatCurrency} />
+        <ProjectsTable 
+          projects={projects}
+          formatCurrency={formatCurrency}
+          formatDate={formatDate}
+          onViewDetails={handleViewDetails}
+        />
       </div>
 
       <ProjectDetailsModal 

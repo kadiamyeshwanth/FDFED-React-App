@@ -1,193 +1,154 @@
 # Build and Beyond
 
-Build and Beyond is a comprehensive web platform that connects customers with construction companies and specialized workers (Architects and Interior Designers). It supports tendering, bidding, worker hiring, secure chat, and project management with real-time updates.
+Build and Beyond is a full‑stack platform that connects customers with construction companies and specialized workers (Architects and Interior Designers). It supports project posting, bidding, hiring, milestone tracking, real‑time chat, reviews, and admin moderation.
 
-## 🚀 Features
+## Features (from the codebase)
 
-- **Customer Tendering**: Customers can post construction projects and design requests
-- **Company Bidding**: Construction companies can bid on projects
-- **Worker Hiring**: Direct hiring of Architects and Interior Designers
-- **Secure Chat**: Real-time messaging between users after deals are accepted
-- **Project Management**: Project updates with milestone tracking and photo uploads
-- **Admin Dashboard**: Complete user and project moderation system
-- **Reviews & Ratings**: Users can review and rate services
+- **Role‑based dashboards** for Customer, Company, Worker, and Admin
+- **Project posting & bidding** for construction and design requests
+- **Worker hiring** with offers/accept/decline flows
+- **Milestones** with approvals, revisions, and completion updates
+- **Reviews & ratings** for completed projects
+- **Complaints & admin replies**
+- **Admin verification** for companies/workers and moderation controls
+- **File uploads** (documents, images, resumes, project updates)
 
-## 🛠️ Technology Stack
+## Tech Stack
 
-- **Database**: MongoDB
-- **Backend**: Node.js, Express.js, Socket.io
-- **Frontend**: React, Vite, Redux Toolkit
-- **Authentication**: JWT
-- **File Upload**: Multer
+### Backend
+- Node.js + Express
+- MongoDB + Mongoose
+- JWT auth + cookies
+- Multer + Cloudinary (uploads)
+- EJS (server view engine)
 
-## 📋 Prerequisites
+### Frontend
+- React 19 + Vite
+- React Router 7
+- Redux Toolkit
+- Axios
 
-Before you begin, ensure you have the following installed:
-- **Node.js** (v16+ recommended)
-- **npm** (comes with Node.js)
-- **MongoDB** (local installation or MongoDB Atlas account)
-- **nodemon** (optional, for backend development)
+## Requirements
 
-## 📦 Installation & Setup
+- Node.js (v16+ recommended)
+- npm
+- MongoDB (local or Atlas)
 
-### 1. Clone the Repository
+## Installation
 
-```bash
-git clone https://github.com/kadiamyeshwanth/FDFED-React-App.git
-cd FDFED-React-App
-```
+### Backend
+From [backend/](backend/):
 
-### 2. Backend Setup
+- Install dependencies: `npm install`
+- Start server: `node app.js`
 
-Navigate to the backend directory and install dependencies:
+The API runs on http://localhost:3000
 
-```bash
-cd backend
-npm install
-```
+### Frontend
+From [frontend/](frontend/):
 
-### 3. Frontend Setup
+- Install dependencies: `npm install`
+- Start dev server: `npm run dev`
 
-Open a new terminal, navigate to the frontend directory, and install dependencies:
+The UI runs on http://localhost:5173
 
-```bash
-cd frontend
-npm install
-```
+## Configuration
 
-## 🚀 Running the Application
+Backend configuration is currently stored in [backend/config/constants.js](backend/config/constants.js). Update these values before running in production:
 
-### Running the Backend
+- `PORT`
+- `MONGO_URI`
+- `JWT_SECRET`
+- `CLOUDINARY_CLOUD_NAME`, `CLOUDINARY_API_KEY`, `CLOUDINARY_API_SECRET`
+- `ADMIN_EMAIL`, `ADMIN_PASSWORD`, `ADMIN_PASSKEY`
 
-From the `backend/` directory:
+> Recommendation: move secrets to environment variables and keep them out of version control.
 
-**Option 1: Using nodemon (recommended for development)**
-```bash
-nodemon app.js
-```
+## Key Routes (high‑level)
 
-**Option 2: Using node**
-```bash
-node app.js
-```
+### Auth
+- `/api/signup` (multipart form with documents)
+- `/api/login`
+- `/api/logout`
+- `/api/session`
 
-The backend server will start on `http://localhost:4000`
+### Customer
+- `/api/customer/profile`
+- `/api/customer/favorites` (GET/POST/DELETE)
+- `/api/customer/review`
+- `/api/customer/review-status/:projectType/:projectId`
 
-### Running the Frontend
+### Company
+- `/api/companydashboard`
+- `/api/companybids`
+- `/api/companyrevenue`
+- `/api/submit-bid`
+- `/api/company/submit-proposal`
 
-From the `frontend/` directory:
+### Worker
+- `/api/worker/dashboard`
+- `/api/worker/jobs`
+- `/api/worker/ongoing-projects`
+- `/api/worker/submit-milestone`
+- `/api/worker/review`
 
-```bash
-npm run dev
-```
+### Projects
+- `/api/projects`
+- `/api/projects/:id`
+- `/api/customer/submit-bid`
+- `/api/customer/accept-bid`
+- `/api/customer/decline-bid`
 
-The frontend development server will start on `http://localhost:5173`
+### Admin
+- `/api/admin/login`
+- `/api/admin/verify-session`
+- `/api/admindashboard`
+- `/api/admin/revenue`
+- `/api/admin/verify-company/:id`
+- `/api/admin/verify-worker/:id`
 
-Open your browser and navigate to `http://localhost:5173` to view the application.
+### Chat & Complaints
+- `/api/chat/:roomId` (protected)
+- `/api/complaints/*`
 
-## 🏗️ Building for Production
 
-### Frontend Production Build
 
-```bash
-cd frontend
-npm run build
-```
+## File Uploads
 
-This creates an optimized production build in the `frontend/dist/` directory.
+- Uploads are handled via Multer and stored via Cloudinary.
+- Static access is exposed at `/uploads` for locally stored files.
 
-To preview the production build locally:
-```bash
-npm run preview
-```
-
-## 📁 Project Structure
+## Project Structure
 
 ```
 FDFED-React-App/
 ├── backend/
-│   ├── app.js                 # Main application entry point
-│   ├── config/                # Configuration files (DB, constants)
-│   ├── controllers/           # Route controllers
-│   ├── middlewares/           # Authentication & upload middlewares
-│   ├── models/                # Database models
-│   ├── routes/                # API routes
-│   └── utils/                 # Helper utilities
-│
+│   ├── app.js
+│   ├── config/
+│   ├── controllers/
+│   ├── middlewares/
+│   ├── migrations/
+│   ├── models/
+│   ├── routes/
+│   └── utils/
 └── frontend/
     ├── src/
-    │   ├── components/        # Reusable components
-    │   ├── context/           # React context providers
-    │   ├── Pages/             # Page components (Admin, Customer, Company, Worker)
-    │   └── store/             # Redux store and slices
+    │   ├── components/
+    │   ├── context/
+    │   ├── Pages/
+    │   └── store/
     ├── index.html
     └── vite.config.js
 ```
 
-## 🔑 User Roles
+## Migration
 
-The platform supports four user roles:
+For existing data, run the milestone migration:
 
-1. **Admin**: Platform moderation and oversight
-2. **Customer**: Post projects and hire workers
-3. **Company**: Bid on construction projects
-4. **Worker**: Apply for jobs (Architects/Interior Designers)
+- `node migrations/addMilestoneFields.js`
 
-## 🌐 API Endpoints
+## Notes
 
-The backend provides RESTful API endpoints for:
-- Authentication (`/api/auth`)
-- Customer operations (`/api/customer`)
-- Company operations (`/api/company`)
-- Worker operations (`/api/worker`)
-- Admin operations (`/api/admin`)
-- Chat functionality (`/api/chat`)
-- Reviews and ratings (`/api/reviews`)
-
-## 🔧 Configuration
-
-### Frontend API Configuration
-
-Update the API base URL in the frontend if needed. The default configuration connects to `http://localhost:4000`.
-
-### Database Migration
-
-If you have existing data, run the migration script for milestone fields:
-
-```bash
-cd backend
-node migrations/addMilestoneFields.js
-```
-
-## ⚠️ Important Notes
-
-- Ensure MongoDB is running before starting the backend server
-- Make sure both backend and frontend are running simultaneously for full functionality
-- The chat feature requires Socket.io connection between frontend and backend
-- File uploads require proper Cloudinary configuration in the backend `.env` file
-
-## 🤝 Contributing
-
-Contributions are welcome! Please feel free to submit issues and pull requests.
-
-1. Fork the repository
-2. Create your feature branch (`git checkout -b feature/AmazingFeature`)
-3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
-4. Push to the branch (`git push origin feature/AmazingFeature`)
-5. Open a Pull Request
-
-## 👥 Team
-
-- **Lead**: Krishnakumar S — smkrishnakumar1506@gmail.com
-- **Member**: Sai Manideep Putchanutala — isaimanideep.p@gmail.com
-- **Member**: K Prudhvi Sai Ram — prudhvi16321@gmail.com
-- **Member**: Yeshwanth K — kadiamyeshwanth@gmail.com
-- **Member**: Polu Avinash Reddy — avinashreddypolu27@gmail.com
-
-## 📝 License
-
-This project is open source and available for educational purposes.
-
----
-
-**Happy Building! 🏗️**
+- Make sure MongoDB is running before starting the backend.
+- Run both backend and frontend for a fully working app.
+- CORS are configured for the Vite dev server (5173).
