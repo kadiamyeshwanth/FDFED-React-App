@@ -510,19 +510,19 @@ const acceptProposal = async (req, res) => {
       project = await ArchitectHiring.findOne({
         _id: id,
         customer: customerId,
-      });
+      }).populate('worker');
       if (!project)
         return res
           .status(404)
           .json({ error: "Project not found or you are not authorized." });
       if (project.proposal && project.proposal.price)
         project.finalAmount = project.proposal.price;
-      project.status = "Accepted";
+      project.status = "Pending Payment"; // Changed from "Accepted" - payment must be completed first
     } else if (type === "interior") {
       const projectToUpdate = await DesignRequest.findOne({
         _id: id,
         customerId: customerId,
-      });
+      }).populate('workerId');
       if (!projectToUpdate)
         return res
           .status(404)
@@ -530,13 +530,20 @@ const acceptProposal = async (req, res) => {
       project = projectToUpdate;
       if (project.proposal && project.proposal.price)
         project.finalAmount = project.proposal.price;
-      project.status = "accepted";
+      project.status = "pending_payment"; // Changed from "accepted" - payment must be completed first
     } else {
       return res.status(400).json({ error: "Invalid project type." });
     }
 
     await project.save();
-    res.status(200).json({ success: true, redirect: "/job_status" });
+    
+    // Return success with redirect to payment checkout page
+    // Customer will be redirected to professional payment page
+    res.status(200).json({ 
+      success: true, 
+      redirect: `/customerdashboard/payment-checkout/${project._id}?type=${type}&payment=deposit`,
+      message: "Proposal accepted! Please complete the payment to start your project."
+    });
   } catch (error) {
     console.error("Error accepting proposal:", error);
     res.status(500).json({ error: "Server Error" });
@@ -716,8 +723,66 @@ const approveMilestone = async (req, res) => {
     milestone.status = 'Approved';
     milestone.approvedAt = new Date();
     await project.save();
+    
+    // Automatically release payment for this milestone
+    let paymentReleaseInfo = null;
+    try {
+      const { releaseMilestonePayment } = require('./paymentController');
+      const mockReq = {
+        body: {
+          projectId: projectId,
+          projectType: projectType,
+          milestonePercentage: milestone.percentage
+        }
+      };
+      
+      // Create promise to capture payment release response
+      const paymentPromise = new Promise((resolve, reject) => {
+        const mockRes = {
+          json: (data) => {
+            console.log('Milestone payment released:', data);
+            resolve(data);
+          },
+          status: (code) => ({ 
+            json: (data) => {
+              console.error('Failed to release milestone payment:', data);
+              reject(data);
+            } 
+          })
+        };
+        
+        releaseMilestonePayment(mockReq, mockRes).catch(reject);
+      });
+      
+      // Wait for payment release to complete
+      paymentReleaseInfo = await paymentPromise;
+      
+    } catch (paymentError) {
+      console.error('Error in milestone payment release:', paymentError);
+      // Don't fail the approval if payment release fails
+    }
 
-    res.status(200).json({ success: true, message: 'Milestone approved successfully' });
+    // Check if there's a next milestone that needs payment
+    const nextMilestone = paymentReleaseInfo?.data?.nextPayment;
+    
+    if (nextMilestone && nextMilestone.milestone) {
+      // Redirect to payment checkout page for next milestone
+      const redirectUrl = `/customerdashboard/payment-checkout/${projectId}?type=${projectType}&payment=milestone&milestone=${nextMilestone.milestone}`;
+      
+      res.status(200).json({ 
+        success: true, 
+        message: `Milestone approved and payment released! Please complete payment for next milestone (${nextMilestone.milestone}%).`,
+        redirect: redirectUrl,
+        paymentInfo: paymentReleaseInfo?.data
+      });
+    } else {
+      // No more milestones - project complete
+      res.status(200).json({ 
+        success: true, 
+        message: 'Milestone approved and payment released! Project completed.',
+        paymentInfo: paymentReleaseInfo?.data
+      });
+    }
   } catch (error) {
     console.error('Error approving milestone:', error);
     res.status(500).json({ error: 'Server error' });
@@ -843,6 +908,130 @@ const reportMilestoneToAdmin = async (req, res) => {
   }
 };
 
+// Get Architect Hiring Project Details
+const getArchitectHiringDetails = async (req, res) => {
+  try {
+    const { projectId } = req.params;
+    
+    if (!req.user || !req.user.user_id) {
+      return res.status(401).json({ error: 'Unauthorized' });
+    }
+
+    const project = await ArchitectHiring.findOne({
+      _id: projectId,
+      customer: req.user.user_id
+    })
+    .populate('worker', 'name email phone specialization')
+    .lean();
+
+    if (!project) {
+      return res.status(404).json({ error: 'Project not found' });
+    }
+
+    res.json(project);
+  } catch (error) {
+    console.error('Error fetching architect hiring details:', error);
+    res.status(500).json({ error: 'Failed to fetch project details' });
+  }
+};
+
+// Get Design Request Details
+const getDesignRequestDetails = async (req, res) => {
+  try {
+    const { projectId } = req.params;
+    
+    if (!req.user || !req.user.user_id) {
+      return res.status(401).json({ error: 'Unauthorized' });
+    }
+
+    const project = await DesignRequest.findOne({
+      _id: projectId,
+      customerId: req.user.user_id
+    })
+    .populate('workerId', 'name email phone specialization')
+    .lean();
+
+    if (!project) {
+      return res.status(404).json({ error: 'Project not found' });
+    }
+
+    res.json(project);
+  } catch (error) {
+    console.error('Error fetching design request details:', error);
+    res.status(500).json({ error: 'Failed to fetch project details' });
+  }
+};
+
+// Get Payment History for Customer
+const getPaymentHistory = async (req, res) => {
+  try {
+    if (!req.user || !req.user.user_id) {
+      return res.status(401).json({ error: 'Unauthorized' });
+    }
+
+    const customerId = req.user.user_id;
+    const { Transaction } = require('../models/index');
+
+    // Get all transactions for this customer
+    const transactions = await Transaction.find({ 
+      customerId: customerId,
+      status: 'completed'
+    })
+    .populate('workerId', 'name email')
+    .populate('projectId', 'projectName')
+    .sort({ createdAt: -1 })
+    .lean();
+
+    // Calculate stats
+    const totalPaid = transactions
+      .filter(t => ['escrow_hold', 'milestone_release'].includes(t.transactionType))
+      .reduce((sum, t) => sum + t.amount, 0);
+
+    // Get unique projects
+    const uniqueProjects = [...new Set(transactions.map(t => t.projectId?._id?.toString()).filter(Boolean))];
+    const totalProjects = uniqueProjects.length;
+
+    // Get pending payments (projects with Accepted status but not all milestones paid)
+    const architectProjects = await ArchitectHiring.find({
+      customer: customerId,
+      status: 'Accepted'
+    }).lean();
+
+    const interiorProjects = await DesignRequest.find({
+      customerId: customerId,
+      status: 'accepted'
+    }).lean();
+
+    let pendingPayments = 0;
+    
+    [...architectProjects, ...interiorProjects].forEach(project => {
+      if (project.paymentDetails && project.paymentDetails.milestonePayments) {
+        const unpaidMilestones = project.paymentDetails.milestonePayments.filter(
+          mp => !mp.paymentCollected && mp.status === 'pending'
+        );
+        pendingPayments += unpaidMilestones.reduce((sum, mp) => sum + mp.amount, 0);
+      }
+    });
+
+    res.json({
+      success: true,
+      transactions: transactions,
+      stats: {
+        totalPaid: totalPaid,
+        totalProjects: totalProjects,
+        pendingPayments: pendingPayments
+      }
+    });
+
+  } catch (error) {
+    console.error('Error fetching payment history:', error);
+    res.status(500).json({ 
+      success: false,
+      error: 'Failed to fetch payment history' 
+    });
+  }
+};
+
 module.exports = {
   submitBidForm,
   getDashboard,
@@ -870,4 +1059,7 @@ module.exports = {
   rejectMilestone,
   requestMilestoneRevision,
   reportMilestoneToAdmin,
+  getArchitectHiringDetails,
+  getDesignRequestDetails,
+  getPaymentHistory,
 };

@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import "./CustomerJobStatus.css";
 import ReviewModal from "../../../../components/ReviewModal/ReviewModal";
 import ReviewDisplay from "../../../../components/ReviewDisplay/ReviewDisplay";
 
 const CustomerJobStatus = () => {
+  const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState("cjs-architect-section");
   const [statusFilters, setStatusFilters] = useState({
     architect: 'all',
@@ -130,9 +131,15 @@ const CustomerJobStatus = () => {
         { projectType },
         { withCredentials: true }
       );
+      
       if (res.data.success) {
-        alert("Milestone approved successfully!");
-        fetchJobStatus();
+        // Check if there's a redirect to payment page for next milestone
+        if (res.data.redirect) {
+          navigate(res.data.redirect);
+        } else {
+          // No more milestones or no redirect needed
+          fetchJobStatus();
+        }
       }
     } catch (error) {
       console.error("Error approving milestone:", error);
@@ -451,7 +458,7 @@ const CustomerJobStatus = () => {
   };
 
   const handleAcceptProposal = async (projectId, type) => {
-    if (!confirm(`Are you sure you want to accept this proposal and mark payment as complete?`)) {
+    if (!confirm(`Are you sure you want to accept this proposal? You will be redirected to the payment page to complete the 25% deposit.`)) {
       return;
     }
 
@@ -461,8 +468,15 @@ const CustomerJobStatus = () => {
         { withCredentials: true }
       );
       if (res.data.success) {
-        alert("Proposal accepted and payment marked as complete!");
-        fetchJobStatus();
+        alert(res.data.message || "Proposal accepted! Redirecting to payment...");
+        
+        // Navigate to payment checkout page
+        if (res.data.redirect) {
+          navigate(res.data.redirect);
+        } else {
+          // Fallback to refresh if no redirect URL
+          fetchJobStatus();
+        }
       }
     } catch (error) {
       console.error("Error accepting proposal:", error);
