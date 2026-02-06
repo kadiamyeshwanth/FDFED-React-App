@@ -31,7 +31,10 @@ const {
   approveMilestone,
   rejectMilestone,
   requestMilestoneRevision,
-  reportMilestoneToAdmin
+  reportMilestoneToAdmin,
+  getArchitectHiringDetails,
+  getDesignRequestDetails,
+  getPaymentHistory
 } = require("../controllers/customerController");
 
 const { submitCustomerReview, getProjectReviewStatus } = require('../controllers/reviewController');
@@ -98,5 +101,12 @@ router.post('/customer/milestone/report-to-admin/:projectId/:milestoneId', auth,
 // Review routes
 router.post('/customer/review', auth, submitCustomerReview);
 router.get('/customer/review-status/:projectType/:projectId', auth, getProjectReviewStatus);
+
+// Payment checkout - get project details
+router.get('/architect-hiring/:projectId', auth, getArchitectHiringDetails);
+router.get('/design-request/:projectId', auth, getDesignRequestDetails);
+
+// Payment history
+router.get('/customer/payment-history', auth, getPaymentHistory);
 
 module.exports = router;

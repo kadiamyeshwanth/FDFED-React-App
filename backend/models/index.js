@@ -198,6 +198,29 @@ const workerSchema = new mongoose.Schema(
       default: "available",
     },
     expectedPrice: { type: String },
+    
+    // Payment & Revenue System
+    subscriptionPlan: {
+      type: String,
+      enum: ["basic", "pro", "premium"],
+      default: "basic"
+    },
+    commissionRate: {
+      type: Number,
+      default: 15, // 15% platform commission for basic
+      min: 0,
+      max: 100
+    },
+    earnings: {
+      totalEarnings: { type: Number, default: 0 }, // Lifetime earnings
+      pendingBalance: { type: Number, default: 0 }, // In escrow, not yet released
+      availableBalance: { type: Number, default: 0 }, // Released, ready for withdrawal
+      withdrawnAmount: { type: Number, default: 0 }, // Already withdrawn
+      monthlyEarnings: { type: Number, default: 0 }, // Current month
+      yearlyEarnings: { type: Number, default: 0 }, // Current year
+      lastResetMonth: { type: Number, default: new Date().getMonth() },
+      lastResetYear: { type: Number, default: new Date().getFullYear() }
+    },
   },
   { timestamps: true }
 );
@@ -226,7 +249,7 @@ const architectHiringSchema = new mongoose.Schema({
   },
   status: {
     type: String,
-    enum: ["Pending", "Proposal Sent", "Accepted", "Rejected", "Completed"],
+    enum: ["Pending", "Proposal Sent", "Pending Payment", "Accepted", "Rejected", "Completed"],
     default: "Pending",
   },
   finalAmount: { type: Number, default: 0 },
@@ -363,6 +386,39 @@ const architectHiringSchema = new mongoose.Schema({
       submittedAt: { type: Date }
     },
     isReviewCompleted: { type: Boolean, default: false }
+  },
+  
+  // Payment & Escrow System
+  paymentDetails: {
+    totalAmount: { type: Number }, // Total project cost (worker's proposal price)
+    platformCommission: { type: Number }, // Platform's 15% commission
+    workerAmount: { type: Number }, // Amount worker will receive (85%)
+    escrowStatus: {
+      type: String,
+      enum: ["not_initiated", "held", "partially_released", "fully_released"],
+      default: "not_initiated"
+    },
+    milestonePayments: [
+      {
+        percentage: { type: Number, required: true }, // 25, 50, 75, 100
+        amount: { type: Number, required: true }, // Amount for this milestone
+        platformFee: { type: Number, required: true }, // Commission for this milestone
+        workerPayout: { type: Number, required: true }, // Net amount to worker
+        paymentCollected: { type: Boolean, default: false }, // Has customer paid for this milestone?
+        paymentCollectedAt: { type: Date }, // When customer paid
+        status: {
+          type: String,
+          enum: ["pending", "released", "withdrawn"],
+          default: "pending"
+        },
+        releasedAt: { type: Date },
+        withdrawnAt: { type: Date },
+        transactionId: { type: mongoose.Schema.Types.ObjectId, ref: "Transaction" }
+      }
+    ],
+    paymentInitiatedAt: { type: Date },
+    stripeSessionId: { type: String },
+    stripePaymentIntentId: { type: String }
   },
 
   createdAt: { type: Date, default: Date.now },
@@ -581,7 +637,7 @@ const designRequestSchema = new mongoose.Schema({
   createdAt: { type: Date, default: Date.now },
   status: { 
     type: String, 
-    enum: ["pending", "proposal_sent", "accepted", "rejected", "completed"], 
+    enum: ["pending", "proposal_sent", "pending_payment", "accepted", "rejected", "completed"], 
     default: "pending" 
   },
   finalAmount: { type: Number, default: 0 },
@@ -633,6 +689,39 @@ const designRequestSchema = new mongoose.Schema({
       submittedAt: { type: Date }
     },
     isReviewCompleted: { type: Boolean, default: false }
+  },
+  
+  // Payment & Escrow System
+  paymentDetails: {
+    totalAmount: { type: Number }, // Total project cost (worker's proposal price)
+    platformCommission: { type: Number }, // Platform's 15% commission
+    workerAmount: { type: Number }, // Amount worker will receive (85%)
+    escrowStatus: {
+      type: String,
+      enum: ["not_initiated", "held", "partially_released", "fully_released"],
+      default: "not_initiated"
+    },
+    milestonePayments: [
+      {
+        percentage: { type: Number, required: true }, // 25, 50, 75, 100
+        amount: { type: Number, required: true }, // Amount for this milestone
+        platformFee: { type: Number, required: true }, // Commission for this milestone
+        workerPayout: { type: Number, required: true }, // Net amount to worker
+        paymentCollected: { type: Boolean, default: false }, // Has customer paid for this milestone?
+        paymentCollectedAt: { type: Date }, // When customer paid
+        status: {
+          type: String,
+          enum: ["pending", "released", "withdrawn"],
+          default: "pending"
+        },
+        releasedAt: { type: Date },
+        withdrawnAt: { type: Date },
+        transactionId: { type: mongoose.Schema.Types.ObjectId, ref: "Transaction" }
+      }
+    ],
+    paymentInitiatedAt: { type: Date },
+    stripeSessionId: { type: String },
+    stripePaymentIntentId: { type: String }
   },
 });
 
@@ -812,6 +901,64 @@ const complaintSchema = new mongoose.Schema({
   createdAt: { type: Date, default: Date.now }
 });
 
+// Transaction Schema - Complete Payment & Revenue Tracking
+const transactionSchema = new mongoose.Schema({
+  transactionType: {
+    type: String,
+    enum: [
+      "escrow_hold",
+      "milestone_release",
+      "worker_withdrawal",
+      "platform_commission",
+      "refund",
+      "subscription_fee"
+    ],
+    required: true
+  },
+  amount: { type: Number, required: true, min: 0 },
+  platformFee: { type: Number, default: 0 },
+  netAmount: { type: Number, required: true },
+  
+  projectId: { type: mongoose.Schema.Types.ObjectId },
+  projectType: { type: String, enum: ['architect', 'interior', 'construction', 'bid'] },
+  workerId: { type: mongoose.Schema.Types.ObjectId, ref: 'Worker' },
+  customerId: { type: mongoose.Schema.Types.ObjectId, ref: 'Customer' },
+  companyId: { type: mongoose.Schema.Types.ObjectId, ref: 'Company' },
+  
+  milestonePercentage: { type: Number, enum: [25, 50, 75, 100] },
+  
+  status: {
+    type: String,
+    enum: ["pending", "completed", "failed", "refunded"],
+    default: "pending"
+  },
+  
+  paymentMethod: { type: String, enum: ["stripe", "razorpay", "bank_transfer", "wallet"], default: "stripe" },
+  stripePaymentIntentId: { type: String },
+  stripeSessionId: { type: String },
+  paymentGatewayResponse: { type: mongoose.Schema.Types.Mixed },
+  
+  bankDetails: {
+    accountHolderName: { type: String },
+    accountNumber: { type: String },
+    ifscCode: { type: String },
+    bankName: { type: String },
+    transferId: { type: String }
+  },
+  
+  description: { type: String },
+  notes: { type: String },
+  processedAt: { type: Date },
+  failureReason: { type: String },
+  
+  createdAt: { type: Date, default: Date.now },
+  updatedAt: { type: Date, default: Date.now }
+}, { timestamps: true });
+
+transactionSchema.index({ workerId: 1, createdAt: -1 });
+transactionSchema.index({ projectId: 1 });
+transactionSchema.index({ transactionType: 1, status: 1 });
+
 // Models
 module.exports = {
   Customer: mongoose.model('Customer', customerSchema),
@@ -827,4 +974,5 @@ module.exports = {
   FavoriteDesign: mongoose.model('FavoriteDesign', favoriteDesignSchema),
   ChatRoom: ChatRoom,
   Complaint: mongoose.model('Complaint', complaintSchema),
+  Transaction: mongoose.model('Transaction', transactionSchema),
 };
