@@ -1,4 +1,3 @@
-// Verify/Reject Company
 const verifyCompany = async (req, res) => {
   try {
     const company = await Company.findByIdAndUpdate(
@@ -29,7 +28,6 @@ const rejectCompany = async (req, res) => {
   }
 };
 
-// Verify/Reject Worker
 const verifyWorker = async (req, res) => {
   try {
     const worker = await Worker.findByIdAndUpdate(
@@ -111,7 +109,6 @@ const getAdminDashboard = async (req, res) => {
     const pendingRequests = pendingArchitectHirings + pendingDesignRequests;
     const openBids = bids.filter((b) => b.status === "open").length;
 
-    // routed file : admin/admin_dashboard
     res.status(200).json({
       counts: {
         customers: customersCount,
@@ -275,7 +272,6 @@ const getCustomerDetail = async (req, res) => {
     if (!customer) {
       return res.status(404).json({ error: "Customer not found" });
     }
-    // routed file : admin/customer-detail
     res.json({ customer });
   } catch (error) {
     console.error("Error fetching customer:", error);
@@ -289,7 +285,6 @@ const getCompanyDetail = async (req, res) => {
     if (!company) {
       return res.status(404).json({ error: "Company not found" });
     }
-    // routed file : admin/company-detail
     res.json({ company });
   } catch (error) {
     console.error("Error fetching company:", error);
@@ -303,7 +298,6 @@ const getWorkerDetail = async (req, res) => {
     if (!worker) {
       return res.status(404).json({ error: "Worker not found" });
     }
-    // routed file : admin/worker-detail
     res.json({ worker });
   } catch (error) {
     console.error("Error fetching worker:", error);
@@ -319,7 +313,6 @@ const getArchitectHiringDetail = async (req, res) => {
     if (!hiring) {
       return res.status(404).json({ error: "Architect hiring not found" });
     }
-    // routed file : admin/architect-hiring-detail
     res.json({ hiring });
   } catch (error) {
     console.error("Error fetching architect hiring:", error);
@@ -335,7 +328,6 @@ const getConstructionProjectDetail = async (req, res) => {
     if (!project) {
       return res.status(404).json({ error: "Construction project not found" });
     }
-    // routed file : admin/construction-project-detail
     res.json({ project });
   } catch (error) {
     console.error("Error fetching construction project:", error);
@@ -351,7 +343,6 @@ const getDesignRequestDetail = async (req, res) => {
     if (!request) {
       return res.status(404).json({ error: "Design request not found" });
     }
-    // routed file : admin/design-request-detail
     res.json({ request });
   } catch (error) {
     console.error("Error fetching design request:", error);
@@ -391,6 +382,163 @@ const getJobApplicationDetail = async (req, res) => {
   }
 };
 
+const getAdminRevenue = async (req, res) => {
+  try {
+    // Fetch all construction projects with company and customer details
+    const projects = await ConstructionProjectSchema.find({})
+      .populate("customerId", "name email phone")
+      .populate("companyId", "companyName email contactPerson")
+      .sort({ createdAt: -1 });
+    
+    console.log(`📊 Admin Revenue: Found ${projects.length} construction projects`);
+
+    // Initialize totals
+    let totalPlatformRevenue = 0;
+    let totalReceivedRevenue = 0;
+    let totalPendingRevenue = 0;
+    
+    // Phase analytics
+    const phaseAnalytics = {
+      phase1: { total: 0, received: 0, pending: 0 },
+      phase2: { total: 0, received: 0, pending: 0 },
+      phase3: { total: 0, received: 0, pending: 0 },
+      phase4: { total: 0, received: 0, pending: 0 },
+      final: { total: 0, received: 0, pending: 0 },
+    };
+
+    const projectsWithDetails = projects.map((project) => {
+      const totalBudget = project.paymentDetails?.totalAmount || project.proposal?.price || 0;
+      const phaseAmount = totalBudget * 0.25; // 25% per phase
+      const finalPhaseAmount = totalBudget * 0.1; // 10% final phase
+
+      let projectReceived = 0;
+      let projectPending = 0;
+      const phaseBreakdown = [];
+
+      for (let i = 1; i <= 4; i++) {
+        const milestone = project.milestones?.find((m) => m.percentage === i * 25);
+        
+        const upfrontAmount = phaseAmount * 0.4;
+        const upfrontStatus = milestone?.payments?.upfront?.status || "pending";
+        const upfrontReceived = (upfrontStatus === "released" || upfrontStatus === "paid") 
+          ? (milestone?.payments?.upfront?.amount || upfrontAmount) 
+          : 0;
+        const upfrontPending = upfrontAmount - upfrontReceived;
+
+        const completionAmount = phaseAmount * 0.6;
+        const completionStatus = milestone?.payments?.completion?.status || "pending";
+        const completionReceived = (completionStatus === "released" || completionStatus === "paid") 
+          ? (milestone?.payments?.completion?.amount || completionAmount) 
+          : 0;
+        const completionPending = completionAmount - completionReceived;
+
+        const phaseReceived = upfrontReceived + completionReceived;
+        const phasePending = upfrontPending + completionPending;
+
+        projectReceived += phaseReceived;
+        projectPending += phasePending;
+
+        phaseAnalytics[`phase${i}`].total += phaseAmount;
+        phaseAnalytics[`phase${i}`].received += phaseReceived;
+        phaseAnalytics[`phase${i}`].pending += phasePending;
+
+        phaseBreakdown.push({
+          phase: i,
+          totalAmount: phaseAmount,
+          upfront: { amount: upfrontAmount, status: upfrontStatus, received: upfrontReceived },
+          completion: { amount: completionAmount, status: completionStatus, received: completionReceived },
+          totalReceived: phaseReceived,
+          totalPending: phasePending,
+        });
+      }
+
+      const finalMilestone = project.milestones?.find((m) => m.percentage === 100);
+      const finalStatus = finalMilestone?.payments?.final?.status || "pending";
+      const finalReceived = (finalStatus === "released" || finalStatus === "paid") 
+        ? (finalMilestone?.payments?.final?.amount || finalPhaseAmount) 
+        : 0;
+      const finalPending = finalPhaseAmount - finalReceived;
+
+      projectReceived += finalReceived;
+      projectPending += finalPending;
+
+      phaseAnalytics.final.total += finalPhaseAmount;
+      phaseAnalytics.final.received += finalReceived;
+      phaseAnalytics.final.pending += finalPending;
+
+      phaseBreakdown.push({
+        phase: 5,
+        isFinal: true,
+        totalAmount: finalPhaseAmount,
+        final: { amount: finalPhaseAmount, status: finalStatus, received: finalReceived },
+        totalReceived: finalReceived,
+        totalPending: finalPending,
+      });
+
+      const projectTotal = totalBudget * 1.1;
+
+      totalPlatformRevenue += projectTotal;
+      totalReceivedRevenue += projectReceived;
+      totalPendingRevenue += projectPending;
+
+      return {
+        _id: project._id,
+        projectName: project.projectName,
+        status: project.status,
+        completionPercentage: project.completionPercentage || 0,
+        customer: {
+          _id: project.customerId?._id,
+          name: project.customerId?.name || project.customerName || "Unknown",
+          email: project.customerId?.email || project.customerEmail || "",
+          phone: project.customerId?.phone || project.customerPhone || "",
+        },
+        company: {
+          _id: project.companyId?._id,
+          name: project.companyId?.companyName || "Unknown Company",
+          email: project.companyId?.email || "",
+          contactPerson: project.companyId?.contactPerson || "",
+        },
+        totalAmount: projectTotal,
+        receivedAmount: projectReceived,
+        pendingAmount: projectPending,
+        phaseBreakdown,
+        createdAt: project.createdAt,
+      };
+    });
+
+    const activeProjectsCount = projects.filter((p) => p.status === "accepted" || p.status === "ongoing").length;
+    const completedProjectsCount = projects.filter((p) => p.status === "completed").length;
+    const collectionRate = totalPlatformRevenue > 0 
+      ? ((totalReceivedRevenue / totalPlatformRevenue) * 100).toFixed(2) 
+      : 0;
+
+    console.log(`💰 Admin Revenue Summary:`);
+    console.log(`   Total Revenue: ₹${totalPlatformRevenue.toLocaleString('en-IN')}`);
+    console.log(`   Received: ₹${totalReceivedRevenue.toLocaleString('en-IN')}`);
+    console.log(`   Pending: ₹${totalPendingRevenue.toLocaleString('en-IN')}`);
+    console.log(`   Collection Rate: ${collectionRate}%`);
+    console.log(`   Active Projects: ${activeProjectsCount}, Completed: ${completedProjectsCount}`);
+
+    res.json({
+      success: true,
+      metrics: {
+        totalRevenue: totalPlatformRevenue,
+        receivedRevenue: totalReceivedRevenue,
+        pendingRevenue: totalPendingRevenue,
+        collectionRate: parseFloat(collectionRate),
+        activeProjects: activeProjectsCount,
+        completedProjects: completedProjectsCount,
+        totalProjects: projects.length,
+      },
+      phaseAnalytics,
+      projects: projectsWithDetails,
+    });
+  } catch (error) {
+    console.error("Error fetching admin revenue:", error);
+    res.status(500).json({ success: false, error: error.message });
+  }
+};
+
 module.exports = {
   getAdminDashboard,
   deleteCustomer,
@@ -413,4 +561,5 @@ module.exports = {
   rejectCompany,
   verifyWorker,
   rejectWorker,
+  getAdminRevenue,
 };

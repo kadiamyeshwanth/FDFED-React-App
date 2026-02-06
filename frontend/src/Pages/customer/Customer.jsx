@@ -13,6 +13,8 @@ import CustomerOngoing from "./components/customer-ongoing/CustomerOngoing";
 import CustomerBidspace from "./components/customer-bidspace/CustomerBidspace";
 import CustomerJobStatus from "./components/customer-jobstatus/CustomerJobStatus";
 import CustomerSettings from "./components/customer-settings/CustomerSettings";
+import CustomerPaymentHistory from "./components/customer-payments/CustomerPaymentHistory";
+import PaymentCheckout from "./components/customer-payments/PaymentCheckout";
 import Chat from "../../components/Chat/Chat";
 
 import ArchitectForm from "./components/Forms/ArchitectForm";
@@ -30,79 +32,36 @@ const Customer = () => {
           path="*"
           element={
             <Routes>
-              <Route
-                path="home"
-                element={
-                    <CustomerHome />
-                }
-              />
+              <Route path="home" element={<CustomerHome />} />
               <Route
                 path="construction_companies_list"
-                element={
-                    <CustomerConstruction />
-                }
+                element={<CustomerConstruction />}
               />
-              <Route
-                path="architect"
-                element={
-                    <CustomerArchitect />
-                }
-              />
-              <Route
-                path="architect_form"
-                element={
-                    <ArchitectForm />
-                }
-              />
-              <Route
-                path="interior_designer"
-                element={
-                    <CustomerInterior />
-                }
-              />
+              <Route path="architect" element={<CustomerArchitect />} />
+              <Route path="architect_form" element={<ArchitectForm />} />
+              <Route path="interior_designer" element={<CustomerInterior />} />
               <Route
                 path="interiordesign_form"
-                element={
-                    <InteriorDesignForm />
-                }
+                element={<InteriorDesignForm />}
+              />
+              <Route path="ongoing_projects" element={<CustomerOngoing />} />
+              <Route path="bidspace" element={<CustomerBidspace />} />
+              <Route path="bidform" element={<BidForm />} />
+              <Route path="job_status" element={<CustomerJobStatus />} />
+              <Route path="customersettings" element={<CustomerSettings />} />
+              <Route
+                path="payment-history"
+                element={<CustomerPaymentHistory />}
               />
               <Route
-                path="ongoing_projects"
-                element={
-                    <CustomerOngoing />
-                }
+                path="payment-checkout/:projectId"
+                element={<PaymentCheckout />}
               />
+              <Route path="constructionform" element={<ConstructionForm />} />
               <Route
-                path="bidspace"
-                element={
-                    <CustomerBidspace />
-                }
+                path="chat/:roomId"
+                element={<Chat userRole="customer" />}
               />
-              <Route
-                path="bidform"
-                element={
-                    <BidForm />
-                }
-              />
-              <Route
-                path="job_status"
-                element={
-                    <CustomerJobStatus />
-                }
-              />
-              <Route
-                path="customersettings"
-                element={
-                    <CustomerSettings />
-                }
-              />
-              <Route
-                path="constructionform"
-                element={
-                    <ConstructionForm />
-                }
-              />
-              <Route path="chat/:roomId" element={<Chat userRole="customer" />} />
               <Route path="*" element={<CustomerHome />} />
             </Routes>
           }

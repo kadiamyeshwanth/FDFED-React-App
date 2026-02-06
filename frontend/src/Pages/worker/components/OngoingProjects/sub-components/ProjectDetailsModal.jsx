@@ -2,9 +2,20 @@ import React from 'react';
 import './ProjectDetailsModal.css';
 
 const ProjectDetailsModal = ({ project, onClose }) => {
+  const [lightboxImage, setLightboxImage] = React.useState(null);
+  
   if (!project) return null;
 
   const isArchitect = project.projectType === 'architect';
+
+  const openLightbox = (imageUrl) => {
+    setLightboxImage(imageUrl);
+  };
+
+  const closeLightbox = (e) => {
+    if (e) e.stopPropagation();
+    setLightboxImage(null);
+  };
 
   return (
     <div className="wkop-modal" onClick={onClose}>
@@ -175,9 +186,85 @@ const ProjectDetailsModal = ({ project, onClose }) => {
             </div>
           )}
 
+          {/* Project Milestones */}
+          {project.milestones && project.milestones.length > 0 && (
+            <div className="wkop-modal-section">
+              <div className="wkop-modal-section-title">
+                <i className="fas fa-tasks"></i> Project Milestones
+              </div>
+              <div className="wkop-milestones-timeline">
+                {project.milestones
+                  .sort((a, b) => a.percentage - b.percentage)
+                  .map((milestone, index) => (
+                    <div key={index} className={`wkop-milestone-item wkop-milestone-${milestone.status?.toLowerCase().replace(/\s+/g, '-')}`}>
+                      <div className="wkop-milestone-header">
+                        <div className="wkop-milestone-percentage">
+                          <span className="wkop-percentage-circle">{milestone.percentage}%</span>
+                        </div>
+                        <div className="wkop-milestone-status">
+                          <span className={`wkop-status-badge wkop-status-${milestone.status?.toLowerCase().replace(/\s+/g, '-')}`}>
+                            {milestone.status === 'Approved' && <i className="fas fa-check-circle"></i>}
+                            {milestone.status === 'Pending' && <i className="fas fa-clock"></i>}
+                            {milestone.status === 'Rejected' && <i className="fas fa-times-circle"></i>}
+                            {milestone.status === 'Revision Requested' && <i className="fas fa-exclamation-circle"></i>}
+                            {' '}{milestone.status || 'Pending'}
+                          </span>
+                        </div>
+                      </div>
+                      <div className="wkop-milestone-body">
+                        <p className="wkop-milestone-description">{milestone.description || 'No description provided'}</p>
+                        {milestone.submittedAt && (
+                          <p className="wkop-milestone-date">
+                            <i className="fas fa-calendar-alt"></i> Submitted: {new Date(milestone.submittedAt).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}
+                          </p>
+                        )}
+                        {milestone.approvedAt && (
+                          <p className="wkop-milestone-date wkop-approved-date">
+                            <i className="fas fa-check"></i> Approved: {new Date(milestone.approvedAt).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}
+                          </p>
+                        )}
+                        {milestone.rejectionReason && (
+                          <div className="wkop-milestone-rejection">
+                            <strong>Rejection Reason:</strong> {milestone.rejectionReason}
+                          </div>
+                        )}
+                        {milestone.revisionNotes && (
+                          <div className="wkop-milestone-revision">
+                            <strong>Revision Notes:</strong> {milestone.revisionNotes}
+                          </div>
+                        )}
+                        {milestone.image && (
+                          <div className="wkop-milestone-image">
+                            <img 
+                              src={milestone.image} 
+                              alt={`Milestone ${milestone.percentage}%`}
+                              onClick={() => openLightbox(milestone.image)}
+                              title="Click to view full size"
+                            />
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  ))}
+              </div>
+            </div>
+          )}
 
         </div>
       </div>
+      
+      {/* Lightbox Modal for Images */}
+      {lightboxImage && (
+        <div className="wkop-lightbox" onClick={(e) => { e.stopPropagation(); closeLightbox(e); }}>
+          <span className="wkop-lightbox-close" onClick={(e) => closeLightbox(e)}>&times;</span>
+          <img 
+            src={lightboxImage} 
+            alt="Full size" 
+            className="wkop-lightbox-image"
+            onClick={(e) => e.stopPropagation()}
+          />
+        </div>
+      )}
     </div>
   );
 };

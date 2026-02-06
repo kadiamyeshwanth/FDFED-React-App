@@ -91,6 +91,15 @@ const CustomerNavbar = () => {
               JOB STATUS
             </Link>
           </div>
+
+          <div className="customer_navbar_navItem">
+            <Link
+              to="/customerdashboard/payment-history"
+              className="customer_navbar_navLink"
+            >
+              PAYMENTS
+            </Link>
+          </div>
         </div>
 
         <div className="customer_navbar_rightSection">

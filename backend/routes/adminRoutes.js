@@ -22,7 +22,8 @@ const {
   verifyCompany,
   rejectCompany,
   verifyWorker,
-  rejectWorker
+  rejectWorker,
+  getAdminRevenue
 } = require('../controllers/adminController');
 
 const authadmin = require('../middlewares/authadmin');
@@ -50,6 +51,9 @@ router.patch('/admin/reject-worker/:id', authadmin, rejectWorker);
 
 // Admin dashboard route (protected)
 router.get('/admindashboard', authadmin, getAdminDashboard);
+
+// Admin revenue analytics route (protected)
+router.get('/admin/revenue', authadmin, getAdminRevenue);
 
 // Delete routes
 router.delete('/admin/delete-customer/:id', authadmin, deleteCustomer);

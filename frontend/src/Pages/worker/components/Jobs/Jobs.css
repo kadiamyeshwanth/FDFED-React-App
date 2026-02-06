@@ -367,6 +367,23 @@
   color: var(--primary-color);
 }
 
+.wkj-update-notice {
+  margin: 0.75rem 0 0 0;
+  padding: 0.75rem;
+  background: #fff3cd;
+  border-left: 4px solid #ffc107;
+  border-radius: 4px;
+  color: #856404;
+  font-size: 0.9rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.wkj-update-notice i {
+  color: #ffc107;
+}
+
 .wkj-modal-body {
   padding: 1.5rem;
 }
@@ -407,6 +424,31 @@
   transition: border-color 0.3s ease;
 }
 
+.wkj-form-group textarea {
+  resize: vertical;
+  min-height: 100px;
+  overflow-y: auto;
+  white-space: pre-wrap;
+}
+
+.wkj-form-group textarea::-webkit-scrollbar {
+  width: 8px;
+}
+
+.wkj-form-group textarea::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 4px;
+}
+
+.wkj-form-group textarea::-webkit-scrollbar-thumb {
+  background: #c1c1c1;
+  border-radius: 4px;
+}
+
+.wkj-form-group textarea::-webkit-scrollbar-thumb:hover {
+  background: #a8a8a8;
+}
+
 .wkj-form-group input:focus,
 .wkj-form-group textarea:focus {
   outline: none;
@@ -414,9 +456,280 @@
   box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.2);
 }
 
-.wkj-form-group textarea {
-  resize: vertical;
-  min-height: 100px;
+/* Form Validation Styles */
+.wkj-form-group.wkj-error input,
+.wkj-form-group.wkj-error textarea {
+  border-color: #e74c3c;
+}
+
+.wkj-form-group.wkj-success input,
+.wkj-form-group.wkj-success textarea {
+  border-color: #27ae60;
+}
+
+.wkj-input-error {
+  border-color: #e74c3c !important;
+}
+
+.wkj-input-error:focus {
+  border-color: #e74c3c !important;
+  box-shadow: 0 0 0 2px rgba(231, 76, 60, 0.2) !important;
+}
+
+.wkj-input-success {
+  border-color: #27ae60 !important;
+}
+
+.wkj-input-success:focus {
+  border-color: #27ae60 !important;
+  box-shadow: 0 0 0 2px rgba(39, 174, 96, 0.2) !important;
+}
+
+.wkj-error-message {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 6px;
+  font-size: 0.875rem;
+  color: #e74c3c;
+  font-weight: 500;
+}
+
+.wkj-error-message i {
+  font-size: 0.875rem;
+}
+
+.wkj-success-message {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 6px;
+  font-size: 0.875rem;
+  color: #27ae60;
+  font-weight: 500;
+}
+
+.wkj-success-message i {
+  font-size: 0.875rem;
+}
+
+.wkj-help-text {
+  display: block;
+  margin-top: 6px;
+  font-size: 0.8125rem;
+  color: var(--text-light);
+}
+
+.wkj-required {
+  color: #e74c3c;
+  font-weight: bold;
+  margin-left: 2px;
+}
+
+/* Character Counter */
+.wkj-char-counter {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 6px;
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
+.wkj-counter-warning {
+  color: #f39c12;
+}
+
+.wkj-counter-success {
+  color: #27ae60;
+}
+
+.wkj-counter-danger {
+  color: #e74c3c;
+}
+
+/* Button Disabled State */
+.wkj-job-action-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  background: #95a5a6;
+}
+
+.wkj-job-action-button:disabled:hover {
+  transform: none;
+  box-shadow: none;
+  background: #95a5a6;
+}
+
+/* Loading Spinner */
+.fa-spinner {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* Proposal Submitted Info Styles */
+.wkj-proposal-submitted-info {
+  background: linear-gradient(135deg, #e8f5e9 0%, #f1f8f4 100%);
+  border: 1px solid #81c784;
+  border-radius: 16px;
+  padding: 0;
+  margin-top: 1rem;
+  overflow: hidden;
+  box-shadow: 0 4px 12px rgba(76, 175, 80, 0.1);
+}
+
+.wkj-proposal-header {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 1.25rem 1.5rem;
+  background: linear-gradient(135deg, #66bb6a 0%, #4caf50 100%);
+  color: white;
+  margin: 0;
+}
+
+.wkj-proposal-header i {
+  font-size: 1.5rem;
+  color: white;
+}
+
+.wkj-proposal-header h3 {
+  margin: 0;
+  font-size: 1.15rem;
+  font-weight: 600;
+  color: white;
+  letter-spacing: 0.3px;
+}
+
+.wkj-proposal-details {
+  background: white;
+  padding: 1.5rem;
+  margin: 0;
+  box-shadow: none;
+  border-bottom: 1px solid #e0e0e0;
+}
+
+.wkj-proposal-detail-item {
+  margin-bottom: 1.25rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid #f5f5f5;
+}
+
+.wkj-proposal-detail-item:last-child {
+  margin-bottom: 0;
+  padding-bottom: 0;
+  border-bottom: none;
+}
+
+.wkj-proposal-label {
+  display: block;
+  font-weight: 600;
+  color: #616161;
+  margin-bottom: 0.5rem;
+  font-size: 0.875rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.wkj-proposal-value {
+  display: inline-block;
+  color: #2e7d32;
+  font-size: 1.5rem;
+  font-weight: 700;
+  letter-spacing: -0.5px;
+}
+
+.wkj-proposal-description {
+  margin: 0;
+  color: #424242;
+  line-height: 1.7;
+  white-space: pre-wrap;
+  word-wrap: break-word;
+  word-break: break-word;
+  font-size: 0.95rem;
+  background: #f8f9fa;
+  padding: 1rem;
+  border-radius: 8px;
+  border-left: 3px solid #66bb6a;
+  max-height: 200px;
+  overflow-y: auto;
+}
+
+.wkj-proposal-description::-webkit-scrollbar {
+  width: 6px;
+}
+
+.wkj-proposal-description::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 3px;
+}
+
+.wkj-proposal-description::-webkit-scrollbar-thumb {
+  background: #66bb6a;
+  border-radius: 3px;
+}
+
+.wkj-proposal-description::-webkit-scrollbar-thumb:hover {
+  background: #4caf50;
+}
+
+.wkj-proposal-status-text {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.625rem;
+  margin: 0;
+  color: #795548;
+  font-weight: 500;
+  font-style: italic;
+  padding: 1rem 1.5rem;
+  background: linear-gradient(135deg, #fff3e0 0%, #ffe0b2 100%);
+  border-radius: 0;
+  font-size: 0.9rem;
+}
+
+.wkj-proposal-status-text i {
+  color: #ff9800;
+  font-size: 1.1rem;
+  animation: pulse 2s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.6; }
+}
+
+/* Update Proposal Button */
+.wkj-update-button {
+  background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%);
+  color: #1976d2;
+  border: 1px solid #90caf9;
+  padding: 0.75rem 1.5rem;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  width: 100%;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.wkj-update-button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  background: linear-gradient(135deg, #bbdefb 0%, #90caf9 100%);
+  border-color: #64b5f6;
+}
+
+.wkj-update-button:active {
+  transform: translateY(0);
 }
 
 /* Responsive adjustments */

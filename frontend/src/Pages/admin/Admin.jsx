@@ -1,6 +1,7 @@
 import { Routes, Route } from "react-router-dom";
 
 import AdminDashboard from "./AdminDashboard/AdminDashboard";
+import AdminRevenueAnalytics from "./AdminRevenueAnalytics/AdminRevenueAnalytics";
 import AdminBidDetail from "./AdminBidDetail/AdminBidDetail";
 import AdminCompanyDetail from "./AdminCompanyDetail/AdminCompanyDetail";
 import AdminConstructionProjectDetail from "./AdminConstructionProjectDetail/AdminConstructionProjectDetail";
@@ -16,6 +17,7 @@ const Admin = () => {
       <Routes>
         <Route index element={<AdminDashboard />} />
         <Route path="admindashboard" element={<AdminDashboard />} />
+        <Route path="revenue-analytics" element={<AdminRevenueAnalytics />} />
         <Route path="bid/:id" element={<AdminBidDetail />} />
         <Route path="company/:id" element={<AdminCompanyDetail />} />
         <Route path="construction-project/:id" element={<AdminConstructionProjectDetail />} />

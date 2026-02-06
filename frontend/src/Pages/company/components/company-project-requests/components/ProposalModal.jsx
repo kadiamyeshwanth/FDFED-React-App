@@ -1,27 +1,12 @@
 // src/pages/company/components/company-project-requests/components/ProposalModal.jsx
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 
-// Predefined work categories for subdivisions
-const WORK_CATEGORIES = [
-  { id: 'excavation', name: 'Excavation' },
-  { id: 'foundation', name: 'Foundation Work' },
-  { id: 'flooring', name: 'Flooring' },
-  { id: 'brickwork', name: 'Brickwork / Masonry' },
-  { id: 'plastering', name: 'Plastering' },
-  { id: 'electrical', name: 'Electrical Wiring' },
-  { id: 'plumbing', name: 'Plumbing' },
-  { id: 'roofing', name: 'Roofing' },
-  { id: 'painting', name: 'Painting' },
-  { id: 'tiling', name: 'Tiling' },
-  { id: 'doors_windows', name: 'Doors & Windows' },
-  { id: 'carpentry', name: 'Carpentry' },
-  { id: 'waterproofing', name: 'Waterproofing' },
-  { id: 'finishing', name: 'Finishing Work' },
-  { id: 'other', name: 'Other' }
-];
-
-const MAX_PHASES = 5;
-const MAX_PERCENTAGE_PER_PHASE = 20;
+// 5 phases: 4 work phases (25% each) + 1 final touching (10%)
+// Total = 110% (100% work + 10% final finishes)
+const WORK_PHASES_COUNT = 4;
+const WORK_PHASE_PERCENTAGE = 25;
+const FINAL_PHASE_PERCENTAGE = 10;
+const TOTAL_PERCENTAGE = 110; // 100% + 10% final
 
 const ProposalModal = ({ 
   isOpen, 
@@ -34,64 +19,62 @@ const ProposalModal = ({
   onSubmitProposal
 }) => {
   const [phases, setPhases] = useState([
-    { 
-      id: 1, 
-      name: 'Phase 1', 
-      percentage: 0, 
-      completionDate: '', 
-      subdivisions: [
-        { id: 1, category: '', description: '', amount: 0 }
-      ]
+    {
+      id: 1,
+      name: 'Phase 1',
+      percentage: WORK_PHASE_PERCENTAGE,
+      requiredMonths: '',
+      amount: '', // Editable
+      isFixed: true,
+      isFinal: false,
+      subdivisions: [{ id: 1, category: '', description: '', amount: '' }]
     },
-    { 
-      id: 'finishing', 
-      name: 'Finishing Touches & Completion', 
-      percentage: 100, 
-      completionDate: '', 
-      isFixed: true
+    {
+      id: 2,
+      name: 'Phase 2',
+      percentage: WORK_PHASE_PERCENTAGE,
+      requiredMonths: '',
+      amount: '', // Editable
+      isFixed: true,
+      isFinal: false,
+      subdivisions: [{ id: 1, category: '', description: '', amount: '' }]
+    },
+    {
+      id: 3,
+      name: 'Phase 3',
+      percentage: WORK_PHASE_PERCENTAGE,
+      requiredMonths: '',
+      amount: '', // Editable
+      isFixed: true,
+      isFinal: false,
+      subdivisions: [{ id: 1, category: '', description: '', amount: '' }]
+    },
+    {
+      id: 4,
+      name: 'Phase 4',
+      percentage: WORK_PHASE_PERCENTAGE,
+      requiredMonths: '',
+      amount: '', // Editable
+      isFixed: true,
+      isFinal: false,
+      subdivisions: [{ id: 1, category: '', description: '', amount: '' }]
+    },
+    {
+      id: 5,
+      name: 'Final Touching',
+      percentage: FINAL_PHASE_PERCENTAGE,
+      requiredMonths: '0.5',
+      amount: '', // Editable
+      isFixed: true,
+      isFinal: true,
+      subdivisions: [{ id: 1, category: 'Final Touches', description: '', amount: '' }]
     }
   ]);
   const [phaseErrors, setPhaseErrors] = useState({});
-  const [nextPhaseId, setNextPhaseId] = useState(2);
-
-  // Calculate remaining percentage for finishing phase
-  const getRemainingPercentage = () => {
-    const otherPhasesTotal = phases
-      .filter(p => !p.isFixed)
-      .reduce((sum, phase) => sum + (parseFloat(phase.percentage) || 0), 0);
-    return Math.max(0, 100 - otherPhasesTotal);
-  };
-
-  // Update finishing phase percentage automatically
-  React.useEffect(() => {
-    const remaining = getRemainingPercentage();
-    setPhases(prevPhases => 
-      prevPhases.map(phase => 
-        phase.isFixed ? { ...phase, percentage: remaining } : phase
-      )
-    );
-  }, [phases.filter(p => !p.isFixed).map(p => p.percentage).join(',')]);
-
-  // Calculate total amount for a phase from its subdivisions
-  const getPhaseAmount = (phase) => {
-    if (phase.isFixed) {
-      // Finishing phase is 10% of all other phases
-      const otherPhasesTotal = phases
-        .filter(p => !p.isFixed)
-        .reduce((sum, p) => sum + (p.subdivisions ? p.subdivisions.reduce((s, sub) => s + (parseFloat(sub.amount) || 0), 0) : 0), 0);
-      return otherPhasesTotal * 0.1;
-    }
-    return phase.subdivisions ? phase.subdivisions.reduce((sum, sub) => sum + (parseFloat(sub.amount) || 0), 0) : 0;
-  };
-
-  // Calculate customer payable amount (10% discount from company)
-  const getCustomerPayableAmount = (phaseAmount) => {
-    return phaseAmount * 0.9;
-  };
 
   const handlePhaseChange = (id, field, value) => {
     setPhases(phases.map(phase => 
-      phase.id === id && !phase.isFixed ? { ...phase, [field]: value } : phase
+      phase.id === id ? { ...phase, [field]: value } : phase
     ));
   };
 
@@ -119,7 +102,7 @@ const ProposalModal = ({
           ...phase,
           subdivisions: [
             ...phase.subdivisions,
-            { id: newSubId, category: '', description: '', amount: 0 }
+            { id: newSubId, category: '', description: '', amount: '' }
           ]
         };
       }
@@ -140,82 +123,86 @@ const ProposalModal = ({
     }));
   };
 
-  const addPhase = () => {
-    const nonFixedPhases = phases.filter(p => !p.isFixed);
-    if (nonFixedPhases.length >= MAX_PHASES - 1) {
-      alert(`Maximum ${MAX_PHASES - 1} custom phases allowed (plus finishing phase)`);
-      return;
-    }
-    const newPhase = {
-      id: nextPhaseId,
-      name: `Phase ${nextPhaseId}`,
-      percentage: 0,
-      completionDate: '',
-      subdivisions: [
-        { id: 1, category: '', description: '', amount: 0 }
-      ]
-    };
-    // Insert before the finishing phase
-    const finishingPhase = phases.find(p => p.isFixed);
-    const otherPhases = phases.filter(p => !p.isFixed);
-    setPhases([...otherPhases, newPhase, finishingPhase]);
-    setNextPhaseId(nextPhaseId + 1);
-  };
-
-  const removePhase = (id) => {
-    const nonFixedPhases = phases.filter(p => !p.isFixed);
-    if (nonFixedPhases.length > 1) {
-      setPhases(phases.filter(phase => phase.id !== id));
-    }
-  };
-
   const getTotalPercentage = () => {
     return phases.reduce((sum, phase) => sum + (parseFloat(phase.percentage) || 0), 0);
   };
 
   const getTotalAmount = () => {
-    // Only sum amounts from non-fixed phases (exclude finishing phase)
-    return phases
-      .filter(p => !p.isFixed)
-      .reduce((sum, phase) => sum + getPhaseAmount(phase), 0);
+    // Total = work phases only (final phase is part of this, not additional)
+    return getWorkPhasesTotalAmount();
+  };
+
+  const getWorkPhasesTotalAmount = () => {
+    return phases.slice(0, 4).reduce((sum, phase) => sum + (parseFloat(getPhaseAmount(phase)) || 0), 0);
+  };
+
+  const getFinalPhaseAmount = () => {
+    const workTotal = getWorkPhasesTotalAmount();
+    return workTotal > 0 ? (workTotal * 0.10) : 0;
+  };
+
+  // Calculate phase amount from subdivisions if they have amounts
+  const getPhaseAmount = (phase) => {
+    const subdivisionTotal = phase.subdivisions.reduce((sum, sub) => {
+      return sum + (parseFloat(sub.amount) || 0);
+    }, 0);
+    // If subdivisions have amounts, use their total; otherwise use the phase amount
+    return subdivisionTotal > 0 ? subdivisionTotal : (parseFloat(phase.amount) || 0);
   };
 
   const validatePhases = () => {
     const errors = {};
     const totalPercentage = getTotalPercentage();
 
-    phases.forEach(phase => {
+    if (phases.length !== 5) {
+      errors.phaseCount = 'Exactly 5 phases are required.';
+    }
+
+    phases.forEach((phase, index) => {
       if (!phase.name.trim()) {
         errors[`phase_${phase.id}_name`] = 'Phase name is required';
       }
-      if (!phase.isFixed) {
-        const phasePercentage = parseFloat(phase.percentage) || 0;
-        if (phasePercentage < 10 || phasePercentage > MAX_PERCENTAGE_PER_PHASE) {
-          errors[`phase_${phase.id}_percentage`] = `Percentage must be between 10 and ${MAX_PERCENTAGE_PER_PHASE}%`;
+
+      // Validate percentage
+      if (phase.isFinal) {
+        if (parseFloat(phase.percentage) !== FINAL_PHASE_PERCENTAGE) {
+          errors[`phase_${phase.id}_percentage`] = `Final phase must be ${FINAL_PHASE_PERCENTAGE}%`;
         }
-      }
-      if (!phase.completionDate) {
-        errors[`phase_${phase.id}_date`] = 'Completion date is required';
-      }
-      
-      // Validate subdivisions
-      const phaseAmount = getPhaseAmount(phase);
-      if (phaseAmount <= 0) {
-        errors[`phase_${phase.id}_amount`] = 'Phase must have at least one subdivision with amount';
+      } else {
+        if (parseFloat(phase.percentage) !== WORK_PHASE_PERCENTAGE) {
+          errors[`phase_${phase.id}_percentage`] = `Work phase must be ${WORK_PHASE_PERCENTAGE}%`;
+        }
       }
 
-      phase.subdivisions.forEach(sub => {
-        if (!sub.category) {
-          errors[`phase_${phase.id}_sub_${sub.id}_category`] = 'Work category is required';
-        }
-        if (parseFloat(sub.amount) <= 0) {
-          errors[`phase_${phase.id}_sub_${sub.id}_amount`] = 'Amount must be greater than 0';
-        }
-      });
+      // Validate required months for work phases
+      if (!phase.isFinal && (!phase.requiredMonths || parseFloat(phase.requiredMonths) <= 0)) {
+        errors[`phase_${phase.id}_months`] = 'Required months must be greater than 0';
+      }
+
+      // Validate amount (can be 0 for final phase, but work phases need amount)
+      const phaseAmount = phase.isFinal ? getFinalPhaseAmount() : getPhaseAmount(phase);
+      if (!phase.isFinal && phaseAmount <= 0) {
+        errors[`phase_${phase.id}_amount`] = 'Please add work items with amounts for this phase';
+      }
+
+      // If amount is direct (not subdivisions), validate it
+      if (phaseAmount > 0) {
+        // Amount is set directly or calculated from subdivisions, that's valid
+      } else if (phase.subdivisions && phase.subdivisions.length > 0) {
+        // Otherwise validate subdivisions
+        phase.subdivisions.forEach(sub => {
+          if (!sub.category) {
+            errors[`phase_${phase.id}_sub_${sub.id}_category`] = 'Work category is required';
+          }
+          if (parseFloat(sub.amount) < 0) {
+            errors[`phase_${phase.id}_sub_${sub.id}_amount`] = 'Amount must be 0 or greater';
+          }
+        });
+      }
     });
 
-    if (totalPercentage !== 100) {
-      errors.totalPercentage = `Total percentage must equal 100% (currently ${totalPercentage}%)`;
+    if (totalPercentage !== TOTAL_PERCENTAGE) {
+      errors.totalPercentage = `Total percentage must equal ${TOTAL_PERCENTAGE}% (currently ${totalPercentage}%)`;
     }
 
     return errors;
@@ -232,19 +219,27 @@ const ProposalModal = ({
 
     setPhaseErrors({});
     
-    // Prepare data with phases and subdivisions
-    const phasesWithAmounts = phases.map(phase => ({
-      ...phase,
-      amount: getPhaseAmount(phase)
+    // Prepare data with phases
+    const phasesData = phases.map(phase => ({
+      name: phase.name,
+      percentage: phase.percentage,
+      requiredMonths: phase.requiredMonths,
+      amount: phase.isFinal ? getFinalPhaseAmount() : getPhaseAmount(phase),
+      subdivisions: phase.subdivisions,
+      isFinal: phase.isFinal,
+      paymentSchedule: {
+        upfrontPercentage: phase.isFinal ? 0 : 40,
+        completionPercentage: phase.isFinal ? 0 : 60,
+        finalPercentage: phase.isFinal ? 10 : 0
+      }
     }));
 
     const proposalWithPhases = {
       ...proposalData,
-      phases: phasesWithAmounts,
+      phases: phasesData,
       totalAmount: getTotalAmount()
     };
 
-    // Call the parent's submit with phases data
     onSubmitProposal(proposalWithPhases);
   };
 
@@ -270,9 +265,9 @@ const ProposalModal = ({
             {/* Phases Section */}
             <div className="requests-phases-container">
               <div className="requests-phases-header-info">
-                <h4 className="requests-phases-title">Construction Phases</h4>
+                <h4 className="requests-phases-title">Construction Phases (5 Phases Total)</h4>
                 <span className="requests-phases-limit">
-                  {phases.length}/{MAX_PHASES} phases (max {MAX_PERCENTAGE_PER_PHASE}% each)
+                  4 work phases (25% each) + 1 final phase (10% auto-calculated)
                 </span>
               </div>
               
@@ -284,18 +279,14 @@ const ProposalModal = ({
 
               <div className="requests-phases-list">
                 {phases.map((phase, index) => (
-                  <div key={phase.id} className={`requests-phase-card ${phase.isFixed ? 'requests-phase-fixed' : ''}`}>
+                  <div key={phase.id} className={`requests-phase-card ${phase.isFinal ? 'requests-phase-final' : 'requests-phase-work'}`}>
                     <div className="requests-phase-header">
-                      <h5>{phase.isFixed ? 'Final Phase: ' : 'Phase ' + (index + 1) + ': '}{phase.name}</h5>
-                      {!phase.isFixed && phases.filter(p => !p.isFixed).length > 1 && (
-                        <button
-                          type="button"
-                          className="requests-phase-remove-btn"
-                          onClick={() => removePhase(phase.id)}
-                          title="Remove this phase"
-                        >
-                          <i className="fas fa-trash"></i>
-                        </button>
+                      <h5>
+                        {phase.isFinal ? '🎯 Final Phase: ' : `Phase ${index + 1}: `}
+                        {phase.name}
+                      </h5>
+                      {phase.isFinal && (
+                        <span className="requests-phase-badge">Final Touching - 10% (Paid at completion)</span>
                       )}
                     </div>
 
@@ -311,7 +302,7 @@ const ProposalModal = ({
                               phaseErrors[`phase_${phase.id}_name`] ? 'requests-input-error' : ''
                             }`}
                             placeholder="e.g., Foundation Work"
-                            disabled={phase.isFixed}
+                            disabled={phase.isFixed && phase.isFinal}
                           />
                           {phaseErrors[`phase_${phase.id}_name`] && (
                             <div className="requests-error-message">
@@ -321,20 +312,17 @@ const ProposalModal = ({
                         </div>
 
                         <div className="requests-phase-form-group">
-                          <label>{phase.isFixed ? 'Work Percentage (Auto-calculated)' : `Work Percentage (min 10%, max ${MAX_PERCENTAGE_PER_PHASE}%)`}</label>
+                          <label>Work Percentage {phase.isFinal ? '(Fixed: 10%)' : '(Fixed: 25%)'}</label>
                           <input
                             type="number"
-                            min="10"
-                            max={MAX_PERCENTAGE_PER_PHASE}
-                            step="1"
                             value={phase.percentage}
                             onChange={(e) => handlePhaseChange(phase.id, 'percentage', e.target.value)}
                             className={`requests-proposal-form-control ${
                               phaseErrors[`phase_${phase.id}_percentage`] ? 'requests-input-error' : ''
-                            } ${phase.isFixed ? 'requests-input-readonly' : ''}`}
+                            } requests-input-readonly`}
                             placeholder="0"
-                            readOnly={phase.isFixed}
-                            disabled={phase.isFixed}
+                            readOnly
+                            disabled
                           />
                           {phaseErrors[`phase_${phase.id}_percentage`] && (
                             <div className="requests-error-message">
@@ -343,41 +331,62 @@ const ProposalModal = ({
                           )}
                         </div>
 
+                        {!phase.isFinal && (
+                          <div className="requests-phase-form-group">
+                            <label>Required Months to Complete</label>
+                            <input
+                              type="number"
+                              min="0.5"
+                              max="60"
+                              step="0.5"
+                              value={phase.requiredMonths}
+                              onChange={(e) => handlePhaseChange(phase.id, 'requiredMonths', e.target.value)}
+                              className={`requests-proposal-form-control ${
+                                phaseErrors[`phase_${phase.id}_months`] ? 'requests-input-error' : ''
+                              }`}
+                              placeholder="e.g., 2, 3.5"
+                            />
+                            {phaseErrors[`phase_${phase.id}_months`] && (
+                              <div className="requests-error-message">
+                                {phaseErrors[`phase_${phase.id}_months`]}
+                              </div>
+                            )}
+                          </div>
+                        )}
+
                         <div className="requests-phase-form-group">
-                          <label>Completion Date</label>
+                          <label>{phase.isFinal ? 'Final Phase Amount (Auto-calculated: 10% of work total)' : 'Phase Total Amount (₹) - Auto-calculated from work items'}</label>
                           <input
-                            type="date"
-                            value={phase.completionDate}
-                            onChange={(e) => handlePhaseChange(phase.id, 'completionDate', e.target.value)}
+                            type="number"
+                            min="0"
+                            step="500"
+                            value={phase.isFinal ? getFinalPhaseAmount() : getPhaseAmount(phase)}
+                            onChange={(e) => !phase.isFinal && handlePhaseChange(phase.id, 'amount', e.target.value)}
                             className={`requests-proposal-form-control ${
-                              phaseErrors[`phase_${phase.id}_date`] ? 'requests-input-error' : ''
-                            }`}
+                              phaseErrors[`phase_${phase.id}_amount`] ? 'requests-input-error' : ''
+                            } requests-input-readonly`}
+                            placeholder="Enter work items below"
+                            disabled={true}
+                            readOnly
                           />
-                          {phaseErrors[`phase_${phase.id}_date`] && (
+                          {phase.isFinal && (
+                            <small style={{ color: '#666', marginTop: '5px', display: 'block' }}>
+                              Auto-calculated based on work phases total
+                            </small>
+                          )}
+                          {phaseErrors[`phase_${phase.id}_amount`] && (
                             <div className="requests-error-message">
-                              {phaseErrors[`phase_${phase.id}_date`]}
+                              {phaseErrors[`phase_${phase.id}_amount`]}
                             </div>
                           )}
                         </div>
-
-                        <div className="requests-phase-total-display">
-                          <strong>{phase.isFixed ? 'Phase Total Amount (10% of all phases):' : 'Phase Total Amount:'}</strong>
-                          <span className="requests-phase-amount-value">₹{getPhaseAmount(phase).toLocaleString('en-IN')}</span>
-                        </div>
-
-                        {!phase.isFixed && (
-                          <div className="requests-phase-customer-payable">
-                            <strong>Customer Payable (10% discount):</strong>
-                            <span className="requests-customer-amount-value">₹{getCustomerPayableAmount(getPhaseAmount(phase)).toLocaleString('en-IN')}</span>
-                          </div>
-                        )}
                       </div>
 
-                      {/* Subdivisions Section - Only for non-fixed phases */}
-                      {!phase.isFixed && (
+                      {/* Subdivisions Section - For work phases */}
+                      {!phase.isFinal && phase.subdivisions && (
                         <div className="requests-subdivisions-container">
                           <div className="requests-subdivisions-header">
-                            <span className="requests-subdivisions-title">Work Items Breakdown</span>
+                            <span className="requests-subdivisions-title">Work Items Breakdown (Optional)</span>
                           </div>
 
                           <div className="requests-subdivisions-list">
@@ -389,61 +398,61 @@ const ProposalModal = ({
                                       type="text"
                                       value={sub.category}
                                       onChange={(e) => handleSubdivisionChange(phase.id, sub.id, 'category', e.target.value)}
-                                    className={`requests-proposal-form-control ${
-                                      phaseErrors[`phase_${phase.id}_sub_${sub.id}_category`] ? 'requests-input-error' : ''
-                                    }`}
-                                    placeholder="e.g., Flooring, Electrical, Painting"
-                                  />
-                                </div>
+                                      className={`requests-proposal-form-control ${
+                                        phaseErrors[`phase_${phase.id}_sub_${sub.id}_category`] ? 'requests-input-error' : ''
+                                      }`}
+                                      placeholder="e.g., Flooring, Electrical"
+                                    />
+                                  </div>
 
-                                <div className="requests-subdivision-field requests-subdivision-desc">
-                                  <input
-                                    type="text"
-                                    value={sub.description}
-                                    onChange={(e) => handleSubdivisionChange(phase.id, sub.id, 'description', e.target.value)}
-                                    className="requests-proposal-form-control"
-                                    placeholder="Details (optional)"
-                                  />
-                                </div>
+                                  <div className="requests-subdivision-field requests-subdivision-desc">
+                                    <input
+                                      type="text"
+                                      value={sub.description}
+                                      onChange={(e) => handleSubdivisionChange(phase.id, sub.id, 'description', e.target.value)}
+                                      className="requests-proposal-form-control"
+                                      placeholder="Details (optional)"
+                                    />
+                                  </div>
 
-                                <div className="requests-subdivision-field requests-subdivision-amount">
-                                  <input
-                                    type="number"
-                                    min="0"
-                                    step="500"
-                                    value={sub.amount}
-                                    onChange={(e) => handleSubdivisionChange(phase.id, sub.id, 'amount', e.target.value)}
-                                    className={`requests-proposal-form-control ${
-                                      phaseErrors[`phase_${phase.id}_sub_${sub.id}_amount`] ? 'requests-input-error' : ''
-                                    }`}
-                                    placeholder="Amount (₹)"
-                                  />
-                                </div>
+                                  <div className="requests-subdivision-field requests-subdivision-amount">
+                                    <input
+                                      type="number"
+                                      min="0"
+                                      step="500"
+                                      value={sub.amount}
+                                      onChange={(e) => handleSubdivisionChange(phase.id, sub.id, 'amount', e.target.value)}
+                                      className={`requests-proposal-form-control ${
+                                        phaseErrors[`phase_${phase.id}_sub_${sub.id}_amount`] ? 'requests-input-error' : ''
+                                      }`}
+                                      placeholder="Amount (₹)"
+                                    />
+                                  </div>
 
-                                <div className="requests-subdivision-actions">
-                                  {phase.subdivisions.length > 1 && (
-                                    <button
-                                      type="button"
-                                      className="requests-subdivision-remove-btn"
-                                      onClick={() => removeSubdivision(phase.id, sub.id)}
-                                      title="Remove"
-                                    >
-                                      <i className="fas fa-minus-circle"></i>
-                                    </button>
-                                  )}
+                                  <div className="requests-subdivision-actions">
+                                    {phase.subdivisions.length > 1 && (
+                                      <button
+                                        type="button"
+                                        className="requests-subdivision-remove-btn"
+                                        onClick={() => removeSubdivision(phase.id, sub.id)}
+                                        title="Remove"
+                                      >
+                                        <i className="fas fa-minus-circle"></i>
+                                      </button>
+                                    )}
+                                  </div>
                                 </div>
                               </div>
-                            </div>
-                          ))}
-                        </div>
+                            ))}
+                          </div>
 
-                        <button
-                          type="button"
-                          className="requests-btn-add-subdivision"
-                          onClick={() => addSubdivision(phase.id)}
-                        >
-                          <i className="fas fa-plus"></i> Add Work Item
-                        </button>
+                          <button
+                            type="button"
+                            className="requests-btn-add-subdivision"
+                            onClick={() => addSubdivision(phase.id)}
+                          >
+                            <i className="fas fa-plus"></i> Add Work Item
+                          </button>
                         </div>
                       )}
                     </div>
@@ -455,31 +464,20 @@ const ProposalModal = ({
               <div className="requests-phases-summary">
                 <div className="requests-summary-item">
                   <span>Total Percentage:</span>
-                  <span className={totalPercentage === 100 ? 'requests-summary-valid' : 'requests-summary-invalid'}>
+                  <span className={totalPercentage === TOTAL_PERCENTAGE ? 'requests-summary-valid' : 'requests-summary-invalid'}>
                     {totalPercentage}%
                   </span>
                 </div>
                 <div className="requests-summary-item">
-                  <span>Total Project Amount:</span>
-                  <span className="requests-summary-amount">₹{totalAmount.toLocaleString('en-IN')}</span>
+                  <span><strong>Total Project Amount:</strong></span>
+                  <span className="requests-summary-amount" style={{ fontWeight: 'bold', fontSize: '16px' }}>₹{totalAmount.toLocaleString('en-IN')}</span>
+                </div>
+                <div className="requests-summary-item">
+                  <span>Final Phase (10% of total):</span>
+                  <span className="requests-summary-amount">₹{getFinalPhaseAmount().toLocaleString('en-IN')}</span>
                 </div>
               </div>
 
-              {/* Add Phase Button */}
-              {phases.filter(p => !p.isFixed).length < MAX_PHASES - 1 && (
-                <button
-                  type="button"
-                  className="requests-btn-add-phase"
-                  onClick={addPhase}
-                >
-                  <i className="fas fa-plus"></i> Add Phase ({phases.filter(p => !p.isFixed).length}/{MAX_PHASES - 1} + Finishing)
-                </button>
-              )}
-              {phases.filter(p => !p.isFixed).length >= MAX_PHASES - 1 && (
-                <div className="requests-max-phases-info">
-                  Maximum {MAX_PHASES - 1} custom phases reached (plus finishing phase)
-                </div>
-              )}
             </div>
 
             {/* Submit Button */}

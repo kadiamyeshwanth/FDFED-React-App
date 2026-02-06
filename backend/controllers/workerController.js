@@ -583,12 +583,62 @@ const submitProposal = async (req, res) => {
       if (!project || (project.worker && project.worker.toString() !== workerId)) {
         return res.status(404).json({ error: 'Project not found or you are not authorized.' });
       }
+      
+      // Check if proposal already exists - allow resubmission only if new price is lower
+      if (project.proposal && project.proposal.sentAt) {
+        const newPrice = parseFloat(price);
+        const oldPrice = parseFloat(project.proposal.price);
+        
+        if (newPrice >= oldPrice) {
+          return res.status(400).json({ 
+            error: `You can only resubmit with a lower price. Current: ₹${oldPrice.toLocaleString()}, Your new quote: ₹${newPrice.toLocaleString()}`,
+            alreadySubmitted: true,
+            currentPrice: oldPrice
+          });
+        }
+        
+        // Store old proposal in history
+        if (!project.proposalHistory) {
+          project.proposalHistory = [];
+        }
+        project.proposalHistory.push({
+          price: project.proposal.price,
+          description: project.proposal.description,
+          sentAt: project.proposal.sentAt
+        });
+      }
+      
       project.status = 'Proposal Sent';
     } else if (projectType === 'interior') {
       project = await DesignRequest.findById(projectId);
       if (!project || (project.workerId && project.workerId.toString() !== workerId)) {
         return res.status(404).json({ error: 'Project not found or you are not authorized.' });
       }
+      
+      // Check if proposal already exists - allow resubmission only if new price is lower
+      if (project.proposal && project.proposal.sentAt) {
+        const newPrice = parseFloat(price);
+        const oldPrice = parseFloat(project.proposal.price);
+        
+        if (newPrice >= oldPrice) {
+          return res.status(400).json({ 
+            error: `You can only resubmit with a lower price. Current: ₹${oldPrice.toLocaleString()}, Your new quote: ₹${newPrice.toLocaleString()}`,
+            alreadySubmitted: true,
+            currentPrice: oldPrice
+          });
+        }
+        
+        // Store old proposal in history
+        if (!project.proposalHistory) {
+          project.proposalHistory = [];
+        }
+        project.proposalHistory.push({
+          price: project.proposal.price,
+          description: project.proposal.description,
+          sentAt: project.proposal.sentAt
+        });
+      }
+      
       project.status = 'proposal_sent';
     } else {
       return res.status(400).json({ error: 'Invalid project type.' });
