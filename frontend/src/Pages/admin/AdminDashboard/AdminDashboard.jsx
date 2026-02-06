@@ -4,7 +4,7 @@ import "./AdminDashboard.css";
 
 const AdminDashboard = () => {
   const navigate = useNavigate();
-  const apiBase = ""; // leave empty to use same origin or set VITE_API_URL
+  const apiBase = ""; 
 
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -36,11 +36,9 @@ const AdminDashboard = () => {
       });
       if (!res.ok) throw new Error(`Server ${res.status}`);
       const json = await res.json();
-      // controller returns { counts, stats, data }
       setData(json);
       setError(null);
-      
-      // Fetch unviewed complaints count
+     
       try {
         const complaintsRes = await fetch(`/api/complaints/unviewed/count`, {
           credentials: 'include',
@@ -65,7 +63,6 @@ const AdminDashboard = () => {
 
   useEffect(() => {
     fetchDashboard();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const handleDelete = async (type, id) => {
@@ -114,7 +111,6 @@ const AdminDashboard = () => {
     if (!Array.isArray(tabData)) return [];
     const q = search.trim().toLowerCase();
     return tabData.filter((item) => {
-      // status filter
       if (statusFilter !== "all") {
         const s = (item.status || item.availability || "").toString();
         if (s.toLowerCase() !== statusFilter.toLowerCase()) return false;
@@ -130,11 +126,10 @@ const AdminDashboard = () => {
 
   const { counts, stats } = data;
 
-  // Helper: check if there are pending companies or workers
   const hasPendingCompanies = (data.data.companies || []).some(c => c.status === 'pending');
   const hasPendingWorkers = (data.data.workers || []).some(w => w.status === 'pending');
 
-  // Handler: verify/reject company/worker
+  
   const handleVerifyReject = async (type, id, action) => {
     if (!window.confirm(`Are you sure you want to ${action} this ${type}?`)) return;
     try {
@@ -169,6 +164,12 @@ const AdminDashboard = () => {
       <header className="header">
         <h1>🎯 Admin Dashboard</h1>
         <div className="header-actions">
+          <button
+            className="btn btn-analytics"
+            onClick={() => navigate("/admin/revenue-analytics")}
+          >
+            📊 Revenue Analytics
+          </button>
           <button className="btn btn-primary" onClick={fetchDashboard}>
             🔄 Refresh Data
           </button>
