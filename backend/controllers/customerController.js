@@ -25,10 +25,14 @@ const getJobRequestStatus = async (req, res) => {
 
     const rawArchitectApplications = await ArchitectHiring.find({
       customer: req.user.user_id,
-    }).select('+milestones +projectUpdates').lean();
+    })
+      .select("+milestones +projectUpdates")
+      .lean();
     const rawInteriorApplications = await DesignRequest.find({
       customerId: req.user.user_id,
-    }).select('+milestones +projectUpdates').lean();
+    })
+      .select("+milestones +projectUpdates")
+      .lean();
     const companyApplications = await ConstructionProjectSchema.find({
       customerId: req.user.user_id,
     }).lean();
@@ -40,7 +44,7 @@ const getJobRequestStatus = async (req, res) => {
           return { ...app, chatId: chatRoom ? chatRoom.roomId : null };
         }
         return app;
-      })
+      }),
     );
 
     const interiorApplications = await Promise.all(
@@ -50,17 +54,15 @@ const getJobRequestStatus = async (req, res) => {
           return { ...app, chatId: chatRoom ? chatRoom.roomId : null };
         }
         return app;
-      })
+      }),
     );
 
     // routed file : customer/Job_Status
-    res
-      .status(200)
-      .json({
-        architectApplications,
-        interiorApplications,
-        companyApplications,
-      });
+    res.status(200).json({
+      architectApplications,
+      interiorApplications,
+      companyApplications,
+    });
   } catch (error) {
     console.error("Error fetching job request status:", error);
     res.status(500).json({ error: "Internal Server Error" });
@@ -70,22 +72,22 @@ const getJobRequestStatus = async (req, res) => {
 const getConstructionCompaniesList = async (req, res) => {
   try {
     const companies = await Company.find({}).lean();
-    
+
     const companiesWithReviews = await Promise.all(
       companies.map(async (company) => {
         const completedProjects = await ConstructionProjectSchema.find({
           companyId: company._id,
-          status: 'accepted',
+          status: "accepted",
           completionPercentage: 100,
-          'customerReview.rating': { $exists: true, $ne: null }
+          "customerReview.rating": { $exists: true, $ne: null },
         })
-        .select('projectName customerReview completionImages')
-        .lean();
+          .select("projectName customerReview completionImages")
+          .lean();
 
         // Calculate average rating
         let averageRating = 0;
         let totalReviews = completedProjects.length;
-        
+
         if (totalReviews > 0) {
           const sumRatings = completedProjects.reduce((sum, project) => {
             return sum + (project.customerReview?.rating || 0);
@@ -97,11 +99,11 @@ const getConstructionCompaniesList = async (req, res) => {
           ...company,
           completedProjectsWithReviews: completedProjects,
           averageRating: parseFloat(averageRating),
-          totalReviews
+          totalReviews,
         };
-      })
+      }),
     );
-    
+
     // routed file : customer/construction_companies_list
     res.status(200).json({ companies: companiesWithReviews, user: req.user });
   } catch (error) {
@@ -172,7 +174,7 @@ const getOngoingProjects = async (req, res) => {
       if (project.targetCompletionDate) {
         targetDate = new Date(project.targetCompletionDate).toLocaleDateString(
           "en-US",
-          { year: "numeric", month: "short", day: "numeric" }
+          { year: "numeric", month: "short", day: "numeric" },
         );
       } else if (project.projectTimeline && project.createdAt) {
         targetDate = getTargetDate(project.createdAt, project.projectTimeline);
@@ -305,21 +307,17 @@ const submitBidForm = async (req, res) => {
     });
 
     await newBid.save();
-    res
-      .status(200)
-      .json({
-        success: true,
-        message: "Bid submitted",
-        redirect: "/job_status",
-      });
+    res.status(200).json({
+      success: true,
+      message: "Bid submitted",
+      redirect: "/job_status",
+    });
   } catch (error) {
     console.error("Error in submitBidForm:", error);
-    res
-      .status(500)
-      .json({
-        error:
-          "Error submitting project request. Please check the fields and try again.",
-      });
+    res.status(500).json({
+      error:
+        "Error submitting project request. Please check the fields and try again.",
+    });
   }
 };
 
@@ -442,7 +440,7 @@ const saveFavoriteDesign = async (req, res) => {
     const updatedDoc = await FavoriteDesign.findOneAndUpdate(
       { customerId },
       { $addToSet: { designs: newDesign } },
-      { new: true, upsert: true }
+      { new: true, upsert: true },
     );
 
     if (!updatedDoc) {
@@ -474,15 +472,13 @@ const removeFavoriteDesign = async (req, res) => {
 
     const result = await FavoriteDesign.updateOne(
       { customerId },
-      { $pull: { designs: { designId: designIdToRemove } } }
+      { $pull: { designs: { designId: designIdToRemove } } },
     );
 
     if (result.modifiedCount === 0 && result.matchedCount === 0) {
-      return res
-        .status(404)
-        .json({
-          message: "Favorite list not found or design not in favorites.",
-        });
+      return res.status(404).json({
+        message: "Favorite list not found or design not in favorites.",
+      });
     }
 
     if (result.modifiedCount === 0 && result.matchedCount === 1) {
@@ -498,7 +494,7 @@ const removeFavoriteDesign = async (req, res) => {
   }
 };
 
-const acceptProposal = async (req, res) => {
+const acceptProposal = async (req, res, next) => {
   try {
     const { type, id } = req.params;
     const customerId = req.user.user_id;
@@ -509,11 +505,12 @@ const acceptProposal = async (req, res) => {
       project = await ArchitectHiring.findOne({
         _id: id,
         customer: customerId,
-      }).populate('worker');
-      if (!project)
-        return res
-          .status(404)
-          .json({ error: "Project not found or you are not authorized." });
+      }).populate("worker");
+      if (!project) {
+        const err = new Error("Project not found or you are not authorized.");
+        err.status = 404;
+        return next(err);
+      }
       if (project.proposal && project.proposal.price)
         project.finalAmount = project.proposal.price;
       project.status = "Pending Payment"; // Changed from "Accepted" - payment must be completed first
@@ -521,11 +518,12 @@ const acceptProposal = async (req, res) => {
       const projectToUpdate = await DesignRequest.findOne({
         _id: id,
         customerId: customerId,
-      }).populate('workerId');
-      if (!projectToUpdate)
-        return res
-          .status(404)
-          .json({ error: "Project not found or you are not authorized." });
+      }).populate("workerId");
+      if (!projectToUpdate) {
+        const err = new Error("Project not found or you are not authorized.");
+        err.status = 404;
+        return next(err);
+      }
       project = projectToUpdate;
       if (project.proposal && project.proposal.price)
         project.finalAmount = project.proposal.price;
@@ -535,35 +533,38 @@ const acceptProposal = async (req, res) => {
     }
 
     await project.save();
-    
+
     // Return success with redirect to payment checkout page
     // Customer will be redirected to professional payment page
-    res.status(200).json({ 
-      success: true, 
+    res.status(200).json({
+      success: true,
       redirect: `/customerdashboard/payment-checkout/${project._id}?type=${type}&payment=deposit`,
-      message: "Proposal accepted! Please complete the payment to start your project."
+      message:
+        "Proposal accepted! Please complete the payment to start your project.",
     });
   } catch (error) {
     console.error("Error accepting proposal:", error);
-    res.status(500).json({ error: "Server Error" });
+    next(error);
   }
 };
 
-const acceptCompanyBid = async (req, res) => {
+const acceptCompanyBid = async (req, res, next) => {
   try {
     const { bidId, companyBidId } = req.params;
     const customerId = req.user.user_id;
 
     const bid = await Bid.findOne({ _id: bidId, customerId: customerId });
     if (!bid) {
-      return res
-        .status(404)
-        .json({ error: "Bid not found or you are not authorized." });
+      const err = new Error("Bid not found or you are not authorized.");
+      err.status = 404;
+      return next(err);
     }
 
     const companyBid = bid.companyBids.id(companyBidId);
     if (!companyBid) {
-      return res.status(404).json({ error: "Company bid not found." });
+      const err = new Error("Company bid not found.");
+      err.status = 404;
+      return next(err);
     }
 
     bid.status = "awarded";
@@ -587,7 +588,7 @@ const acceptCompanyBid = async (req, res) => {
     res.status(200).json({ success: true, redirect: "/ongoing_projects" });
   } catch (error) {
     console.error("Error accepting company bid:", error);
-    res.status(500).json({ error: "Server Error" });
+    next(error);
   }
 };
 
@@ -689,7 +690,9 @@ const rejectCompanyProposal = async (req, res) => {
     }
 
     await project.save();
-    res.status(200).json({ success: true, message: "Proposal rejected successfully" });
+    res
+      .status(200)
+      .json({ success: true, message: "Proposal rejected successfully" });
   } catch (error) {
     console.error("Error rejecting company proposal:", error);
     res.status(500).json({ error: "Server Error" });
@@ -705,9 +708,11 @@ const acceptConstructionProposal = async (req, res) => {
       _id: projectId,
       customerId: customerId,
     });
-    
+
     if (!project || project.status !== "proposal_sent") {
-      return res.status(404).json({ error: "Project not found or proposal not available." });
+      return res
+        .status(404)
+        .json({ error: "Project not found or proposal not available." });
     }
 
     // Update project status to accepted
@@ -715,7 +720,9 @@ const acceptConstructionProposal = async (req, res) => {
     project.proposalAcceptedAt = new Date();
 
     await project.save();
-    res.status(200).json({ success: true, message: "Proposal accepted successfully" });
+    res
+      .status(200)
+      .json({ success: true, message: "Proposal accepted successfully" });
   } catch (error) {
     console.error("Error accepting construction proposal:", error);
     res.status(500).json({ error: "Server Error" });
@@ -759,87 +766,86 @@ const approveMilestone = async (req, res) => {
     const { projectType } = req.body;
 
     let project;
-    if (projectType === 'architect') {
+    if (projectType === "architect") {
       project = await ArchitectHiring.findById(projectId);
-    } else if (projectType === 'interior') {
+    } else if (projectType === "interior") {
       project = await DesignRequest.findById(projectId);
     }
 
     if (!project) {
-      return res.status(404).json({ error: 'Project not found' });
+      return res.status(404).json({ error: "Project not found" });
     }
 
     const milestone = project.milestones.id(milestoneId);
     if (!milestone) {
-      return res.status(404).json({ error: 'Milestone not found' });
+      return res.status(404).json({ error: "Milestone not found" });
     }
 
-    milestone.status = 'Approved';
+    milestone.status = "Approved";
     milestone.approvedAt = new Date();
     await project.save();
-    
+
     // Automatically release payment for this milestone
     let paymentReleaseInfo = null;
     try {
-      const { releaseMilestonePayment } = require('./paymentController');
+      const { releaseMilestonePayment } = require("./paymentController");
       const mockReq = {
         body: {
           projectId: projectId,
           projectType: projectType,
-          milestonePercentage: milestone.percentage
-        }
+          milestonePercentage: milestone.percentage,
+        },
       };
-      
+
       // Create promise to capture payment release response
       const paymentPromise = new Promise((resolve, reject) => {
         const mockRes = {
           json: (data) => {
-            console.log('Milestone payment released:', data);
+            console.log("Milestone payment released:", data);
             resolve(data);
           },
-          status: (code) => ({ 
+          status: (code) => ({
             json: (data) => {
-              console.error('Failed to release milestone payment:', data);
+              console.error("Failed to release milestone payment:", data);
               reject(data);
-            } 
-          })
+            },
+          }),
         };
-        
+
         releaseMilestonePayment(mockReq, mockRes).catch(reject);
       });
-      
+
       // Wait for payment release to complete
       paymentReleaseInfo = await paymentPromise;
-      
     } catch (paymentError) {
-      console.error('Error in milestone payment release:', paymentError);
+      console.error("Error in milestone payment release:", paymentError);
       // Don't fail the approval if payment release fails
     }
 
     // Check if there's a next milestone that needs payment
     const nextMilestone = paymentReleaseInfo?.data?.nextPayment;
-    
+
     if (nextMilestone && nextMilestone.milestone) {
       // Redirect to payment checkout page for next milestone
       const redirectUrl = `/customerdashboard/payment-checkout/${projectId}?type=${projectType}&payment=milestone&milestone=${nextMilestone.milestone}`;
-      
-      res.status(200).json({ 
-        success: true, 
+
+      res.status(200).json({
+        success: true,
         message: `Milestone approved and payment released! Please complete payment for next milestone (${nextMilestone.milestone}%).`,
         redirect: redirectUrl,
-        paymentInfo: paymentReleaseInfo?.data
+        paymentInfo: paymentReleaseInfo?.data,
       });
     } else {
       // No more milestones - project complete
-      res.status(200).json({ 
-        success: true, 
-        message: 'Milestone approved and payment released! Project completed.',
-        paymentInfo: paymentReleaseInfo?.data
+      res.status(200).json({
+        success: true,
+        message: "Milestone approved and payment released! Project completed.",
+        paymentInfo: paymentReleaseInfo?.data,
       });
     }
   } catch (error) {
-    console.error('Error approving milestone:', error);
-    res.status(500).json({ error: 'Server error' });
+    console.error("Error approving milestone:", error);
+    res.status(500).json({ error: "Server error" });
   }
 };
 
@@ -849,30 +855,30 @@ const rejectMilestone = async (req, res) => {
     const { projectType, reason } = req.body;
 
     let project;
-    if (projectType === 'architect') {
+    if (projectType === "architect") {
       project = await ArchitectHiring.findById(projectId);
-    } else if (projectType === 'interior') {
+    } else if (projectType === "interior") {
       project = await DesignRequest.findById(projectId);
     }
 
     if (!project) {
-      return res.status(404).json({ error: 'Project not found' });
+      return res.status(404).json({ error: "Project not found" });
     }
 
     const milestone = project.milestones.id(milestoneId);
     if (!milestone) {
-      return res.status(404).json({ error: 'Milestone not found' });
+      return res.status(404).json({ error: "Milestone not found" });
     }
 
-    milestone.status = 'Rejected';
+    milestone.status = "Rejected";
     milestone.rejectedAt = new Date();
     if (reason) milestone.rejectionReason = reason;
     await project.save();
 
-    res.status(200).json({ success: true, message: 'Milestone rejected' });
+    res.status(200).json({ success: true, message: "Milestone rejected" });
   } catch (error) {
-    console.error('Error rejecting milestone:', error);
-    res.status(500).json({ error: 'Server error' });
+    console.error("Error rejecting milestone:", error);
+    res.status(500).json({ error: "Server error" });
   }
 };
 
@@ -882,23 +888,23 @@ const requestMilestoneRevision = async (req, res) => {
     const { projectType, revisionNotes } = req.body;
 
     if (!revisionNotes || !revisionNotes.trim()) {
-      return res.status(400).json({ error: 'Revision notes are required' });
+      return res.status(400).json({ error: "Revision notes are required" });
     }
 
     let project;
-    if (projectType === 'architect') {
+    if (projectType === "architect") {
       project = await ArchitectHiring.findById(projectId);
-    } else if (projectType === 'interior') {
+    } else if (projectType === "interior") {
       project = await DesignRequest.findById(projectId);
     }
 
     if (!project) {
-      return res.status(404).json({ error: 'Project not found' });
+      return res.status(404).json({ error: "Project not found" });
     }
 
     const milestone = project.milestones.id(milestoneId);
     if (!milestone) {
-      return res.status(404).json({ error: 'Milestone not found' });
+      return res.status(404).json({ error: "Milestone not found" });
     }
 
     // Add to revision history
@@ -907,19 +913,21 @@ const requestMilestoneRevision = async (req, res) => {
     }
     milestone.revisionHistory.push({
       requestedAt: new Date(),
-      notes: revisionNotes
+      notes: revisionNotes,
     });
 
-    milestone.status = 'Revision Requested';
+    milestone.status = "Revision Requested";
     milestone.revisionRequestedAt = new Date();
     milestone.revisionNotes = revisionNotes;
-    
+
     await project.save();
 
-    res.status(200).json({ success: true, message: 'Revision request sent to worker' });
+    res
+      .status(200)
+      .json({ success: true, message: "Revision request sent to worker" });
   } catch (error) {
-    console.error('Error requesting milestone revision:', error);
-    res.status(500).json({ error: 'Server error' });
+    console.error("Error requesting milestone revision:", error);
+    res.status(500).json({ error: "Server error" });
   }
 };
 
@@ -929,36 +937,41 @@ const reportMilestoneToAdmin = async (req, res) => {
     const { projectType, reportReason } = req.body;
 
     if (!reportReason || !reportReason.trim()) {
-      return res.status(400).json({ error: 'Report reason is required' });
+      return res.status(400).json({ error: "Report reason is required" });
     }
 
     let project;
-    if (projectType === 'architect') {
+    if (projectType === "architect") {
       project = await ArchitectHiring.findById(projectId);
-    } else if (projectType === 'interior') {
+    } else if (projectType === "interior") {
       project = await DesignRequest.findById(projectId);
     }
 
     if (!project) {
-      return res.status(404).json({ error: 'Project not found' });
+      return res.status(404).json({ error: "Project not found" });
     }
 
     const milestone = project.milestones.id(milestoneId);
     if (!milestone) {
-      return res.status(404).json({ error: 'Milestone not found' });
+      return res.status(404).json({ error: "Milestone not found" });
     }
 
-    milestone.status = 'Under Review';
+    milestone.status = "Under Review";
     milestone.reportedToAdminAt = new Date();
     milestone.adminReport = reportReason;
-    
+
     await project.save();
 
     // TODO: Send notification to admin
-    res.status(200).json({ success: true, message: 'Milestone reported to admin for review' });
+    res
+      .status(200)
+      .json({
+        success: true,
+        message: "Milestone reported to admin for review",
+      });
   } catch (error) {
-    console.error('Error reporting milestone to admin:', error);
-    res.status(500).json({ error: 'Server error' });
+    console.error("Error reporting milestone to admin:", error);
+    res.status(500).json({ error: "Server error" });
   }
 };
 
@@ -966,26 +979,26 @@ const reportMilestoneToAdmin = async (req, res) => {
 const getArchitectHiringDetails = async (req, res) => {
   try {
     const { projectId } = req.params;
-    
+
     if (!req.user || !req.user.user_id) {
-      return res.status(401).json({ error: 'Unauthorized' });
+      return res.status(401).json({ error: "Unauthorized" });
     }
 
     const project = await ArchitectHiring.findOne({
       _id: projectId,
-      customer: req.user.user_id
+      customer: req.user.user_id,
     })
-    .populate('worker', 'name email phone specialization')
-    .lean();
+      .populate("worker", "name email phone specialization")
+      .lean();
 
     if (!project) {
-      return res.status(404).json({ error: 'Project not found' });
+      return res.status(404).json({ error: "Project not found" });
     }
 
     res.json(project);
   } catch (error) {
-    console.error('Error fetching architect hiring details:', error);
-    res.status(500).json({ error: 'Failed to fetch project details' });
+    console.error("Error fetching architect hiring details:", error);
+    res.status(500).json({ error: "Failed to fetch project details" });
   }
 };
 
@@ -993,26 +1006,26 @@ const getArchitectHiringDetails = async (req, res) => {
 const getDesignRequestDetails = async (req, res) => {
   try {
     const { projectId } = req.params;
-    
+
     if (!req.user || !req.user.user_id) {
-      return res.status(401).json({ error: 'Unauthorized' });
+      return res.status(401).json({ error: "Unauthorized" });
     }
 
     const project = await DesignRequest.findOne({
       _id: projectId,
-      customerId: req.user.user_id
+      customerId: req.user.user_id,
     })
-    .populate('workerId', 'name email phone specialization')
-    .lean();
+      .populate("workerId", "name email phone specialization")
+      .lean();
 
     if (!project) {
-      return res.status(404).json({ error: 'Project not found' });
+      return res.status(404).json({ error: "Project not found" });
     }
 
     res.json(project);
   } catch (error) {
-    console.error('Error fetching design request details:', error);
-    res.status(500).json({ error: 'Failed to fetch project details' });
+    console.error("Error fetching design request details:", error);
+    res.status(500).json({ error: "Failed to fetch project details" });
   }
 };
 
@@ -1020,50 +1033,60 @@ const getDesignRequestDetails = async (req, res) => {
 const getPaymentHistory = async (req, res) => {
   try {
     if (!req.user || !req.user.user_id) {
-      return res.status(401).json({ error: 'Unauthorized' });
+      return res.status(401).json({ error: "Unauthorized" });
     }
 
     const customerId = req.user.user_id;
-    const { Transaction } = require('../models/index');
+    const { Transaction } = require("../models/index");
 
     // Get all transactions for this customer
-    const transactions = await Transaction.find({ 
+    const transactions = await Transaction.find({
       customerId: customerId,
-      status: 'completed'
+      status: "completed",
     })
-    .populate('workerId', 'name email')
-    .populate('projectId', 'projectName')
-    .sort({ createdAt: -1 })
-    .lean();
+      .populate("workerId", "name email")
+      .populate("projectId", "projectName")
+      .sort({ createdAt: -1 })
+      .lean();
 
     // Calculate stats
     const totalPaid = transactions
-      .filter(t => ['escrow_hold', 'milestone_release'].includes(t.transactionType))
+      .filter((t) =>
+        ["escrow_hold", "milestone_release"].includes(t.transactionType),
+      )
       .reduce((sum, t) => sum + t.amount, 0);
 
     // Get unique projects
-    const uniqueProjects = [...new Set(transactions.map(t => t.projectId?._id?.toString()).filter(Boolean))];
+    const uniqueProjects = [
+      ...new Set(
+        transactions.map((t) => t.projectId?._id?.toString()).filter(Boolean),
+      ),
+    ];
     const totalProjects = uniqueProjects.length;
 
     // Get pending payments (projects with Accepted status but not all milestones paid)
     const architectProjects = await ArchitectHiring.find({
       customer: customerId,
-      status: 'Accepted'
+      status: "Accepted",
     }).lean();
 
     const interiorProjects = await DesignRequest.find({
       customerId: customerId,
-      status: 'accepted'
+      status: "accepted",
     }).lean();
 
     let pendingPayments = 0;
-    
-    [...architectProjects, ...interiorProjects].forEach(project => {
+
+    [...architectProjects, ...interiorProjects].forEach((project) => {
       if (project.paymentDetails && project.paymentDetails.milestonePayments) {
-        const unpaidMilestones = project.paymentDetails.milestonePayments.filter(
-          mp => !mp.paymentCollected && mp.status === 'pending'
+        const unpaidMilestones =
+          project.paymentDetails.milestonePayments.filter(
+            (mp) => !mp.paymentCollected && mp.status === "pending",
+          );
+        pendingPayments += unpaidMilestones.reduce(
+          (sum, mp) => sum + mp.amount,
+          0,
         );
-        pendingPayments += unpaidMilestones.reduce((sum, mp) => sum + mp.amount, 0);
       }
     });
 
@@ -1073,15 +1096,14 @@ const getPaymentHistory = async (req, res) => {
       stats: {
         totalPaid: totalPaid,
         totalProjects: totalProjects,
-        pendingPayments: pendingPayments
-      }
+        pendingPayments: pendingPayments,
+      },
     });
-
   } catch (error) {
-    console.error('Error fetching payment history:', error);
-    res.status(500).json({ 
+    console.error("Error fetching payment history:", error);
+    res.status(500).json({
       success: false,
-      error: 'Failed to fetch payment history' 
+      error: "Failed to fetch payment history",
     });
   }
 };
