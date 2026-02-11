@@ -2,8 +2,8 @@
 // src/Pages/customer/components/Forms/InteriorDesignForm.jsx
 import React, { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
-import { useDispatch, useSelector } from 'react-redux';
-import { fetchCustomerProfile } from '../../../../store/slices/customerProfileSlice';
+import { useDispatch, useSelector } from "react-redux";
+import { fetchCustomerProfile } from "../../../../store/slices/customerProfileSlice";
 import axios from "axios";
 import "./InteriorDesignForm.css";
 
@@ -39,7 +39,7 @@ const InteriorDesignForm = () => {
 
   // ---------- Floor Requirements State ----------
   const [floorRequirements, setFloorRequirements] = useState([
-    { floorNumber: 1, details: "" }
+    { floorNumber: 1, details: "" },
   ]);
 
   const handleFloorChange = (index, field, value) => {
@@ -53,12 +53,14 @@ const InteriorDesignForm = () => {
   const addFloorRequirement = () => {
     setFloorRequirements((prev) => [
       ...prev,
-      { floorNumber: prev.length + 1, details: "" }
+      { floorNumber: prev.length + 1, details: "" },
     ]);
   };
 
   const removeFloorRequirement = (index) => {
-    setFloorRequirements((prev) => prev.length === 1 ? prev : prev.filter((_, i) => i !== index));
+    setFloorRequirements((prev) =>
+      prev.length === 1 ? prev : prev.filter((_, i) => i !== index),
+    );
   };
 
   // Update form fields if profile changes and fields are empty
@@ -74,7 +76,12 @@ const InteriorDesignForm = () => {
 
   // Fetch profile on mount if not loaded yet
   useEffect(() => {
-    if (!customerProfile.name && !customerProfile.email && !customerProfile.phone && customerProfile.status !== 'loading') {
+    if (
+      !customerProfile.name &&
+      !customerProfile.email &&
+      !customerProfile.phone &&
+      customerProfile.status !== "loading"
+    ) {
       dispatch(fetchCustomerProfile());
     }
     // eslint-disable-next-line
@@ -199,7 +206,6 @@ const InteriorDesignForm = () => {
     e.preventDefault();
     if (!validateForm()) return;
 
-
     const submitData = new FormData();
     submitData.append("workerId", workerId);
 
@@ -211,10 +217,10 @@ const InteriorDesignForm = () => {
     submitData.append("floorRequirements", JSON.stringify(floorRequirements));
 
     currentFiles.forEach((file) =>
-      submitData.append("currentRoomImages", file)
+      submitData.append("currentRoomImages", file),
     );
     inspirationFiles.forEach((file) =>
-      submitData.append("inspirationImages", file)
+      submitData.append("inspirationImages", file),
     );
 
     try {
@@ -330,16 +336,32 @@ const InteriorDesignForm = () => {
           <div className="interior-form-form-group">
             <label>Floor Requirements</label>
             {floorRequirements.map((floor, idx) => (
-              <div key={idx} style={{ display: 'flex', alignItems: 'center', marginBottom: 8 }}>
-                <span style={{ marginRight: 8 }}>Floor {floor.floorNumber}:</span>
+              <div
+                key={idx}
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  marginBottom: 8,
+                }}
+              >
+                <span style={{ marginRight: 8 }}>
+                  Floor {floor.floorNumber}:
+                </span>
                 <input
                   type="text"
                   placeholder="Describe requirements for this floor"
                   value={floor.details}
-                  onChange={e => handleFloorChange(idx, 'details', e.target.value)}
+                  onChange={(e) =>
+                    handleFloorChange(idx, "details", e.target.value)
+                  }
                   style={{ flex: 1, marginRight: 8 }}
                 />
-                <button type="button" onClick={() => removeFloorRequirement(idx)} disabled={floorRequirements.length === 1} style={{ marginRight: 4 }}>
+                <button
+                  type="button"
+                  onClick={() => removeFloorRequirement(idx)}
+                  disabled={floorRequirements.length === 1}
+                  style={{ marginRight: 4 }}
+                >
                   -
                 </button>
                 {idx === floorRequirements.length - 1 && (
@@ -349,7 +371,10 @@ const InteriorDesignForm = () => {
                 )}
               </div>
             ))}
-            <p className="interior-form-info-text">Add requirements for each floor (optional, but helps us understand your needs).</p>
+            <p className="interior-form-info-text">
+              Add requirements for each floor (optional, but helps us understand
+              your needs).
+            </p>
           </div>
 
           <div className="interior-form-form-group">
