@@ -12,7 +12,7 @@ const upload = multer();
 router.get('/companydashboard', isAuthenticated, getDashboard);
 router.get('/companyongoing_projects', isAuthenticated, getOngoingProjects);
 router.get('/project_requests', isAuthenticated, getProjectRequests);
-router.patch('/api/projects/:projectId/:status', isAuthenticated, updateProjectStatusController);
+router.patch('/projects/:projectId/:status', isAuthenticated, updateProjectStatusController);
 router.get('/companyhiring', isAuthenticated, getHiring);
 
 // FIXED: Add upload.any() middleware here to parse FormData

@@ -109,6 +109,58 @@ const getAdminDashboard = async (req, res) => {
     const pendingRequests = pendingArchitectHirings + pendingDesignRequests;
     const openBids = bids.filter((b) => b.status === "open").length;
 
+    // Calculate revenue from Architect Hirings
+    let architectHiringRevenue = {
+      totalProjects: architectHirings.length,
+      totalRevenue: 0,
+      platformCommission: 0,
+      workerPayout: 0,
+      activeProjects: 0,
+      completedProjects: 0,
+    };
+
+    architectHirings.forEach(hiring => {
+      if (hiring.paymentDetails && hiring.paymentDetails.totalAmount) {
+        architectHiringRevenue.totalRevenue += hiring.paymentDetails.totalAmount || 0;
+        architectHiringRevenue.platformCommission += hiring.paymentDetails.platformCommission || 0;
+        architectHiringRevenue.workerPayout += hiring.paymentDetails.workerAmount || 0;
+        
+        if (hiring.status === 'accepted' || hiring.status === 'In-Progress') {
+          architectHiringRevenue.activeProjects++;
+        } else if (hiring.status === 'Completed') {
+          architectHiringRevenue.completedProjects++;
+        }
+      }
+    });
+
+    // Calculate revenue from Design Requests
+    let designRequestRevenue = {
+      totalProjects: designRequests.length,
+      totalRevenue: 0,
+      platformCommission: 0,
+      workerPayout: 0,
+      activeProjects: 0,
+      completedProjects: 0,
+    };
+
+    designRequests.forEach(request => {
+      if (request.paymentDetails && request.paymentDetails.totalAmount) {
+        designRequestRevenue.totalRevenue += request.paymentDetails.totalAmount || 0;
+        designRequestRevenue.platformCommission += request.paymentDetails.platformCommission || 0;
+        designRequestRevenue.workerPayout += request.paymentDetails.workerAmount || 0;
+        
+        if (request.status === 'accepted' || request.status === 'In-Progress') {
+          designRequestRevenue.activeProjects++;
+        } else if (request.status === 'Completed') {
+          designRequestRevenue.completedProjects++;
+        }
+      }
+    });
+
+    // Combined revenue metrics
+    const totalPlatformRevenue = architectHiringRevenue.platformCommission + designRequestRevenue.platformCommission;
+    const totalProjectRevenue = architectHiringRevenue.totalRevenue + designRequestRevenue.totalRevenue;
+
     res.status(200).json({
       counts: {
         customers: customersCount,
@@ -119,6 +171,15 @@ const getAdminDashboard = async (req, res) => {
         activeProjects,
         pendingRequests,
         openBids,
+      },
+      revenue: {
+        architectHiring: architectHiringRevenue,
+        designRequest: designRequestRevenue,
+        combined: {
+          totalPlatformCommission: totalPlatformRevenue,
+          totalProjectRevenue: totalProjectRevenue,
+          totalProjects: architectHiringRevenue.totalProjects + designRequestRevenue.totalProjects,
+        }
       },
       data: {
         customers,
@@ -385,17 +446,39 @@ const getJobApplicationDetail = async (req, res) => {
 const getAdminRevenue = async (req, res) => {
   try {
     // Fetch all construction projects with company and customer details
-    const projects = await ConstructionProjectSchema.find({})
+    const constructionProjects = await ConstructionProjectSchema.find({})
       .populate("customerId", "name email phone")
       .populate("companyId", "companyName email contactPerson")
       .sort({ createdAt: -1 });
     
-    console.log(`📊 Admin Revenue: Found ${projects.length} construction projects`);
+    // Fetch architect hirings
+    const architectHirings = await ArchitectHiring.find({})
+      .populate("customer", "name email phone")
+      .populate("worker", "name email specialization")
+      .sort({ createdAt: -1 });
+    
+    // Fetch design requests
+    const designRequests = await DesignRequest.find({})
+      .populate("customerId", "name email phone")
+      .populate("workerId", "name email specialization")
+      .sort({ createdAt: -1 });
+    
+    console.log(`📊 Admin Revenue: Found ${constructionProjects.length} construction, ${architectHirings.length} architect, ${designRequests.length} design projects`);
 
     // Initialize totals
     let totalPlatformRevenue = 0;
     let totalReceivedRevenue = 0;
     let totalPendingRevenue = 0;
+    
+    // Construction Projects Revenue
+    let constructionRevenue = {
+      totalProjects: constructionProjects.length,
+      platformRevenue: 0,
+      receivedRevenue: 0,
+      pendingRevenue: 0,
+      activeProjects: 0,
+      completedProjects: 0,
+    };
     
     // Phase analytics
     const phaseAnalytics = {
@@ -406,7 +489,7 @@ const getAdminRevenue = async (req, res) => {
       final: { total: 0, received: 0, pending: 0 },
     };
 
-    const projectsWithDetails = projects.map((project) => {
+    const constructionProjectsWithDetails = constructionProjects.map((project) => {
       const totalBudget = project.paymentDetails?.totalAmount || project.proposal?.price || 0;
       const phaseAmount = totalBudget * 0.25; // 25% per phase
       const finalPhaseAmount = totalBudget * 0.1; // 10% final phase
@@ -480,9 +563,14 @@ const getAdminRevenue = async (req, res) => {
       totalPlatformRevenue += projectTotal;
       totalReceivedRevenue += projectReceived;
       totalPendingRevenue += projectPending;
+      
+      constructionRevenue.platformRevenue += projectTotal;
+      constructionRevenue.receivedRevenue += projectReceived;
+      constructionRevenue.pendingRevenue += projectPending;
 
       return {
         _id: project._id,
+        projectType: 'construction',
         projectName: project.projectName,
         status: project.status,
         completionPercentage: project.completionPercentage || 0,
@@ -506,8 +594,165 @@ const getAdminRevenue = async (req, res) => {
       };
     });
 
-    const activeProjectsCount = projects.filter((p) => p.status === "accepted" || p.status === "ongoing").length;
-    const completedProjectsCount = projects.filter((p) => p.status === "completed").length;
+    constructionRevenue.activeProjects = constructionProjects.filter((p) => p.status === "accepted" || p.status === "ongoing").length;
+    constructionRevenue.completedProjects = constructionProjects.filter((p) => p.status === "completed").length;
+
+    // Process Architect Hirings
+    let architectHiringRevenue = {
+      totalProjects: architectHirings.length,
+      platformRevenue: 0,
+      receivedRevenue: 0,
+      pendingRevenue: 0,
+      activeProjects: 0,
+      completedProjects: 0,
+    };
+
+    const architectHiringsWithDetails = architectHirings.map((hiring) => {
+      const totalAmount = hiring.paymentDetails?.totalAmount || 0;
+      const platformCommission = hiring.paymentDetails?.platformCommission || 0;
+      const workerAmount = hiring.paymentDetails?.workerAmount || 0;
+      const escrowStatus = hiring.paymentDetails?.escrowStatus || 'not_initiated';
+      
+      // Calculate received and pending amounts based on milestone payments
+      let receivedAmount = 0;
+      let pendingAmount = 0;
+      
+      if (hiring.paymentDetails?.milestonePayments) {
+        hiring.paymentDetails.milestonePayments.forEach(milestone => {
+          if (milestone.paymentCollected) {
+            receivedAmount += milestone.platformFee || 0;
+          } else {
+            pendingAmount += milestone.platformFee || 0;
+          }
+        });
+      }
+      
+      if (totalAmount > 0) {
+        totalPlatformRevenue += platformCommission;
+        totalReceivedRevenue += receivedAmount;
+        totalPendingRevenue += pendingAmount;
+        
+        architectHiringRevenue.platformRevenue += platformCommission;
+        architectHiringRevenue.receivedRevenue += receivedAmount;
+        architectHiringRevenue.pendingRevenue += pendingAmount;
+      }
+      
+      if (hiring.status === 'accepted' || hiring.status === 'In-Progress') {
+        architectHiringRevenue.activeProjects++;
+      } else if (hiring.status === 'Completed') {
+        architectHiringRevenue.completedProjects++;
+      }
+      
+      return {
+        _id: hiring._id,
+        projectType: 'architect',
+        projectName: hiring.projectName || 'Architecture Project',
+        status: hiring.status,
+        customer: {
+          _id: hiring.customer?._id,
+          name: hiring.customer?.name || hiring.customerDetails?.fullName || "Unknown",
+          email: hiring.customer?.email || hiring.customerDetails?.email || "",
+          phone: hiring.customer?.phone || hiring.customerDetails?.contactNumber || "",
+        },
+        worker: {
+          _id: hiring.worker?._id,
+          name: hiring.worker?.name || "Not Assigned",
+          email: hiring.worker?.email || "",
+          specialization: hiring.worker?.specialization || "",
+        },
+        totalAmount: totalAmount,
+        platformCommission: platformCommission,
+        workerAmount: workerAmount,
+        receivedAmount: receivedAmount,
+        pendingAmount: pendingAmount,
+        escrowStatus: escrowStatus,
+        createdAt: hiring.createdAt,
+      };
+    });
+
+    // Process Design Requests
+    let designRequestRevenue = {
+      totalProjects: designRequests.length,
+      platformRevenue: 0,
+      receivedRevenue: 0,
+      pendingRevenue: 0,
+      activeProjects: 0,
+      completedProjects: 0,
+    };
+
+    const designRequestsWithDetails = designRequests.map((request) => {
+      const totalAmount = request.paymentDetails?.totalAmount || 0;
+      const platformCommission = request.paymentDetails?.platformCommission || 0;
+      const workerAmount = request.paymentDetails?.workerAmount || 0;
+      const escrowStatus = request.paymentDetails?.escrowStatus || 'not_initiated';
+      
+      // Calculate received and pending amounts based on milestone payments
+      let receivedAmount = 0;
+      let pendingAmount = 0;
+      
+      if (request.paymentDetails?.milestonePayments) {
+        request.paymentDetails.milestonePayments.forEach(milestone => {
+          if (milestone.paymentCollected) {
+            receivedAmount += milestone.platformFee || 0;
+          } else {
+            pendingAmount += milestone.platformFee || 0;
+          }
+        });
+      }
+      
+      if (totalAmount > 0) {
+        totalPlatformRevenue += platformCommission;
+        totalReceivedRevenue += receivedAmount;
+        totalPendingRevenue += pendingAmount;
+        
+        designRequestRevenue.platformRevenue += platformCommission;
+        designRequestRevenue.receivedRevenue += receivedAmount;
+        designRequestRevenue.pendingRevenue += pendingAmount;
+      }
+      
+      if (request.status === 'accepted' || request.status === 'In-Progress') {
+        designRequestRevenue.activeProjects++;
+      } else if (request.status === 'Completed') {
+        designRequestRevenue.completedProjects++;
+      }
+      
+      return {
+        _id: request._id,
+        projectType: 'interior',
+        projectName: request.projectName || `${request.roomType} Design`,
+        status: request.status,
+        customer: {
+          _id: request.customerId?._id,
+          name: request.customerId?.name || request.fullName || "Unknown",
+          email: request.customerId?.email || request.email || "",
+          phone: request.customerId?.phone || request.phone || "",
+        },
+        worker: {
+          _id: request.workerId?._id,
+          name: request.workerId?.name || "Not Assigned",
+          email: request.workerId?.email || "",
+          specialization: request.workerId?.specialization || "",
+        },
+        totalAmount: totalAmount,
+        platformCommission: platformCommission,
+        workerAmount: workerAmount,
+        receivedAmount: receivedAmount,
+        pendingAmount: pendingAmount,
+        escrowStatus: escrowStatus,
+        roomType: request.roomType,
+        createdAt: request.createdAt,
+      };
+    });
+
+    // Combine all projects
+    const allProjects = [
+      ...constructionProjectsWithDetails,
+      ...architectHiringsWithDetails,
+      ...designRequestsWithDetails
+    ].sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+
+    const activeProjectsCount = constructionRevenue.activeProjects + architectHiringRevenue.activeProjects + designRequestRevenue.activeProjects;
+    const completedProjectsCount = constructionRevenue.completedProjects + architectHiringRevenue.completedProjects + designRequestRevenue.completedProjects;
     const collectionRate = totalPlatformRevenue > 0 
       ? ((totalReceivedRevenue / totalPlatformRevenue) * 100).toFixed(2) 
       : 0;
@@ -518,6 +763,9 @@ const getAdminRevenue = async (req, res) => {
     console.log(`   Pending: ₹${totalPendingRevenue.toLocaleString('en-IN')}`);
     console.log(`   Collection Rate: ${collectionRate}%`);
     console.log(`   Active Projects: ${activeProjectsCount}, Completed: ${completedProjectsCount}`);
+    console.log(`   Construction: ${constructionRevenue.platformRevenue.toLocaleString('en-IN')}`);
+    console.log(`   Architect: ${architectHiringRevenue.platformRevenue.toLocaleString('en-IN')}`);
+    console.log(`   Interior: ${designRequestRevenue.platformRevenue.toLocaleString('en-IN')}`);
 
     res.json({
       success: true,
@@ -528,10 +776,18 @@ const getAdminRevenue = async (req, res) => {
         collectionRate: parseFloat(collectionRate),
         activeProjects: activeProjectsCount,
         completedProjects: completedProjectsCount,
-        totalProjects: projects.length,
+        totalProjects: allProjects.length,
+      },
+      revenueByType: {
+        construction: constructionRevenue,
+        architect: architectHiringRevenue,
+        interior: designRequestRevenue,
       },
       phaseAnalytics,
-      projects: projectsWithDetails,
+      projects: allProjects,
+      constructionProjects: constructionProjectsWithDetails,
+      architectHirings: architectHiringsWithDetails,
+      designRequests: designRequestsWithDetails,
     });
   } catch (error) {
     console.error("Error fetching admin revenue:", error);

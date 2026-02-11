@@ -165,7 +165,7 @@ const CompanyProjectRequests = () => {
     }
 
     try {
-      const res = await fetch(`http://localhost:3000/api/company/api/projects/${projectId}/rejected`, {
+      const res = await fetch(`http://localhost:3000/api/projects/${projectId}/rejected`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         credentials: "include",

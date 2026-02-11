@@ -200,6 +200,62 @@ const ArchitectHiringDetail = () => {
           </Section>
         )}
 
+        {hiring.paymentDetails && hiring.paymentDetails.totalAmount && (
+          <Section title="Payment & Revenue Details">
+            <Card>
+              <div className="detail-grid">
+                <DataRow label="Total Project Amount">
+                  <strong style={{ color: '#2563eb', fontSize: '1.1em' }}>
+                    ₹{hiring.paymentDetails.totalAmount?.toLocaleString('en-IN') ?? '0'}
+                  </strong>
+                </DataRow>
+                <DataRow label="Platform Commission">
+                  <span style={{ color: '#16a34a', fontWeight: '600' }}>
+                    ₹{hiring.paymentDetails.platformCommission?.toLocaleString('en-IN') ?? '0'}
+                    {hiring.paymentDetails.totalAmount && hiring.paymentDetails.platformCommission && 
+                      ` (${((hiring.paymentDetails.platformCommission / hiring.paymentDetails.totalAmount) * 100).toFixed(1)}%)`
+                    }
+                  </span>
+                </DataRow>
+                <DataRow label="Worker Payout (Net)">
+                  ₹{hiring.paymentDetails.workerAmount?.toLocaleString('en-IN') ?? '0'}
+                </DataRow>
+                <DataRow label="Escrow Status">
+                  <Badge variant={
+                    hiring.paymentDetails.escrowStatus === 'fully_released' ? 'success' :
+                    hiring.paymentDetails.escrowStatus === 'partially_released' ? 'info' :
+                    hiring.paymentDetails.escrowStatus === 'held' ? 'warning' : 'default'
+                  }>
+                    {hiring.paymentDetails.escrowStatus?.replace('_', ' ').toUpperCase() ?? 'NOT INITIATED'}
+                  </Badge>
+                </DataRow>
+              </div>
+              {hiring.paymentDetails.milestonePayments && hiring.paymentDetails.milestonePayments.length > 0 && (
+                <div style={{ marginTop: '20px', borderTop: '1px solid #e5e7eb', paddingTop: '15px' }}>
+                  <h4 style={{ marginBottom: '12px', fontSize: '0.95em', color: '#6b7280' }}>
+                    Milestone Payments Breakdown
+                  </h4>
+                  <div className="detail-grid">
+                    {hiring.paymentDetails.milestonePayments.map((milestone, idx) => (
+                      <DataRow key={idx} label={`Milestone ${milestone.percentage}%`}>
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                          <span>₹{milestone.amount?.toLocaleString('en-IN') ?? '0'}</span>
+                          <Badge variant={
+                            milestone.status === 'released' ? 'success' :
+                            milestone.status === 'withdrawn' ? 'info' : 'warning'
+                          } style={{ width: 'fit-content' }}>
+                            {milestone.paymentCollected ? 'Collected' : 'Pending Collection'}
+                          </Badge>
+                        </div>
+                      </DataRow>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </Card>
+          </Section>
+        )}
+
         <Section title="Timestamps">
           <Card>
             <div className="detail-grid">
