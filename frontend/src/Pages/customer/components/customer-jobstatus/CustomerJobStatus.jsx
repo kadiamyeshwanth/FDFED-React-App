@@ -9,9 +9,9 @@ const CustomerJobStatus = () => {
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState("cjs-architect-section");
   const [statusFilters, setStatusFilters] = useState({
-    architect: 'all',
-    interior: 'all',
-    company: 'all'
+    architect: "all",
+    interior: "all",
+    company: "all",
   });
   const [applications, setApplications] = useState({
     architect: [],
@@ -26,26 +26,26 @@ const CustomerJobStatus = () => {
     projectId: null,
     milestoneId: null,
     projectType: null,
-    notes: ''
+    notes: "",
   });
   const [reviewModal, setReviewModal] = useState({
     isOpen: false,
     projectId: null,
     projectName: null,
-    projectType: null
+    projectType: null,
   });
   const [phasesModal, setPhasesModal] = useState({
     isOpen: false,
     projectId: null,
     projectType: null,
     phases: [],
-    proposalData: null
+    proposalData: null,
   });
   const [proposalModal, setProposalModal] = useState({
     isOpen: false,
     projectId: null,
     projectType: null,
-    proposal: null
+    proposal: null,
   });
 
   const fetchJobStatus = async () => {
@@ -56,8 +56,10 @@ const CustomerJobStatus = () => {
       const data = res.data;
 
       // Sort applications by creation date (most recent first)
-      const sortByDate = (apps) => 
-        (apps || []).sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+      const sortByDate = (apps) =>
+        (apps || []).sort(
+          (a, b) => new Date(b.createdAt) - new Date(a.createdAt),
+        );
 
       setApplications({
         architect: sortByDate(data.architectApplications),
@@ -78,13 +80,13 @@ const CustomerJobStatus = () => {
   const handleTabClick = (tabId) => setActiveTab(tabId);
 
   const handleStatusFilter = (section, status) => {
-    setStatusFilters(prev => ({ ...prev, [section]: status }));
+    setStatusFilters((prev) => ({ ...prev, [section]: status }));
   };
 
   const filterApplicationsByStatus = (apps, status) => {
-    if (status === 'all') return apps;
-    return apps.filter(app => {
-      const appStatus = app.status?.toLowerCase() || '';
+    if (status === "all") return apps;
+    return apps.filter((app) => {
+      const appStatus = app.status?.toLowerCase() || "";
       return appStatus === status.toLowerCase();
     });
   };
@@ -95,24 +97,24 @@ const CustomerJobStatus = () => {
       pending: 0,
       accepted: 0,
       rejected: 0,
-      completed: 0
+      completed: 0,
     };
-    
-    apps.forEach(app => {
-      const status = app.status?.toLowerCase() || '';
+
+    apps.forEach((app) => {
+      const status = app.status?.toLowerCase() || "";
       if (counts.hasOwnProperty(status)) {
         counts[status]++;
       }
     });
-    
+
     return counts;
   };
 
   const toggleSection = (appId, section) => {
     const key = `${appId}-${section}`;
-    setExpandedSections(prev => ({
+    setExpandedSections((prev) => ({
       ...prev,
-      [key]: !prev[key]
+      [key]: !prev[key],
     }));
   };
 
@@ -137,14 +139,18 @@ const CustomerJobStatus = () => {
       minute: "2-digit",
     });
 
-  const handleApproveMilestone = async (projectId, milestoneId, projectType) => {
+  const handleApproveMilestone = async (
+    projectId,
+    milestoneId,
+    projectType,
+  ) => {
     try {
       const res = await axios.post(
         `/api/customer/milestone/approve/${projectId}/${milestoneId}`,
         { projectType },
-        { withCredentials: true }
+        { withCredentials: true },
       );
-      
+
       if (res.data.success) {
         // Check if there's a redirect to payment page for next milestone
         if (res.data.redirect) {
@@ -166,7 +172,7 @@ const CustomerJobStatus = () => {
       const res = await axios.post(
         `/api/customer/milestone/reject/${projectId}/${milestoneId}`,
         { projectType, reason },
-        { withCredentials: true }
+        { withCredentials: true },
       );
       if (res.data.success) {
         alert("Milestone rejected");
@@ -184,7 +190,7 @@ const CustomerJobStatus = () => {
       projectId,
       milestoneId,
       projectType,
-      notes: ''
+      notes: "",
     });
   };
 
@@ -197,12 +203,21 @@ const CustomerJobStatus = () => {
     try {
       const res = await axios.post(
         `/api/customer/milestone/request-revision/${revisionModal.projectId}/${revisionModal.milestoneId}`,
-        { projectType: revisionModal.projectType, revisionNotes: revisionModal.notes },
-        { withCredentials: true }
+        {
+          projectType: revisionModal.projectType,
+          revisionNotes: revisionModal.notes,
+        },
+        { withCredentials: true },
       );
       if (res.data.success) {
         alert("Revision request sent to worker!");
-        setRevisionModal({ isOpen: false, projectId: null, milestoneId: null, projectType: null, notes: '' });
+        setRevisionModal({
+          isOpen: false,
+          projectId: null,
+          milestoneId: null,
+          projectType: null,
+          notes: "",
+        });
         fetchJobStatus();
       }
     } catch (error) {
@@ -212,21 +227,29 @@ const CustomerJobStatus = () => {
   };
 
   const handleCloseRevisionModal = () => {
-    setRevisionModal({ isOpen: false, projectId: null, milestoneId: null, projectType: null, notes: '' });
+    setRevisionModal({
+      isOpen: false,
+      projectId: null,
+      milestoneId: null,
+      projectType: null,
+      notes: "",
+    });
   };
 
   const handleReportToAdmin = async (projectId, milestoneId, projectType) => {
-    const reportReason = prompt("Please describe the issue to report to admin:");
+    const reportReason = prompt(
+      "Please describe the issue to report to admin:",
+    );
     if (!reportReason || !reportReason.trim()) {
       alert("Report reason is required");
       return;
     }
-    
+
     try {
       const res = await axios.post(
         `/api/customer/milestone/report-to-admin/${projectId}/${milestoneId}`,
         { projectType, reportReason },
-        { withCredentials: true }
+        { withCredentials: true },
       );
       if (res.data.success) {
         alert("Milestone reported to admin for review!");
@@ -242,14 +265,18 @@ const CustomerJobStatus = () => {
   const isProjectComplete = (app) => {
     if (!app.milestones || app.milestones.length === 0) return false;
     const totalProgress = app.milestones
-      .filter(m => m.status === 'Approved')
+      .filter((m) => m.status === "Approved")
       .reduce((sum, m) => sum + m.percentage, 0);
     return totalProgress >= 100;
   };
 
   // Check if customer has already reviewed
   const hasCustomerReviewed = (app) => {
-    return app.review && app.review.customerToWorker && app.review.customerToWorker.rating;
+    return (
+      app.review &&
+      app.review.customerToWorker &&
+      app.review.customerToWorker.rating
+    );
   };
 
   // Open review modal
@@ -258,7 +285,7 @@ const CustomerJobStatus = () => {
       isOpen: true,
       projectId,
       projectName,
-      projectType
+      projectType,
     });
   };
 
@@ -266,29 +293,34 @@ const CustomerJobStatus = () => {
   const handleSubmitReview = async ({ rating, comment }) => {
     try {
       const res = await axios.post(
-        '/api/customer/review',
+        "/api/customer/review",
         {
           projectId: reviewModal.projectId,
           projectType: reviewModal.projectType,
           rating,
-          comment
+          comment,
         },
-        { withCredentials: true }
+        { withCredentials: true },
       );
-      
+
       if (res.data) {
-        alert('Review submitted successfully!');
-        setReviewModal({ isOpen: false, projectId: null, projectName: null, projectType: null });
+        alert("Review submitted successfully!");
+        setReviewModal({
+          isOpen: false,
+          projectId: null,
+          projectName: null,
+          projectType: null,
+        });
         fetchJobStatus();
-        
+
         // Check if project is now completed (both reviews done)
         if (res.data.isProjectCompleted) {
-          alert('Both reviews completed! Project moved to Completed section.');
+          alert("Both reviews completed! Project moved to Completed section.");
         }
       }
     } catch (error) {
-      console.error('Error submitting review:', error);
-      alert(error.response?.data?.error || 'Failed to submit review');
+      console.error("Error submitting review:", error);
+      alert(error.response?.data?.error || "Failed to submit review");
       throw error;
     }
   };
@@ -298,24 +330,25 @@ const CustomerJobStatus = () => {
       <div className="cjs-collapsible-buttons">
         <button
           className="cjs-section-btn"
-          onClick={() => toggleSection(appId, 'details')}
+          onClick={() => toggleSection(appId, "details")}
         >
-          {isSectionExpanded(appId, 'details') ? '▼' : '▶'} Project Details
+          {isSectionExpanded(appId, "details") ? "▼" : "▶"} Project Details
         </button>
         {hasMilestones && (
           <button
             className="cjs-section-btn cjs-milestone-btn"
-            onClick={() => toggleSection(appId, 'milestones')}
+            onClick={() => toggleSection(appId, "milestones")}
           >
-            {isSectionExpanded(appId, 'milestones') ? '▼' : '▶'} Progress Milestones
+            {isSectionExpanded(appId, "milestones") ? "▼" : "▶"} Progress
+            Milestones
           </button>
         )}
         {hasUpdates && (
           <button
             className="cjs-section-btn cjs-updates-btn"
-            onClick={() => toggleSection(appId, 'updates')}
+            onClick={() => toggleSection(appId, "updates")}
           >
-            {isSectionExpanded(appId, 'updates') ? '▼' : '▶'} Project Updates
+            {isSectionExpanded(appId, "updates") ? "▼" : "▶"} Project Updates
           </button>
         )}
       </div>
@@ -325,7 +358,9 @@ const CustomerJobStatus = () => {
   const renderMilestones = (app, projectType) => {
     if (!app.milestones || app.milestones.length === 0) return null;
 
-    const sortedMilestones = [...app.milestones].sort((a, b) => b.percentage - a.percentage);
+    const sortedMilestones = [...app.milestones].sort(
+      (a, b) => b.percentage - a.percentage,
+    );
 
     return (
       <div className="cjs-milestones-section">
@@ -337,13 +372,19 @@ const CustomerJobStatus = () => {
               className={`cjs-milestone-card cjs-milestone-${milestone.status.toLowerCase()}`}
             >
               <div className="cjs-milestone-header">
-                <span className="cjs-milestone-percentage">{milestone.percentage}%</span>
-                <span className={`cjs-milestone-status cjs-status-${milestone.status.toLowerCase().replace(' ', '-')}`}>
-                  {milestone.status === 'Pending' && '⏳ Pending Approval'}
-                  {milestone.status === 'Approved' && '✅ Approved'}
-                  {milestone.status === 'Rejected' && '❌ Rejected'}
-                  {milestone.status === 'Revision Requested' && '🔄 Revision Requested'}
-                  {milestone.status === 'Under Review' && '🚨 Under Admin Review'}
+                <span className="cjs-milestone-percentage">
+                  {milestone.percentage}%
+                </span>
+                <span
+                  className={`cjs-milestone-status cjs-status-${milestone.status.toLowerCase().replace(" ", "-")}`}
+                >
+                  {milestone.status === "Pending" && "⏳ Pending Approval"}
+                  {milestone.status === "Approved" && "✅ Approved"}
+                  {milestone.status === "Rejected" && "❌ Rejected"}
+                  {milestone.status === "Revision Requested" &&
+                    "🔄 Revision Requested"}
+                  {milestone.status === "Under Review" &&
+                    "🚨 Under Admin Review"}
                 </span>
               </div>
               <div className="cjs-milestone-date">
@@ -362,50 +403,68 @@ const CustomerJobStatus = () => {
                   />
                 </div>
               )}
-              {milestone.status === 'Pending' && (
+              {milestone.status === "Pending" && (
                 <div className="cjs-milestone-actions">
                   <button
                     className="cjs-btn-approve"
-                    onClick={() => handleApproveMilestone(app._id, milestone._id, projectType)}
+                    onClick={() =>
+                      handleApproveMilestone(
+                        app._id,
+                        milestone._id,
+                        projectType,
+                      )
+                    }
                   >
                     ✓ Approve
                   </button>
                   <button
                     className="cjs-btn-revision"
-                    onClick={() => handleRequestRevision(app._id, milestone._id, projectType)}
+                    onClick={() =>
+                      handleRequestRevision(app._id, milestone._id, projectType)
+                    }
                   >
                     🔄 Request Revision
                   </button>
                   <button
                     className="cjs-btn-report"
-                    onClick={() => handleReportToAdmin(app._id, milestone._id, projectType)}
+                    onClick={() =>
+                      handleReportToAdmin(app._id, milestone._id, projectType)
+                    }
                   >
                     🚨 Report to Admin
                   </button>
                 </div>
               )}
-              {milestone.status === 'Approved' && milestone.approvedAt && (
+              {milestone.status === "Approved" && milestone.approvedAt && (
                 <div className="cjs-milestone-approved-date">
                   Approved: {formatDateTime(milestone.approvedAt)}
                 </div>
               )}
-              {milestone.status === 'Rejected' && milestone.rejectedAt && (
+              {milestone.status === "Rejected" && milestone.rejectedAt && (
                 <div className="cjs-milestone-rejected-info">
                   <div>Rejected: {formatDateTime(milestone.rejectedAt)}</div>
-                  {milestone.rejectionReason && <div>Reason: {milestone.rejectionReason}</div>}
+                  {milestone.rejectionReason && (
+                    <div>Reason: {milestone.rejectionReason}</div>
+                  )}
                 </div>
               )}
-              {milestone.status === 'Revision Requested' && (
+              {milestone.status === "Revision Requested" && (
                 <div className="cjs-milestone-revision-info">
-                  <div>Revision Requested: {formatDateTime(milestone.revisionRequestedAt)}</div>
+                  <div>
+                    Revision Requested:{" "}
+                    {formatDateTime(milestone.revisionRequestedAt)}
+                  </div>
                   <div className="cjs-revision-notes">
                     <strong>Notes:</strong> {milestone.revisionNotes}
                   </div>
                 </div>
               )}
-              {milestone.status === 'Under Review' && (
+              {milestone.status === "Under Review" && (
                 <div className="cjs-milestone-review-info">
-                  <div>Reported to Admin: {formatDateTime(milestone.reportedToAdminAt)}</div>
+                  <div>
+                    Reported to Admin:{" "}
+                    {formatDateTime(milestone.reportedToAdminAt)}
+                  </div>
                   <div className="cjs-admin-report">
                     <strong>Issue:</strong> {milestone.adminReport}
                   </div>
@@ -414,28 +473,34 @@ const CustomerJobStatus = () => {
             </div>
           ))}
         </div>
-        
+
         {/* Review Section - Show when project is 100% complete */}
         {isProjectComplete(app) && !hasCustomerReviewed(app) && (
           <div className="cjs-review-prompt">
             <div className="cjs-review-prompt-content">
               <i className="fas fa-star"></i>
               <h4>Project Complete!</h4>
-              <p>This project has reached 100% completion. Please rate and review your experience with the worker.</p>
+              <p>
+                This project has reached 100% completion. Please rate and review
+                your experience with the worker.
+              </p>
               <button
                 className="cjs-btn-review"
-                onClick={() => openReviewModal(app._id, app.projectName, projectType)}
+                onClick={() =>
+                  openReviewModal(app._id, app.projectName, projectType)
+                }
               >
                 ⭐ Rate & Review Worker
               </button>
             </div>
           </div>
         )}
-        
+
         {/* Display Reviews if completed */}
-        {app.review && (app.review.customerToWorker || app.review.workerToCustomer) && (
-          <ReviewDisplay review={app.review} userType="customer" />
-        )}
+        {app.review &&
+          (app.review.customerToWorker || app.review.workerToCustomer) && (
+            <ReviewDisplay review={app.review} userType="customer" />
+          )}
       </div>
     );
   };
@@ -444,7 +509,7 @@ const CustomerJobStatus = () => {
     if (!app.projectUpdates || app.projectUpdates.length === 0) return null;
 
     const sortedUpdates = [...app.projectUpdates].sort(
-      (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
+      (a, b) => new Date(b.createdAt) - new Date(a.createdAt),
     );
 
     return (
@@ -453,7 +518,9 @@ const CustomerJobStatus = () => {
         <div className="cjs-updates-list">
           {sortedUpdates.map((update, index) => (
             <div key={index} className="cjs-update-item">
-              <div className="cjs-update-date">{formatDateTime(update.createdAt)}</div>
+              <div className="cjs-update-date">
+                {formatDateTime(update.createdAt)}
+              </div>
               <div className="cjs-update-text">{update.updateText}</div>
               {update.updateImage && (
                 <img
@@ -471,28 +538,33 @@ const CustomerJobStatus = () => {
   };
 
   const handleAcceptProposal = async (projectId, type) => {
-    if (!confirm(`Are you sure you want to accept this proposal and mark payment as complete?`)) {
+    if (
+      !confirm(
+        `Are you sure you want to accept this proposal and mark payment as complete?`,
+      )
+    ) {
       return;
     }
 
     try {
       let endpoint;
-      if (type === 'company') {
+      if (type === "company") {
         endpoint = `/api/customer/accept-company-proposal/${projectId}`;
       } else {
         endpoint = `/api/customer/accept-proposal/${type}/${projectId}`;
       }
 
       const res = await axios.get(endpoint, { withCredentials: true });
-      
+
       if (res.data.success) {
-        alert(res.data.message || "Proposal accepted! Redirecting to payment...");
-        
-        // Navigate to payment checkout page
-        if (res.data.redirect) {
+        alert(
+          res.data.message || "Proposal accepted! Redirecting to payment...",
+        );
+        if (type === "company") {
+          navigate("/customerdashboard/ongoing_projects");
+        } else if (res.data.redirect) {
           navigate(res.data.redirect);
         } else {
-          // Fallback to refresh if no redirect URL
           fetchJobStatus();
         }
       }
@@ -508,14 +580,18 @@ const CustomerJobStatus = () => {
 
     try {
       let endpoint;
-      if (type === 'company') {
+      if (type === "company") {
         endpoint = `/api/customer/reject-company-proposal/${projectId}`;
       } else {
         endpoint = `/api/customer/reject-proposal/${type}/${projectId}`;
       }
 
-      const res = await axios.post(endpoint, { reason }, { withCredentials: true });
-      
+      const res = await axios.post(
+        endpoint,
+        { reason },
+        { withCredentials: true },
+      );
+
       if (res.data.success) {
         alert("Proposal rejected successfully!");
         fetchJobStatus();
@@ -528,7 +604,7 @@ const CustomerJobStatus = () => {
 
   const renderProposal = (app, type) => {
     const isProposalSent = ["proposal_sent", "Proposal Sent"].includes(
-      app.status
+      app.status,
     );
     const isAccepted = app.status?.toLowerCase() === "accepted";
 
@@ -539,12 +615,14 @@ const CustomerJobStatus = () => {
             ₹{app.proposal.price.toLocaleString("en-IN")}
           </div>
           <button
-            onClick={() => setProposalModal({
-              isOpen: true,
-              projectId: app._id,
-              projectType: type,
-              proposal: app.proposal
-            })}
+            onClick={() =>
+              setProposalModal({
+                isOpen: true,
+                projectId: app._id,
+                projectType: type,
+                proposal: app.proposal,
+              })
+            }
             className="cjs-btn-accept-pay"
           >
             View Details
@@ -573,13 +651,14 @@ const CustomerJobStatus = () => {
     const hasMilestones = app.milestones && app.milestones.length > 0;
     const hasUpdates = app.projectUpdates && app.projectUpdates.length > 0;
     const hasImages = app.additionalDetails?.referenceImages?.length > 0;
-    const pendingMilestones = hasMilestones ? app.milestones.filter(m => m.status === 'Pending').length : 0;
+    const pendingMilestones = hasMilestones
+      ? app.milestones.filter((m) => m.status === "Pending").length
+      : 0;
 
     return (
       <div key={app._id} className="cjs-application cjs-architect-app">
         <div className="cjs-status-container">
           <div className="cjs-status cjs-architect-status">{app.status}</div>
-
         </div>
         <h3>
           <span className="cjs-project-name">{app.projectName}</span>
@@ -591,13 +670,19 @@ const CustomerJobStatus = () => {
 
         {pendingMilestones > 0 && (
           <div className="cjs-pending-notice">
-            ⚠️ {pendingMilestones} milestone{pendingMilestones > 1 ? 's' : ''} pending your approval
+            ⚠️ {pendingMilestones} milestone{pendingMilestones > 1 ? "s" : ""}{" "}
+            pending your approval
           </div>
         )}
 
-        {renderCollapsibleButtons(app._id, hasMilestones, hasUpdates, hasImages)}
+        {renderCollapsibleButtons(
+          app._id,
+          hasMilestones,
+          hasUpdates,
+          hasImages,
+        )}
 
-        {isSectionExpanded(app._id, 'details') && (
+        {isSectionExpanded(app._id, "details") && (
           <div className="cjs-application-data-section">
             <div className="cjs-application-data">
               <div className="cjs-section-title">Customer Details</div>
@@ -637,7 +722,8 @@ const CustomerJobStatus = () => {
                 <strong>Size:</strong> {app.plotInformation?.plotSize}
               </p>
               <p>
-                <strong>Orientation:</strong> {app.plotInformation?.plotOrientation}
+                <strong>Orientation:</strong>{" "}
+                {app.plotInformation?.plotOrientation}
               </p>
             </div>
 
@@ -654,7 +740,8 @@ const CustomerJobStatus = () => {
                 {app.designRequirements?.specialFeatures || "None specified"}
               </p>
               <p>
-                <strong>Style:</strong> {app.designRequirements?.architecturalStyle}
+                <strong>Style:</strong>{" "}
+                {app.designRequirements?.architecturalStyle}
               </p>
             </div>
 
@@ -691,16 +778,23 @@ const CustomerJobStatus = () => {
 
             {/* Reference Images */}
             {app.additionalDetails?.referenceImages?.length > 0 && (
-              <div className="cjs-application-data" style={{gridColumn: '1 / -1'}}>
+              <div
+                className="cjs-application-data"
+                style={{ gridColumn: "1 / -1" }}
+              >
                 <div className="cjs-section-title">Reference Images</div>
                 <div className="cjs-images-grid">
                   {app.additionalDetails.referenceImages.map((img, i) => (
                     <img
                       key={i}
-                      src={typeof img === 'string' ? img : img.url}
+                      src={typeof img === "string" ? img : img.url}
                       alt={`Reference ${i + 1}`}
                       className="cjs-grid-image"
-                      onClick={() => setLightboxImage(typeof img === 'string' ? img : img.url)}
+                      onClick={() =>
+                        setLightboxImage(
+                          typeof img === "string" ? img : img.url,
+                        )
+                      }
                     />
                   ))}
                 </div>
@@ -713,8 +807,9 @@ const CustomerJobStatus = () => {
           </div>
         )}
 
-        {isSectionExpanded(app._id, 'milestones') && renderMilestones(app, 'architect')}
-        {isSectionExpanded(app._id, 'updates') && renderUpdates(app)}
+        {isSectionExpanded(app._id, "milestones") &&
+          renderMilestones(app, "architect")}
+        {isSectionExpanded(app._id, "updates") && renderUpdates(app)}
       </div>
     );
   };
@@ -722,16 +817,19 @@ const CustomerJobStatus = () => {
   const renderInteriorApp = (app) => {
     const hasMilestones = app.milestones && app.milestones.length > 0;
     const hasUpdates = app.projectUpdates && app.projectUpdates.length > 0;
-    const hasCurrentImages = app.currentRoomImages && app.currentRoomImages.length > 0;
-    const hasInspirationImages = app.inspirationImages && app.inspirationImages.length > 0;
+    const hasCurrentImages =
+      app.currentRoomImages && app.currentRoomImages.length > 0;
+    const hasInspirationImages =
+      app.inspirationImages && app.inspirationImages.length > 0;
     const hasImages = hasCurrentImages || hasInspirationImages;
-    const pendingMilestones = hasMilestones ? app.milestones.filter(m => m.status === 'Pending').length : 0;
+    const pendingMilestones = hasMilestones
+      ? app.milestones.filter((m) => m.status === "Pending").length
+      : 0;
 
     return (
       <div key={app._id} className="cjs-application cjs-interior-app">
         <div className="cjs-status-container">
           <div className="cjs-status cjs-interior-status">{app.status}</div>
-
         </div>
         <h3 className="cjs-project-name">{app.projectName}</h3>
         <p>
@@ -740,20 +838,22 @@ const CustomerJobStatus = () => {
 
         {pendingMilestones > 0 && (
           <div className="cjs-pending-notice">
-            ⚠️ {pendingMilestones} milestone{pendingMilestones > 1 ? 's' : ''} pending your approval
+            ⚠️ {pendingMilestones} milestone{pendingMilestones > 1 ? "s" : ""}{" "}
+            pending your approval
           </div>
         )}
 
         {renderCollapsibleButtons(app._id, hasMilestones, hasUpdates)}
 
-        {isSectionExpanded(app._id, 'details') && (
+        {isSectionExpanded(app._id, "details") && (
           <>
             <div className="cjs-section-title">Room Details</div>
             <p>
               <strong>Type:</strong> {app.roomType}
             </p>
             <p>
-              <strong>Size:</strong> {app.roomSize?.length}×{app.roomSize?.width}
+              <strong>Size:</strong> {app.roomSize?.length}×
+              {app.roomSize?.width}
               {app.roomSize?.unit}
             </p>
             <p>
@@ -769,7 +869,7 @@ const CustomerJobStatus = () => {
 
             {/* Current Room Images */}
             {hasCurrentImages && (
-              <div style={{marginTop: '20px'}}>
+              <div style={{ marginTop: "20px" }}>
                 <div className="cjs-section-title">Current Room Images</div>
                 <div className="cjs-images-grid">
                   {app.currentRoomImages.map((img, i) => (
@@ -787,7 +887,7 @@ const CustomerJobStatus = () => {
 
             {/* Inspiration Images */}
             {hasInspirationImages && (
-              <div style={{marginTop: '20px'}}>
+              <div style={{ marginTop: "20px" }}>
                 <div className="cjs-section-title">Inspiration Images</div>
                 <div className="cjs-images-grid">
                   {app.inspirationImages.map((img, i) => (
@@ -809,8 +909,9 @@ const CustomerJobStatus = () => {
           </>
         )}
 
-        {isSectionExpanded(app._id, 'milestones') && renderMilestones(app, 'interior')}
-        {isSectionExpanded(app._id, 'updates') && renderUpdates(app)}
+        {isSectionExpanded(app._id, "milestones") &&
+          renderMilestones(app, "interior")}
+        {isSectionExpanded(app._id, "updates") && renderUpdates(app)}
       </div>
     );
   };
@@ -819,13 +920,12 @@ const CustomerJobStatus = () => {
     <div key={app._id} className="cjs-application cjs-company-app">
       <div className="cjs-status-container">
         <div className="cjs-status cjs-company-status">{app.status}</div>
-
       </div>
-      
+
       <h3>
         <span className="cjs-project-name">{app.projectName}</span>
       </h3>
-      
+
       <div className="cjs-date-info">
         Submitted: {formatDate(app.createdAt)}
       </div>
@@ -838,7 +938,9 @@ const CustomerJobStatus = () => {
         </div>
         <div className="cjs-company-detail-item">
           <span className="cjs-detail-label">Budget:</span>
-          <span className="cjs-detail-value">₹{app.estimatedBudget?.toLocaleString("en-IN")}</span>
+          <span className="cjs-detail-value">
+            ₹{app.estimatedBudget?.toLocaleString("en-IN")}
+          </span>
         </div>
         <div className="cjs-company-detail-item">
           <span className="cjs-detail-label">Timeline:</span>
@@ -890,35 +992,41 @@ const CustomerJobStatus = () => {
           activeTab === "cjs-architect-section" ? "cjs-active" : ""
         }`}
       >
-        <h2 className="cjs-architect-heading">
-          My Architect Applications
-        </h2>
+        <h2 className="cjs-architect-heading">My Architect Applications</h2>
         <p>Monitor your architect hiring requests and project progress</p>
-        
+
         {/* Status Filter Tabs */}
         {applications.architect.length > 0 && (
           <div className="cjs-status-filter-tabs">
-            {['all', 'pending', 'accepted', 'rejected', 'completed'].map(status => {
-              const counts = getStatusCounts(applications.architect);
-              const count = counts[status] || 0;
-              if (status !== 'all' && count === 0) return null;
-              
-              return (
-                <button
-                  key={status}
-                  className={`cjs-status-filter-btn ${statusFilters.architect === status ? 'active' : ''}`}
-                  onClick={() => handleStatusFilter('architect', status)}
-                >
-                  {status.charAt(0).toUpperCase() + status.slice(1)} ({count})
-                </button>
-              );
-            })}
+            {["all", "pending", "accepted", "rejected", "completed"].map(
+              (status) => {
+                const counts = getStatusCounts(applications.architect);
+                const count = counts[status] || 0;
+                if (status !== "all" && count === 0) return null;
+
+                return (
+                  <button
+                    key={status}
+                    className={`cjs-status-filter-btn ${statusFilters.architect === status ? "active" : ""}`}
+                    onClick={() => handleStatusFilter("architect", status)}
+                  >
+                    {status.charAt(0).toUpperCase() + status.slice(1)} ({count})
+                  </button>
+                );
+              },
+            )}
           </div>
         )}
 
         {applications.architect.length > 0 ? (
-          filterApplicationsByStatus(applications.architect, statusFilters.architect).length > 0 ? (
-            filterApplicationsByStatus(applications.architect, statusFilters.architect).map(renderArchitectApp)
+          filterApplicationsByStatus(
+            applications.architect,
+            statusFilters.architect,
+          ).length > 0 ? (
+            filterApplicationsByStatus(
+              applications.architect,
+              statusFilters.architect,
+            ).map(renderArchitectApp)
           ) : (
             <div className="cjs-no-applications">
               <p>No {statusFilters.architect} applications found.</p>
@@ -937,35 +1045,41 @@ const CustomerJobStatus = () => {
           activeTab === "cjs-interior-section" ? "cjs-active" : ""
         }`}
       >
-        <h2 className="cjs-interior-heading">
-          My Interior Design Requests
-        </h2>
+        <h2 className="cjs-interior-heading">My Interior Design Requests</h2>
         <p>Monitor your interior design requests and project progress</p>
-        
+
         {/* Status Filter Tabs */}
         {applications.interior.length > 0 && (
           <div className="cjs-status-filter-tabs">
-            {['all', 'pending', 'accepted', 'rejected', 'completed'].map(status => {
-              const counts = getStatusCounts(applications.interior);
-              const count = counts[status] || 0;
-              if (status !== 'all' && count === 0) return null;
-              
-              return (
-                <button
-                  key={status}
-                  className={`cjs-status-filter-btn ${statusFilters.interior === status ? 'active' : ''}`}
-                  onClick={() => handleStatusFilter('interior', status)}
-                >
-                  {status.charAt(0).toUpperCase() + status.slice(1)} ({count})
-                </button>
-              );
-            })}
+            {["all", "pending", "accepted", "rejected", "completed"].map(
+              (status) => {
+                const counts = getStatusCounts(applications.interior);
+                const count = counts[status] || 0;
+                if (status !== "all" && count === 0) return null;
+
+                return (
+                  <button
+                    key={status}
+                    className={`cjs-status-filter-btn ${statusFilters.interior === status ? "active" : ""}`}
+                    onClick={() => handleStatusFilter("interior", status)}
+                  >
+                    {status.charAt(0).toUpperCase() + status.slice(1)} ({count})
+                  </button>
+                );
+              },
+            )}
           </div>
         )}
 
         {applications.interior.length > 0 ? (
-          filterApplicationsByStatus(applications.interior, statusFilters.interior).length > 0 ? (
-            filterApplicationsByStatus(applications.interior, statusFilters.interior).map(renderInteriorApp)
+          filterApplicationsByStatus(
+            applications.interior,
+            statusFilters.interior,
+          ).length > 0 ? (
+            filterApplicationsByStatus(
+              applications.interior,
+              statusFilters.interior,
+            ).map(renderInteriorApp)
           ) : (
             <div className="cjs-no-applications">
               <p>No {statusFilters.interior} applications found.</p>
@@ -984,38 +1098,42 @@ const CustomerJobStatus = () => {
           activeTab === "cjs-company-section" ? "cjs-active" : ""
         }`}
       >
-        <h2 className="cjs-company-heading">
-          My Construction Projects
-        </h2>
-        <p>
-          Track your construction company applications and project status
-        </p>
-        
+        <h2 className="cjs-company-heading">My Construction Projects</h2>
+        <p>Track your construction company applications and project status</p>
+
         {/* Status Filter Tabs */}
         {applications.company.length > 0 && (
           <div className="cjs-status-filter-tabs">
-            {['all', 'pending', 'accepted', 'rejected', 'completed'].map(status => {
-              const counts = getStatusCounts(applications.company);
-              const count = counts[status] || 0;
-              if (status !== 'all' && count === 0) return null;
-              
-              return (
-                <button
-                  key={status}
-                  className={`cjs-status-filter-btn ${statusFilters.company === status ? 'active' : ''}`}
-                  onClick={() => handleStatusFilter('company', status)}
-                >
-                  {status.charAt(0).toUpperCase() + status.slice(1)} ({count})
-                </button>
-              );
-            })}
+            {["all", "pending", "accepted", "rejected", "completed"].map(
+              (status) => {
+                const counts = getStatusCounts(applications.company);
+                const count = counts[status] || 0;
+                if (status !== "all" && count === 0) return null;
+
+                return (
+                  <button
+                    key={status}
+                    className={`cjs-status-filter-btn ${statusFilters.company === status ? "active" : ""}`}
+                    onClick={() => handleStatusFilter("company", status)}
+                  >
+                    {status.charAt(0).toUpperCase() + status.slice(1)} ({count})
+                  </button>
+                );
+              },
+            )}
           </div>
         )}
 
         {applications.company.length > 0 ? (
-          filterApplicationsByStatus(applications.company, statusFilters.company).length > 0 ? (
+          filterApplicationsByStatus(
+            applications.company,
+            statusFilters.company,
+          ).length > 0 ? (
             <div className="cjs-company-app-container">
-              {filterApplicationsByStatus(applications.company, statusFilters.company).map(renderCompanyApp)}
+              {filterApplicationsByStatus(
+                applications.company,
+                statusFilters.company,
+              ).map(renderCompanyApp)}
             </div>
           ) : (
             <div className="cjs-no-applications">
@@ -1033,9 +1151,20 @@ const CustomerJobStatus = () => {
 
       {/* Lightbox Modal */}
       {lightboxImage && (
-        <div className="cjs-lightbox-overlay" onClick={() => setLightboxImage(null)}>
-          <div className="cjs-lightbox-content" onClick={(e) => e.stopPropagation()}>
-            <button className="cjs-lightbox-close" onClick={() => setLightboxImage(null)}>×</button>
+        <div
+          className="cjs-lightbox-overlay"
+          onClick={() => setLightboxImage(null)}
+        >
+          <div
+            className="cjs-lightbox-content"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <button
+              className="cjs-lightbox-close"
+              onClick={() => setLightboxImage(null)}
+            >
+              ×
+            </button>
             <img src={lightboxImage} alt="Full size preview" />
           </div>
         </div>
@@ -1044,28 +1173,46 @@ const CustomerJobStatus = () => {
       {/* Revision Request Modal */}
       {revisionModal.isOpen && (
         <div className="cjs-modal-overlay" onClick={handleCloseRevisionModal}>
-          <div className="cjs-modal-content" onClick={(e) => e.stopPropagation()}>
+          <div
+            className="cjs-modal-content"
+            onClick={(e) => e.stopPropagation()}
+          >
             <div className="cjs-modal-header">
               <h3>Request Milestone Revision</h3>
-              <button className="cjs-modal-close" onClick={handleCloseRevisionModal}>×</button>
+              <button
+                className="cjs-modal-close"
+                onClick={handleCloseRevisionModal}
+              >
+                ×
+              </button>
             </div>
             <div className="cjs-modal-body">
-              <label htmlFor="revisionNotes">Please describe what needs to be revised:</label>
+              <label htmlFor="revisionNotes">
+                Please describe what needs to be revised:
+              </label>
               <textarea
                 id="revisionNotes"
                 className="cjs-modal-textarea"
                 value={revisionModal.notes}
-                onChange={(e) => setRevisionModal({ ...revisionModal, notes: e.target.value })}
+                onChange={(e) =>
+                  setRevisionModal({ ...revisionModal, notes: e.target.value })
+                }
                 placeholder="Describe the changes or improvements needed..."
                 rows="6"
                 autoFocus
               />
             </div>
             <div className="cjs-modal-footer">
-              <button className="cjs-modal-btn cjs-modal-btn-cancel" onClick={handleCloseRevisionModal}>
+              <button
+                className="cjs-modal-btn cjs-modal-btn-cancel"
+                onClick={handleCloseRevisionModal}
+              >
                 Cancel
               </button>
-              <button className="cjs-modal-btn cjs-modal-btn-submit" onClick={handleSubmitRevision}>
+              <button
+                className="cjs-modal-btn cjs-modal-btn-submit"
+                onClick={handleSubmitRevision}
+              >
                 Send Revision Request
               </button>
             </div>
@@ -1075,11 +1222,24 @@ const CustomerJobStatus = () => {
 
       {/* Phases Modal */}
       {phasesModal.isOpen && (
-        <div className="cjs-modal-overlay" onClick={() => setPhasesModal({ ...phasesModal, isOpen: false })}>
-          <div className="cjs-phases-modal-content" onClick={(e) => e.stopPropagation()}>
+        <div
+          className="cjs-modal-overlay"
+          onClick={() => setPhasesModal({ ...phasesModal, isOpen: false })}
+        >
+          <div
+            className="cjs-phases-modal-content"
+            onClick={(e) => e.stopPropagation()}
+          >
             <div className="cjs-modal-header">
               <h3>Project Phases Breakdown</h3>
-              <button className="cjs-modal-close" onClick={() => setPhasesModal({ ...phasesModal, isOpen: false })}>×</button>
+              <button
+                className="cjs-modal-close"
+                onClick={() =>
+                  setPhasesModal({ ...phasesModal, isOpen: false })
+                }
+              >
+                ×
+              </button>
             </div>
             <div className="cjs-phases-modal-body">
               {phasesModal.phases && phasesModal.phases.length > 0 ? (
@@ -1088,12 +1248,20 @@ const CustomerJobStatus = () => {
                     <div key={phase.id || index} className="cjs-phase-card">
                       <div className="cjs-phase-header">
                         <h4>{phase.name}</h4>
-                        <span className="cjs-phase-percentage">{phase.percentage}%</span>
+                        <span className="cjs-phase-percentage">
+                          {phase.percentage}%
+                        </span>
                       </div>
                       <div className="cjs-phase-details">
-                        <p><strong>Amount:</strong> ₹{(phase.amount || 0).toLocaleString('en-IN')}</p>
+                        <p>
+                          <strong>Amount:</strong> ₹
+                          {(phase.amount || 0).toLocaleString("en-IN")}
+                        </p>
                         {phase.requiredMonths && (
-                          <p><strong>Required Months:</strong> {phase.requiredMonths} months</p>
+                          <p>
+                            <strong>Required Months:</strong>{" "}
+                            {phase.requiredMonths} months
+                          </p>
                         )}
                       </div>
                       {phase.subdivisions && phase.subdivisions.length > 0 && (
@@ -1102,9 +1270,18 @@ const CustomerJobStatus = () => {
                           <ul>
                             {phase.subdivisions.map((sub, subIndex) => (
                               <li key={subIndex}>
-                                <span className="cjs-sub-category">{sub.category}</span>
-                                {sub.description && <span className="cjs-sub-desc"> - {sub.description}</span>}
-                                <span className="cjs-sub-amount">₹{(sub.amount || 0).toLocaleString('en-IN')}</span>
+                                <span className="cjs-sub-category">
+                                  {sub.category}
+                                </span>
+                                {sub.description && (
+                                  <span className="cjs-sub-desc">
+                                    {" "}
+                                    - {sub.description}
+                                  </span>
+                                )}
+                                <span className="cjs-sub-amount">
+                                  ₹{(sub.amount || 0).toLocaleString("en-IN")}
+                                </span>
                               </li>
                             ))}
                           </ul>
@@ -1115,12 +1292,21 @@ const CustomerJobStatus = () => {
                   <div className="cjs-phases-summary">
                     <div className="cjs-summary-item">
                       <span>Total Project Cost:</span>
-                      <span className="cjs-summary-amount">₹{(phasesModal.proposalData?.price || 0).toLocaleString('en-IN')}</span>
+                      <span className="cjs-summary-amount">
+                        ₹
+                        {(phasesModal.proposalData?.price || 0).toLocaleString(
+                          "en-IN",
+                        )}
+                      </span>
                     </div>
                     <div className="cjs-summary-item">
                       <span>Total Percentage:</span>
                       <span className="cjs-summary-percentage">
-                        {phasesModal.phases.reduce((sum, p) => sum + (parseFloat(p.percentage) || 0), 0)}%
+                        {phasesModal.phases.reduce(
+                          (sum, p) => sum + (parseFloat(p.percentage) || 0),
+                          0,
+                        )}
+                        %
                       </span>
                     </div>
                   </div>
@@ -1130,19 +1316,26 @@ const CustomerJobStatus = () => {
               )}
             </div>
             <div className="cjs-modal-footer">
-              <button 
+              <button
                 className="cjs-modal-btn cjs-modal-btn-cancel"
                 onClick={() => {
-                  handleRejectProposal(phasesModal.projectId, phasesModal.projectType);
+                  handleRejectProposal(
+                    phasesModal.projectId,
+                    phasesModal.projectType,
+                  );
                   setPhasesModal({ ...phasesModal, isOpen: false });
                 }}
               >
                 Reject
               </button>
-              <button 
-                className="cjs-modal-btn cjs-modal-btn-submit" 
+              <button
+                className="cjs-modal-btn cjs-modal-btn-submit"
                 onClick={() => {
-                  handleAcceptProposal(phasesModal.projectId, phasesModal.projectType, true);
+                  handleAcceptProposal(
+                    phasesModal.projectId,
+                    phasesModal.projectType,
+                    true,
+                  );
                   setPhasesModal({ ...phasesModal, isOpen: false });
                 }}
               >
@@ -1155,79 +1348,207 @@ const CustomerJobStatus = () => {
 
       {/* Proposal Details Modal */}
       {proposalModal.isOpen && proposalModal.proposal && (
-        <div className="cjs-modal-overlay" onClick={() => setProposalModal({ isOpen: false, projectId: null, projectType: null, proposal: null })}>
-          <div className="cjs-modal-content" onClick={(e) => e.stopPropagation()}>
+        <div
+          className="cjs-modal-overlay"
+          onClick={() =>
+            setProposalModal({
+              isOpen: false,
+              projectId: null,
+              projectType: null,
+              proposal: null,
+            })
+          }
+        >
+          <div
+            className="cjs-modal-content"
+            onClick={(e) => e.stopPropagation()}
+          >
             <div className="cjs-modal-header">
               <h3>📋 Proposal Details</h3>
-              <button className="cjs-modal-close" onClick={() => setProposalModal({ isOpen: false, projectId: null, projectType: null, proposal: null })}>×</button>
+              <button
+                className="cjs-modal-close"
+                onClick={() =>
+                  setProposalModal({
+                    isOpen: false,
+                    projectId: null,
+                    projectType: null,
+                    proposal: null,
+                  })
+                }
+              >
+                ×
+              </button>
             </div>
-            <div className="cjs-modal-body" style={{ maxHeight: "600px", overflowY: "auto" }}>
+            <div
+              className="cjs-modal-body"
+              style={{ maxHeight: "600px", overflowY: "auto" }}
+            >
               {/* Proposal Price */}
-              <div style={{ marginBottom: "20px", paddingBottom: "15px", borderBottom: "2px solid #ddd" }}>
-                <p style={{ margin: "0", fontSize: "13px", color: "#666" }}>Proposal Price</p>
-                <p style={{ margin: "8px 0 0 0", fontSize: "28px", color: "#ff9800", fontWeight: "bold" }}>
+              <div
+                style={{
+                  marginBottom: "20px",
+                  paddingBottom: "15px",
+                  borderBottom: "2px solid #ddd",
+                }}
+              >
+                <p style={{ margin: "0", fontSize: "13px", color: "#666" }}>
+                  Proposal Price
+                </p>
+                <p
+                  style={{
+                    margin: "8px 0 0 0",
+                    fontSize: "28px",
+                    color: "#ff9800",
+                    fontWeight: "bold",
+                  }}
+                >
                   ₹{proposalModal.proposal.price.toLocaleString("en-IN")}
                 </p>
               </div>
 
               {/* Description */}
               {proposalModal.proposal.description && (
-                <div style={{ marginBottom: "20px", paddingBottom: "15px", borderBottom: "2px solid #ddd" }}>
-                  <p style={{ margin: "0 0 8px 0", fontSize: "14px", fontWeight: "bold", color: "#333" }}>Description:</p>
-                  <p style={{ margin: "0", color: "#666", fontSize: "13px" }}>{proposalModal.proposal.description}</p>
+                <div
+                  style={{
+                    marginBottom: "20px",
+                    paddingBottom: "15px",
+                    borderBottom: "2px solid #ddd",
+                  }}
+                >
+                  <p
+                    style={{
+                      margin: "0 0 8px 0",
+                      fontSize: "14px",
+                      fontWeight: "bold",
+                      color: "#333",
+                    }}
+                  >
+                    Description:
+                  </p>
+                  <p style={{ margin: "0", color: "#666", fontSize: "13px" }}>
+                    {proposalModal.proposal.description}
+                  </p>
                 </div>
               )}
 
               {/* Phases */}
-              {proposalModal.proposal.phases && proposalModal.proposal.phases.length > 0 && (
-                <div style={{ marginBottom: "20px" }}>
-                  <p style={{ margin: "0 0 12px 0", fontSize: "14px", fontWeight: "bold", color: "#333" }}>
-                    🎯 Project Phases ({proposalModal.proposal.phases.length}):
-                  </p>
-                  <div style={{ display: "grid", gap: "12px" }}>
-                    {proposalModal.proposal.phases.map((phase, idx) => (
-                      <div
-                        key={idx}
-                        style={{
-                          backgroundColor: phase.isFinal ? "#fff3e0" : "#f5f5f5",
-                          padding: "12px",
-                          borderRadius: "6px",
-                          borderLeft: phase.isFinal ? "4px solid #d32f2f" : "4px solid #1a73e8"
-                        }}
-                      >
-                        <p style={{ margin: "0 0 6px 0", fontWeight: "bold", color: phase.isFinal ? "#d32f2f" : "#1a73e8", fontSize: "13px" }}>
-                          {phase.isFinal ? "🎯 " : ""}{phase.name}
-                        </p>
-                        <div style={{ fontSize: "12px", color: "#666", lineHeight: "1.7" }}>
-                          <p style={{ margin: "3px 0" }}><strong>Percentage:</strong> {phase.percentage}%</p>
-                          <p style={{ margin: "3px 0" }}><strong>Amount:</strong> ₹{Number(phase.amount).toLocaleString('en-IN')}</p>
-                          {!phase.isFinal && <p style={{ margin: "3px 0" }}><strong>Duration:</strong> {phase.requiredMonths} months</p>}
-                          
-                          {/* Work Items */}
-                          {phase.subdivisions && phase.subdivisions.length > 0 && (
-                            <div style={{ marginTop: "8px", paddingTop: "8px", borderTop: "1px dashed #ddd" }}>
-                              <p style={{ margin: "0 0 4px 0", fontWeight: "bold", fontSize: "11px" }}>Work Items:</p>
-                              {phase.subdivisions.map((sub, sIdx) => (
-                                <p key={sIdx} style={{ margin: "2px 0", fontSize: "11px", paddingLeft: "8px" }}>
-                                  • <strong>{sub.category}:</strong> {sub.description} {sub.amount ? `- ₹${Number(sub.amount).toLocaleString('en-IN')}` : ""}
-                                </p>
-                              ))}
-                            </div>
-                          )}
+              {proposalModal.proposal.phases &&
+                proposalModal.proposal.phases.length > 0 && (
+                  <div style={{ marginBottom: "20px" }}>
+                    <p
+                      style={{
+                        margin: "0 0 12px 0",
+                        fontSize: "14px",
+                        fontWeight: "bold",
+                        color: "#333",
+                      }}
+                    >
+                      🎯 Project Phases ({proposalModal.proposal.phases.length}
+                      ):
+                    </p>
+                    <div style={{ display: "grid", gap: "12px" }}>
+                      {proposalModal.proposal.phases.map((phase, idx) => (
+                        <div
+                          key={idx}
+                          style={{
+                            backgroundColor: phase.isFinal
+                              ? "#fff3e0"
+                              : "#f5f5f5",
+                            padding: "12px",
+                            borderRadius: "6px",
+                            borderLeft: phase.isFinal
+                              ? "4px solid #d32f2f"
+                              : "4px solid #1a73e8",
+                          }}
+                        >
+                          <p
+                            style={{
+                              margin: "0 0 6px 0",
+                              fontWeight: "bold",
+                              color: phase.isFinal ? "#d32f2f" : "#1a73e8",
+                              fontSize: "13px",
+                            }}
+                          >
+                            {phase.isFinal ? "🎯 " : ""}
+                            {phase.name}
+                          </p>
+                          <div
+                            style={{
+                              fontSize: "12px",
+                              color: "#666",
+                              lineHeight: "1.7",
+                            }}
+                          >
+                            <p style={{ margin: "3px 0" }}>
+                              <strong>Percentage:</strong> {phase.percentage}%
+                            </p>
+                            <p style={{ margin: "3px 0" }}>
+                              <strong>Amount:</strong> ₹
+                              {Number(phase.amount).toLocaleString("en-IN")}
+                            </p>
+                            {!phase.isFinal && (
+                              <p style={{ margin: "3px 0" }}>
+                                <strong>Duration:</strong>{" "}
+                                {phase.requiredMonths} months
+                              </p>
+                            )}
+
+                            {/* Work Items */}
+                            {phase.subdivisions &&
+                              phase.subdivisions.length > 0 && (
+                                <div
+                                  style={{
+                                    marginTop: "8px",
+                                    paddingTop: "8px",
+                                    borderTop: "1px dashed #ddd",
+                                  }}
+                                >
+                                  <p
+                                    style={{
+                                      margin: "0 0 4px 0",
+                                      fontWeight: "bold",
+                                      fontSize: "11px",
+                                    }}
+                                  >
+                                    Work Items:
+                                  </p>
+                                  {phase.subdivisions.map((sub, sIdx) => (
+                                    <p
+                                      key={sIdx}
+                                      style={{
+                                        margin: "2px 0",
+                                        fontSize: "11px",
+                                        paddingLeft: "8px",
+                                      }}
+                                    >
+                                      • <strong>{sub.category}:</strong>{" "}
+                                      {sub.description}{" "}
+                                      {sub.amount
+                                        ? `- ₹${Number(sub.amount).toLocaleString("en-IN")}`
+                                        : ""}
+                                    </p>
+                                  ))}
+                                </div>
+                              )}
+                          </div>
                         </div>
-                      </div>
-                    ))}
+                      ))}
+                    </div>
                   </div>
-                </div>
-              )}
+                )}
             </div>
             <div className="cjs-modal-footer">
               <button
                 className="cjs-modal-btn cjs-modal-btn-cancel"
                 onClick={() => {
-                  const reason = prompt("Please provide a reason for rejection (optional):");
+                  const reason = prompt(
+                    "Please provide a reason for rejection (optional):",
+                  );
                   if (reason !== null) {
-                    handleRejectProposal(proposalModal.projectId, proposalModal.projectType);
+                    handleRejectProposal(
+                      proposalModal.projectId,
+                      proposalModal.projectType,
+                    );
                   }
                 }}
               >
@@ -1236,8 +1557,16 @@ const CustomerJobStatus = () => {
               <button
                 className="cjs-modal-btn cjs-modal-btn-submit"
                 onClick={() => {
-                  handleAcceptProposal(proposalModal.projectId, proposalModal.projectType);
-                  setProposalModal({ isOpen: false, projectId: null, projectType: null, proposal: null });
+                  handleAcceptProposal(
+                    proposalModal.projectId,
+                    proposalModal.projectType,
+                  );
+                  setProposalModal({
+                    isOpen: false,
+                    projectId: null,
+                    projectType: null,
+                    proposal: null,
+                  });
                 }}
               >
                 Accept
@@ -1250,7 +1579,14 @@ const CustomerJobStatus = () => {
       {/* Review Modal */}
       <ReviewModal
         isOpen={reviewModal.isOpen}
-        onClose={() => setReviewModal({ isOpen: false, projectId: null, projectName: null, projectType: null })}
+        onClose={() =>
+          setReviewModal({
+            isOpen: false,
+            projectId: null,
+            projectName: null,
+            projectType: null,
+          })
+        }
         onSubmit={handleSubmitReview}
         projectName={reviewModal.projectName}
         reviewType="customer"

@@ -63,6 +63,10 @@ body {
   margin: 0 auto;
   padding: 2rem;
   flex: 1;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
 }
 
 .co-header {
@@ -693,6 +697,11 @@ body {
   padding: 3rem;
   text-align: center;
   color: var(--medium-grey);
+  min-height: 60vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
 }
 
 /* Animations */

@@ -1,20 +1,23 @@
-const express = require('express');
+const express = require("express");
 const router = express.Router();
-const complaintController = require('../controllers/complaintController');
+const complaintController = require("../controllers/complaintController");
 
-// Submit a complaint (company/customer)
-router.post('/', complaintController.submitComplaint);
+// submit a complaint by company or customer
+router.post("/", complaintController.submitComplaint);
 
-// Get unviewed complaints count (admin dashboard)
-router.get('/unviewed/count', complaintController.getUnviewedComplaintsCount);
+// count of unviewed complaints for the admin dashboard
+router.get("/unviewed/count", complaintController.getUnviewedComplaintsCount);
 
-// Get unviewed complaints count (company - only customer complaints)
-router.get('/company/unviewed/count', complaintController.getCompanyUnviewedComplaintsCount);
+// count of unviewed complaints for a company (only customer complaints)
+router.get(
+  "/company/unviewed/count",
+  complaintController.getCompanyUnviewedComplaintsCount,
+);
 
-// Get all complaints for a project (admin)
-router.get('/:projectId', complaintController.getProjectComplaints);
+// get all complaints for a project
+router.get("/:projectId", complaintController.getProjectComplaints);
 
-// Admin reply to a complaint
-router.post('/:complaintId/reply', complaintController.replyToComplaint);
+// admin to reply to a complaint
+router.post("/:complaintId/reply", complaintController.replyToComplaint);
 
 module.exports = router;

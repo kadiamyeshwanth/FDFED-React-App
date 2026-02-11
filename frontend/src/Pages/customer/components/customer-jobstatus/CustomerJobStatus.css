@@ -49,11 +49,11 @@
 
 .cjs-tab:hover {
   color: #1e293b;
-  background: #fff7ed; /* subtle light orange background on hover (no animation) */
+  background: #f8fafc;
 }
 
 .cjs-tab.cjs-active {
-  border-bottom: 3px solid #fb923c; /* primary orange */
+  border-bottom: 3px solid #3b82f6;
   font-weight: 600;
   color: #1e293b;
   background: white;
@@ -87,22 +87,20 @@
 }
 
 .cjs-status-filter-btn:hover {
-  background: #fff7ed; /* subtle */
-  border-color: #e9c7ad;
+  background: #f8fafc;
+  border-color: #cbd5e1;
   color: #475569;
-  /* no transform */
 }
 
 .cjs-status-filter-btn.active {
-  background: linear-gradient(135deg, #ffd8b5 0%, #fb923c 100%);
-  color: #1e1b18;
-  border-color: #fb923c;
-  box-shadow: 0 2px 8px rgba(251, 146, 60, 0.12);
+  background: #3b82f6;
+  color: white;
+  border-color: #3b82f6;
+  box-shadow: 0 2px 8px rgba(59, 130, 246, 0.12);
 }
 
 .cjs-status-filter-btn.active:hover {
-  background: linear-gradient(135deg, #ffd8b5 0%, #fb923c 100%);
-  /* no transform or animation */
+  background: #2563eb;
 }
 
 .cjs-content-section {
@@ -126,26 +124,46 @@
   margin-bottom: 32px;
 }
 
-.cjs-architect-heading,
-.cjs-interior-heading,
+.cjs-architect-heading {
+  color: #1e293b;
+  padding-left: 16px;
+  margin-bottom: 16px;
+  font-weight: 700;
+  font-size: 1.75rem;
+  box-shadow:
+    0 4px 8px rgba(59, 130, 246, 0.1),
+    inset 0 0 0 1px #3b82f6;
+  padding: 12px 16px;
+  border-radius: 8px;
+  background: #eff6ff;
+}
+
+.cjs-interior-heading {
+  color: #1e293b;
+  padding-left: 16px;
+  margin-bottom: 16px;
+  font-weight: 700;
+  font-size: 1.75rem;
+  box-shadow:
+    0 4px 8px rgba(139, 92, 246, 0.1),
+    inset 0 0 0 1px #8b5cf6;
+  padding: 12px 16px;
+  border-radius: 8px;
+  background: #f3e8ff;
+}
+
 .cjs-company-heading {
   color: #1e293b;
   padding-left: 16px;
   margin-bottom: 16px;
   font-weight: 700;
   font-size: 1.75rem;
-}
-
-.cjs-architect-heading {
-  border-left: 5px solid #ffd8b5; /* light orange accent */
-}
-
-.cjs-interior-heading {
-  border-left: 5px solid #ffb07a;
-}
-
-.cjs-company-heading {
-  border-left: 5px solid #f97316;
+  box-shadow:
+    0 4px 8px rgba(6, 182, 212, 0.1),
+    inset 0 0 0 1px #06b6d4;
+  padding: 12px 16px;
+  border-radius: 8px;
+  background: #ecfeff;
 }
 
 .cjs-application {
@@ -427,7 +445,7 @@
 }
 
 .cjs-btn-accept-pay {
-  background: linear-gradient(135deg, #ffb07a 0%, #f97316 100%);
+  background: #22c55e;
   color: white;
   text-decoration: none;
   border: none;
@@ -436,21 +454,25 @@
   padding: 12px 24px;
   display: inline-block;
   margin-top: 16px;
-  box-shadow: 0 2px 8px rgba(249, 115, 22, 0.12);
+  box-shadow: 0 2px 8px rgba(34, 197, 94, 0.12);
   cursor: pointer;
   font-size: 1rem;
   font-family: inherit;
 }
 
 .cjs-btn-accept-pay:hover {
-  /* no animation on hover; keep appearance consistent */
-  background: linear-gradient(135deg, #ffb07a 0%, #f97316 100%);
+  background: #16a34a;
+}
+
+.cjs-btn-accept-pay:active {
+  background: #15803d;
+  box-shadow: 0 2px 4px rgba(34, 197, 94, 0.2);
 }
 
 /* Pending Notice */
 .cjs-pending-notice {
-  background: linear-gradient(135deg, #fff7ed 0%, #fff0dc 100%);
-  border: 2px solid #fbbf24;
+  background: #fef3c7;
+  border: 2px solid #f59e0b;
   border-radius: 12px;
   padding: 16px 20px;
   margin: 20px 0;
@@ -460,7 +482,9 @@
   align-items: center;
   gap: 12px;
   font-size: 0.95rem;
-  box-shadow: 0 2px 8px rgba(251, 191, 36, 0.08);
+  box-shadow:
+    0 4px 8px rgba(245, 158, 11, 0.1),
+    inset 0 0 0 1px #f59e0b;
 }
 
 /* Collapsible Buttons */
@@ -496,33 +520,48 @@
 }
 
 .cjs-milestone-btn {
-  background: linear-gradient(135deg, #ffd8b5 0%, #fb923c 100%);
-  color: #1e1b18;
+  background: #3b82f6;
+  color: white;
   border: none;
 }
 
 .cjs-milestone-btn:hover {
-  background: linear-gradient(135deg, #ffd8b5 0%, #fb923c 100%);
+  background: #2563eb;
+}
+
+.cjs-milestone-btn:active {
+  background: #1d4ed8;
+  box-shadow: 0 2px 4px rgba(59, 130, 246, 0.2);
 }
 
 .cjs-updates-btn {
-  background: linear-gradient(135deg, #ffb07a 0%, #f97316 100%);
-  color: #1e1b18;
+  background: #8b5cf6;
+  color: white;
   border: none;
 }
 
 .cjs-updates-btn:hover {
-  background: linear-gradient(135deg, #ffb07a 0%, #f97316 100%);
+  background: #7c3aed;
+}
+
+.cjs-updates-btn:active {
+  background: #6d28d9;
+  box-shadow: 0 2px 4px rgba(139, 92, 246, 0.2);
 }
 
 .cjs-images-btn {
-  background: linear-gradient(135deg, #ffd8b5 0%, #fb923c 100%);
-  color: #1e1b18;
+  background: #06b6d4;
+  color: white;
   border: none;
 }
 
 .cjs-images-btn:hover {
-  background: linear-gradient(135deg, #ffd8b5 0%, #fb923c 100%);
+  background: #0891b2;
+}
+
+.cjs-images-btn:active {
+  background: #0e7490;
+  box-shadow: 0 2px 4px rgba(6, 182, 212, 0.2);
 }
 
 /* Milestones Section */
@@ -551,27 +590,55 @@
   background: white;
   border-radius: 16px;
   padding: 28px;
-  border-left: 5px solid #e2e8f0;
-  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
   border: 1px solid #e2e8f0;
-  border-left-width: 5px;
   margin-bottom: 8px;
-  /* no hover animation */
+  cursor: pointer;
+}
+
+.cjs-milestone-card:active {
+  transform: scale(0.98);
 }
 
 .cjs-milestone-pending {
-  border-left-color: #f59e0b;
-  background: linear-gradient(135deg, #ffffff 0%, #fffbeb 100%);
+  box-shadow:
+    0 4px 12px rgba(245, 158, 11, 0.15),
+    inset 0 0 0 1px #f59e0b;
+  background: #fffbeb;
+  border-color: #f59e0b;
+}
+
+.cjs-milestone-pending:active {
+  box-shadow:
+    0 4px 20px rgba(245, 158, 11, 0.25),
+    inset 0 0 0 2px #f59e0b;
 }
 
 .cjs-milestone-approved {
-  border-left-color: #fb923c;
-  background: linear-gradient(135deg, #ffffff 0%, #fff7ed 100%);
+  box-shadow:
+    0 4px 12px rgba(34, 197, 94, 0.15),
+    inset 0 0 0 1px #22c55e;
+  background: #f0fdf4;
+  border-color: #22c55e;
+}
+
+.cjs-milestone-approved:active {
+  box-shadow:
+    0 4px 20px rgba(34, 197, 94, 0.25),
+    inset 0 0 0 2px #22c55e;
 }
 
 .cjs-milestone-rejected {
-  border-left-color: #ef4444;
-  background: linear-gradient(135deg, #ffffff 0%, #fef2f2 100%);
+  box-shadow:
+    0 4px 12px rgba(239, 68, 68, 0.15),
+    inset 0 0 0 1px #ef4444;
+  background: #fef2f2;
+  border-color: #ef4444;
+}
+
+.cjs-milestone-rejected:active {
+  box-shadow:
+    0 4px 20px rgba(239, 68, 68, 0.25),
+    inset 0 0 0 2px #ef4444;
 }
 
 .cjs-milestone-header {
@@ -584,8 +651,8 @@
 }
 
 .cjs-milestone-percentage {
-  background: linear-gradient(135deg, #ffd8b5 0%, #fb923c 100%);
-  color: #1e1b18;
+  background: #3b82f6;
+  color: white;
   padding: 10px 18px;
   border-radius: 24px;
   font-weight: 700;
@@ -604,15 +671,15 @@
 }
 
 .cjs-status-pending {
-  background: #fff7ed;
+  background: #fef3c7;
   color: #92400e;
-  border: 1px solid #fbbf24;
+  border: 1px solid #f59e0b;
 }
 
 .cjs-status-approved {
-  background: #fff7ed;
-  color: #7a2f06;
-  border: 1px solid #fb923c;
+  background: #dcfce7;
+  color: #166534;
+  border: 1px solid #22c55e;
 }
 
 .cjs-status-rejected {
@@ -634,9 +701,9 @@
   margin: 16px 0;
   font-size: 1rem;
   padding: 14px;
-  background: #fffaf7;
+  background: #f8fafc;
   border-radius: 10px;
-  border-left: 3px solid #e2e8f0;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
 }
 
 .cjs-milestone-image-container {
@@ -680,15 +747,33 @@
 }
 
 .cjs-btn-approve {
-  background: linear-gradient(135deg, #ffb07a 0%, #f97316 100%);
+  background: #22c55e;
   color: white;
-  box-shadow: 0 2px 8px rgba(249, 115, 22, 0.12);
+  box-shadow: 0 2px 8px rgba(34, 197, 94, 0.12);
+}
+
+.cjs-btn-approve:hover {
+  background: #16a34a;
+}
+
+.cjs-btn-approve:active {
+  background: #15803d;
+  box-shadow: 0 2px 4px rgba(34, 197, 94, 0.2);
 }
 
 .cjs-btn-reject {
-  background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+  background: #ef4444;
   color: white;
   box-shadow: 0 2px 8px rgba(239, 68, 68, 0.12);
+}
+
+.cjs-btn-reject:hover {
+  background: #dc2626;
+}
+
+.cjs-btn-reject:active {
+  background: #b91c1c;
+  box-shadow: 0 2px 4px rgba(239, 68, 68, 0.2);
 }
 
 .cjs-milestone-approved-date,
@@ -710,9 +795,10 @@
 .cjs-updates-section {
   margin: 24px 0;
   padding: 28px;
-  background: linear-gradient(135deg, #fff7ed 0%, #fff2e8 100%);
+  background: #f8fafc;
   border-radius: 16px;
   border: 1px solid #e2e8f0;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
 }
 
 .cjs-updates-section h4 {
@@ -730,12 +816,20 @@
 
 .cjs-update-item {
   background: white;
-  border-left: 5px solid #fb923c;
   border-radius: 12px;
   border: 1px solid #e2e8f0;
-  border-left-width: 5px;
   padding: 16px;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+  box-shadow:
+    0 4px 8px rgba(59, 130, 246, 0.1),
+    inset 0 0 0 1px #3b82f6;
+  cursor: pointer;
+}
+
+.cjs-update-item:active {
+  box-shadow:
+    0 4px 12px rgba(59, 130, 246, 0.2),
+    inset 0 0 0 2px #3b82f6;
+  transform: scale(0.99);
 }
 
 .cjs-update-date {
@@ -767,9 +861,10 @@
 .cjs-images-section {
   margin: 24px 0;
   padding: 28px;
-  background: linear-gradient(135deg, #fff8ff 0%, #fff2ff 100%);
+  background: #f8fafc;
   border-radius: 16px;
   border: 1px solid #e2e8f0;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
 }
 
 .cjs-images-section h4 {
@@ -847,9 +942,8 @@
 }
 
 .cjs-lightbox-close:hover {
-  background: #fff7ed;
-  color: #c2410c;
-  /* no rotation or transform */
+  background: #f1f5f9;
+  color: #3b82f6;
 }
 
 @media (max-width: 768px) {
@@ -884,9 +978,9 @@
 .cjs-btn-revision {
   flex: 1;
   min-width: 130px;
-  background: linear-gradient(135deg, #ffd8b5 0%, #fb923c 100%);
-  color: #1e1b18;
-  box-shadow: 0 2px 8px rgba(245, 158, 11, 0.08);
+  background: #f59e0b;
+  color: white;
+  box-shadow: 0 2px 8px rgba(245, 158, 11, 0.12);
   padding: 12px 16px;
   border: none;
   border-radius: 10px;
@@ -899,12 +993,21 @@
   gap: 6px;
 }
 
+.cjs-btn-revision:hover {
+  background: #d97706;
+}
+
+.cjs-btn-revision:active {
+  background: #b45309;
+  box-shadow: 0 2px 4px rgba(245, 158, 11, 0.2);
+}
+
 .cjs-btn-report {
   flex: 1;
   min-width: 130px;
-  background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+  background: #ef4444;
   color: white;
-  box-shadow: 0 2px 8px rgba(239, 68, 68, 0.08);
+  box-shadow: 0 2px 8px rgba(239, 68, 68, 0.12);
   padding: 12px 16px;
   border: none;
   border-radius: 10px;
@@ -915,15 +1018,26 @@
   align-items: center;
   justify-content: center;
   gap: 6px;
+}
+
+.cjs-btn-report:hover {
+  background: #dc2626;
+}
+
+.cjs-btn-report:active {
+  background: #b91c1c;
+  box-shadow: 0 2px 4px rgba(239, 68, 68, 0.2);
 }
 
 /* Revision and Review Status Info */
 .cjs-milestone-revision-info {
   margin-top: 16px;
   padding: 16px;
-  background: linear-gradient(135deg, #fff7ed 0%, #fff0dc 100%);
-  border-left: 4px solid #f59e0b;
+  background: #fef3c7;
   border-radius: 10px;
+  box-shadow:
+    0 4px 8px rgba(245, 158, 11, 0.1),
+    inset 0 0 0 1px #f59e0b;
   font-size: 0.9rem;
   color: #92400e;
   line-height: 1.6;
@@ -932,9 +1046,11 @@
 .cjs-milestone-review-info {
   margin-top: 16px;
   padding: 16px;
-  background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%);
-  border-left: 4px solid #ef4444;
+  background: #fee2e2;
   border-radius: 10px;
+  box-shadow:
+    0 4px 8px rgba(239, 68, 68, 0.1),
+    inset 0 0 0 1px #ef4444;
   font-size: 0.9rem;
   color: #991b1b;
   line-height: 1.6;
@@ -951,24 +1067,44 @@
 
 /* Status Badge Colors */
 .cjs-status-revision-requested {
-  background: linear-gradient(135deg, #fff7ed 0%, #fff0dc 100%);
+  background: #fef3c7;
   color: #92400e !important;
+  border: 1px solid #f59e0b;
 }
 
 .cjs-status-under-review {
-  background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%);
+  background: #fee2e2;
   color: #991b1b !important;
+  border: 1px solid #ef4444;
 }
 
 /* Milestone Card Background Colors for New Statuses */
 .cjs-milestone-revision-requested {
-  background: linear-gradient(135deg, #fffaf0 0%, #fff7ed 100%);
-  border-left: 5px solid #f59e0b;
+  background: #fef3c7;
+  box-shadow:
+    0 4px 12px rgba(245, 158, 11, 0.15),
+    inset 0 0 0 1px #f59e0b;
+  border-color: #f59e0b;
+}
+
+.cjs-milestone-revision-requested:active {
+  box-shadow:
+    0 4px 20px rgba(245, 158, 11, 0.25),
+    inset 0 0 0 2px #f59e0b;
 }
 
 .cjs-milestone-under-review {
-  background: linear-gradient(135deg, #fff2f2 0%, #fee2e2 100%);
-  border-left: 5px solid #ef4444;
+  background: #fee2e2;
+  box-shadow:
+    0 4px 12px rgba(239, 68, 68, 0.15),
+    inset 0 0 0 1px #ef4444;
+  border-color: #ef4444;
+}
+
+.cjs-milestone-under-review:active {
+  box-shadow:
+    0 4px 20px rgba(239, 68, 68, 0.25),
+    inset 0 0 0 2px #ef4444;
 }
 
 /* Revision Request Modal */
@@ -1000,7 +1136,7 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  background: linear-gradient(135deg, #fffaf7 0%, #fff2e8 100%);
+  background: #f8fafc;
 }
 
 .cjs-modal-header h3 {
@@ -1027,9 +1163,9 @@
 }
 
 .cjs-modal-close:hover {
-  background: #fff7ed;
-  border-color: #f97316;
-  color: #f97316;
+  background: #f1f5f9;
+  border-color: #3b82f6;
+  color: #3b82f6;
 }
 
 .cjs-modal-body {
@@ -1058,8 +1194,8 @@
 
 .cjs-modal-textarea:focus {
   outline: none;
-  border-color: #f97316;
-  box-shadow: 0 0 0 0 rgba(0,0,0,0); /* no animation */
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 0 rgba(0, 0, 0, 0);
 }
 
 .cjs-modal-textarea::placeholder {
@@ -1068,7 +1204,7 @@
 
 .cjs-modal-footer {
   padding: 20px 28px;
-  background: #fffaf7;
+  background: #f8fafc;
   display: flex;
   gap: 12px;
   justify-content: flex-end;
@@ -1092,30 +1228,36 @@
 }
 
 .cjs-modal-btn-cancel:hover {
-  background: #fff7ed;
-  border-color: #e9c7ad;
+  background: #f1f5f9;
+  border-color: #cbd5e1;
   color: #475569;
 }
 
 .cjs-modal-btn-submit {
-  background: linear-gradient(135deg, #ffd8b5 0%, #fb923c 100%);
-  color: #1e1b18;
-  box-shadow: 0 2px 8px rgba(245, 158, 11, 0.12);
+  background: #3b82f6;
+  color: white;
+  box-shadow: 0 2px 8px rgba(59, 130, 246, 0.12);
 }
 
 .cjs-modal-btn-submit:hover {
-  background: linear-gradient(135deg, #ffd8b5 0%, #fb923c 100%);
+  background: #2563eb;
+}
+
+.cjs-modal-btn-submit:active {
+  background: #1d4ed8;
+  box-shadow: 0 2px 4px rgba(59, 130, 246, 0.2);
 }
 
 /* Review Prompt Section */
 .cjs-review-prompt {
   margin-top: 32px;
   padding: 32px;
-  background: linear-gradient(135deg, #fff7ed 0%, #fff0dc 100%);
+  background: #fef3c7;
   border-radius: 16px;
-  border: 2px solid #fbbf24;
-  box-shadow: 0 2px 8px rgba(251, 191, 36, 0.08);
-  /* animation removed */
+  border: 2px solid #f59e0b;
+  box-shadow:
+    0 4px 12px rgba(245, 158, 11, 0.1),
+    inset 0 0 0 1px #f59e0b;
 }
 
 .cjs-review-prompt-content {
@@ -1145,18 +1287,23 @@
 
 .cjs-btn-review {
   padding: 14px 32px;
-  background: linear-gradient(135deg, #ffb07a 0%, #f97316 100%);
+  background: #f59e0b;
   color: white;
   border: none;
   border-radius: 10px;
   font-size: 16px;
   font-weight: 600;
   cursor: pointer;
-  box-shadow: 0 2px 8px rgba(249, 115, 22, 0.12);
+  box-shadow: 0 2px 8px rgba(245, 158, 11, 0.12);
 }
 
 .cjs-btn-review:hover {
-  background: linear-gradient(135deg, #ffb07a 0%, #f97316 100%);
+  background: #d97706;
+}
+
+.cjs-btn-review:active {
+  background: #b45309;
+  box-shadow: 0 2px 4px rgba(245, 158, 11, 0.2);
 }
 
 /* Phases Modal Styles */
@@ -1199,7 +1346,7 @@
 }
 
 .cjs-phase-percentage {
-  background: linear-gradient(135deg, #ffb07a 0%, #f97316 100%);
+  background: #3b82f6;
   color: white;
   padding: 4px 12px;
   border-radius: 20px;
@@ -1260,7 +1407,7 @@
 
 .cjs-sub-amount {
   font-weight: 600;
-  color: #f97316;
+  color: #3b82f6;
 }
 
 .cjs-phases-summary {
@@ -1292,12 +1439,12 @@
 .cjs-summary-amount,
 .cjs-summary-percentage {
   font-weight: 700;
-  color: #f97316;
+  color: #3b82f6;
   font-size: 1.05rem;
 }
 
 .cjs-btn-view-details {
-  background: linear-gradient(135deg, #ffb07a 0%, #f97316 100%);
+  background: #3b82f6;
   color: white;
   padding: 12px 24px;
   border: none;
@@ -1305,11 +1452,27 @@
   font-size: 0.95rem;
   font-weight: 600;
   cursor: pointer;
-  box-shadow: 0 2px 8px rgba(249, 115, 22, 0.12);
+  box-shadow: 0 2px 8px rgba(59, 130, 246, 0.12);
 }
 
 .cjs-btn-view-details:hover {
-  background: linear-gradient(135deg, #ff9a5c 0%, #ea580c 100%);
+  background: #2563eb;
+}
+
+.cjs-btn-view-details:active {
+  background: #1d4ed8;
+  box-shadow: 0 2px 4px rgba(59, 130, 246, 0.2);
 }
 
 /* Removed keyframes and animations entirely from this file */
+
+.cjs-loading {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  font-size: 1.5rem;
+  color: #64748b;
+  background: #fff;
+}

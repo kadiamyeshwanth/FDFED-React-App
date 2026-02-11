@@ -37,6 +37,30 @@ const InteriorDesignForm = () => {
     projectDescription: "",
   });
 
+  // ---------- Floor Requirements State ----------
+  const [floorRequirements, setFloorRequirements] = useState([
+    { floorNumber: 1, details: "" }
+  ]);
+
+  const handleFloorChange = (index, field, value) => {
+    setFloorRequirements((prev) => {
+      const updated = [...prev];
+      updated[index][field] = value;
+      return updated;
+    });
+  };
+
+  const addFloorRequirement = () => {
+    setFloorRequirements((prev) => [
+      ...prev,
+      { floorNumber: prev.length + 1, details: "" }
+    ]);
+  };
+
+  const removeFloorRequirement = (index) => {
+    setFloorRequirements((prev) => prev.length === 1 ? prev : prev.filter((_, i) => i !== index));
+  };
+
   // Update form fields if profile changes and fields are empty
   useEffect(() => {
     setFormData((prev) => ({
@@ -175,12 +199,16 @@ const InteriorDesignForm = () => {
     e.preventDefault();
     if (!validateForm()) return;
 
+
     const submitData = new FormData();
     submitData.append("workerId", workerId);
 
     Object.entries(formData).forEach(([key, value]) => {
       submitData.append(key, value);
     });
+
+    // Append floorRequirements as JSON string (backend should parse it)
+    submitData.append("floorRequirements", JSON.stringify(floorRequirements));
 
     currentFiles.forEach((file) =>
       submitData.append("currentRoomImages", file)
@@ -297,6 +325,32 @@ const InteriorDesignForm = () => {
         {/* Project Details */}
         <div className="interior-form-section">
           <h2 className="interior-form-section-title">Project Details</h2>
+
+          {/* Floor Requirements */}
+          <div className="interior-form-form-group">
+            <label>Floor Requirements</label>
+            {floorRequirements.map((floor, idx) => (
+              <div key={idx} style={{ display: 'flex', alignItems: 'center', marginBottom: 8 }}>
+                <span style={{ marginRight: 8 }}>Floor {floor.floorNumber}:</span>
+                <input
+                  type="text"
+                  placeholder="Describe requirements for this floor"
+                  value={floor.details}
+                  onChange={e => handleFloorChange(idx, 'details', e.target.value)}
+                  style={{ flex: 1, marginRight: 8 }}
+                />
+                <button type="button" onClick={() => removeFloorRequirement(idx)} disabled={floorRequirements.length === 1} style={{ marginRight: 4 }}>
+                  -
+                </button>
+                {idx === floorRequirements.length - 1 && (
+                  <button type="button" onClick={addFloorRequirement}>
+                    +
+                  </button>
+                )}
+              </div>
+            ))}
+            <p className="interior-form-info-text">Add requirements for each floor (optional, but helps us understand your needs).</p>
+          </div>
 
           <div className="interior-form-form-group">
             <label>Room Type*</label>
