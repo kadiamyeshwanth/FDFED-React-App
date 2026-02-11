@@ -23,15 +23,11 @@ const isAuthenticated = require("../middlewares/auth");
 // Create a Multer instance for handling FormData
 const upload = multer();
 
-router.get("/companydashboard", isAuthenticated, getDashboard);
-router.get("/companyongoing_projects", isAuthenticated, getOngoingProjects);
-router.get("/project_requests", isAuthenticated, getProjectRequests);
-router.patch(
-  "/api/projects/:projectId/:status",
-  isAuthenticated,
-  updateProjectStatusController,
-);
-router.get("/companyhiring", isAuthenticated, getHiring);
+router.get('/companydashboard', isAuthenticated, getDashboard);
+router.get('/companyongoing_projects', isAuthenticated, getOngoingProjects);
+router.get('/project_requests', isAuthenticated, getProjectRequests);
+router.patch('/projects/:projectId/:status', isAuthenticated, updateProjectStatusController);
+router.get('/companyhiring', isAuthenticated, getHiring);
 
 // Add upload.any() middleware to parse FormData
 router.post(

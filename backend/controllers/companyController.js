@@ -544,11 +544,11 @@ const updateCompanyProfile = async (req, res) => {
     if (profileType === 'worker') {
       const { companyLocation, companySize, specializations, aboutCompany, whyJoinUs, currentOpenings } = req.body;
       if (companyLocation) company.location.city = companyLocation;
-      company.size = companySize;
-      company.specialization = specializations.split(',').map(s => s.trim());
-      company.aboutCompany = aboutCompany;
-      company.whyJoinUs = whyJoinUs;
-      company.currentOpenings = currentOpenings;
+      if (companySize) company.size = companySize;
+      if (specializations) company.specialization = specializations.split(',').map(s => s.trim());
+      if (aboutCompany) company.aboutCompany = aboutCompany;
+      if (whyJoinUs) company.whyJoinUs = whyJoinUs;
+      if (currentOpenings) company.currentOpenings = currentOpenings;
     } else if (profileType === 'customer') {
       const { companyLocation, projectsCompleted, yearsInBusiness, customerAboutCompany, didYouKnow, completedProjects } = req.body;
       if (companyLocation) company.location.city = companyLocation;

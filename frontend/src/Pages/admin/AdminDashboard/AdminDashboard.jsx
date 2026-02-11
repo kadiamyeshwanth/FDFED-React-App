@@ -201,6 +201,13 @@ const AdminDashboard = () => {
     (w) => w.status === "pending"
   );
 
+  // Get revenue data from backend
+  const revenue = data.revenue || {
+    architectHiring: { totalProjects: 0, platformCommission: 0, totalRevenue: 0 },
+    designRequest: { totalProjects: 0, platformCommission: 0, totalRevenue: 0 },
+    combined: { totalPlatformCommission: 0, totalProjectRevenue: 0 }
+  };
+
   const renderTableByTab = () => {
     switch (activeTab) {
       case "customers":
@@ -732,6 +739,40 @@ const AdminDashboard = () => {
               value={stats?.openBids ?? 0}
               icon={BarChart3}
               color="indigo"
+            />
+          </div>
+        </Section>
+
+        {/* Platform Revenue Section */}
+        <Section title="Platform Revenue & Earnings" className="stats-section">
+          <div className="stats-grid">
+            <StatCard
+              title="Architect Hiring Revenue"
+              value={`₹${(revenue.architectHiring.platformCommission || 0).toLocaleString('en-IN')}`}
+              icon={BarChart3}
+              color="blue"
+              subtitle={`From ${revenue.architectHiring.totalProjects || 0} projects`}
+            />
+            <StatCard
+              title="Interior Design Revenue"
+              value={`₹${(revenue.designRequest.platformCommission || 0).toLocaleString('en-IN')}`}
+              icon={BarChart3}
+              color="purple"
+              subtitle={`From ${revenue.designRequest.totalProjects || 0} projects`}
+            />
+            <StatCard
+              title="Total Platform Commission"
+              value={`₹${(revenue.combined.totalPlatformCommission || 0).toLocaleString('en-IN')}`}
+              icon={BarChart3}
+              color="green"
+              subtitle={`Total earnings from all projects`}
+            />
+            <StatCard
+              title="Total Project Volume"
+              value={`₹${(revenue.combined.totalProjectRevenue || 0).toLocaleString('en-IN')}`}
+              icon={BarChart3}
+              color="orange"
+              subtitle={`Gross project value handled`}
             />
           </div>
         </Section>

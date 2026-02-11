@@ -101,6 +101,10 @@ const submitArchitect = async (req, res) => {
 const submitDesignRequest = async (req, res) => {
   try {
     const customer = req.user.user_id;
+    const worker =
+      req.body.workerId && req.body.workerId !== ""
+        ? new mongoose.Types.ObjectId(req.body.workerId)
+        : null;
     const {
       projectName,
       fullName,
@@ -115,8 +119,12 @@ const submitDesignRequest = async (req, res) => {
       heightUnit,
       designPreference,
       projectDescription,
-      workerId,
     } = req.body;
+    
+    console.log('=== Design Request Debug ===');
+    console.log('Received workerId:', req.body.workerId);
+    console.log('Converted worker ObjectId:', worker);
+    
     if (
       !projectName ||
       !fullName ||
@@ -157,9 +165,12 @@ const submitDesignRequest = async (req, res) => {
       currentRoomImages,
       customerId: customer,
       inspirationImages,
-      workerId,
+      workerId: worker,
     });
     await designRequest.save();
+    
+    console.log('Design request saved with workerId:', designRequest.workerId);
+    
     res
       .status(201)
       .json({
