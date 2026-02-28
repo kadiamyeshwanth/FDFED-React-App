@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import AdminLayout from "../../../components/admin/AdminLayout";
 import { PageHeader, ActionButton, Spinner, Card, Badge } from "../../../components/admin/AdminUIComponents";
+import { useAdminAuth } from "../../../context/AdminAuthContext";
 import {
   ArrowLeft, IndianRupee, TrendingUp, Clock, Building2,
   CheckCircle, Eye, X,
@@ -10,6 +11,7 @@ import "./AdminRevenueAnalytics.css";
 
 const AdminRevenueAnalytics = () => {
   const navigate = useNavigate();
+  const { basePath } = useAdminAuth();
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [data, setData] = useState(null);
@@ -62,7 +64,7 @@ const AdminRevenueAnalytics = () => {
     <AdminLayout>
       <div className="detail-error">
         <p>Error: {error}</p>
-        <ActionButton label="Back to Dashboard" icon={ArrowLeft} variant="secondary" onClick={() => navigate("/admin/admindashboard")} />
+        <ActionButton label="Back to Dashboard" icon={ArrowLeft} variant="secondary" onClick={() => navigate(`${basePath}/admindashboard`)} />
       </div>
     </AdminLayout>
   );
@@ -81,7 +83,7 @@ const AdminRevenueAnalytics = () => {
           title="Platform Revenue Analytics"
           subtitle="Comprehensive overview of all construction projects, companies, and payment tracking"
           actions={
-            <ActionButton label="Back to Dashboard" icon={ArrowLeft} variant="secondary" onClick={() => navigate("/admin/admindashboard")} />
+            <ActionButton label="Back to Dashboard" icon={ArrowLeft} variant="secondary" onClick={() => navigate(`${basePath}/admindashboard`)} />
           }
         />
 
@@ -91,7 +93,7 @@ const AdminRevenueAnalytics = () => {
             <div className="revenue-stat-icon"><IndianRupee size={22} /></div>
             <div className="revenue-stat-content">
               <span className="revenue-stat-label">Total Platform Revenue</span>
-              <span className="revenue-stat-value">{formatCurrency(metrics.totalRevenue)}</span>
+                <span className="revenue-stat-value">{formatCurrency(metrics.totalPlatformRevenue)}</span>
               <Badge variant="info">{metrics.totalProjects || 0} Projects</Badge>
             </div>
           </div>
@@ -174,35 +176,6 @@ const AdminRevenueAnalytics = () => {
                   <div className="phase-amount"><span className="phase-label">Completed</span><span className="phase-value">{data.revenueByType.interior.completedProjects}</span></div>
                 </div>
               </div>
-            </div>
-          </Card>
-        )}
-
-        {/* Phase Analytics (Construction Only) */}
-        {data.phaseAnalytics && Object.keys(data.phaseAnalytics).length > 0 && (
-          <Card className="phase-analytics-card">
-            <h3 className="phase-analytics-title">Phase-wise Payment Breakdown</h3>
-            <div className="phase-grid">
-              {Object.entries(data.phaseAnalytics).map(([phaseKey, phase]) => {
-                const phaseNumber = phaseKey === "final" ? "Final" : `Phase ${phaseKey.replace("phase", "")}`;
-                const collectionRate = phase.total > 0 ? ((phase.received / phase.total) * 100).toFixed(1) : 0;
-                return (
-                  <div key={phaseKey} className="phase-card">
-                    <div className="phase-header">
-                      <h4>{phaseNumber}</h4>
-                      <span className="phase-rate">{collectionRate}%</span>
-                    </div>
-                    <div className="phase-amounts">
-                      <div className="phase-amount"><span className="phase-label">Total</span><span className="phase-value">{formatCurrency(phase.total)}</span></div>
-                      <div className="phase-amount"><span className="phase-label">Received</span><span className="phase-value received-text">{formatCurrency(phase.received)}</span></div>
-                      <div className="phase-amount"><span className="phase-label">Pending</span><span className="phase-value pending-text">{formatCurrency(phase.pending)}</span></div>
-                    </div>
-                    <div className="revenue-mini-bar">
-                      <div className="revenue-mini-fill primary" style={{ width: `${collectionRate}%` }}></div>
-                    </div>
-                  </div>
-                );
-              })}
             </div>
           </Card>
         )}
@@ -340,72 +313,6 @@ const AdminRevenueAnalytics = () => {
                   <div className="modal-info-item"><span className="modal-info-label">Customer Phone</span><span className="modal-info-value">{selectedProject.customer.phone || "N/A"}</span></div>
                 </div>
               </div>
-
-              {/* Phase Breakdown (Construction Only) */}
-              {selectedProject.projectType === 'construction' && selectedProject.phaseBreakdown && (
-                <div className="modal-phases-section">
-                  <h3>Phase-wise Payment Breakdown</h3>
-                  {selectedProject.phaseBreakdown.map((phase) => (
-                  <div key={phase.phase} className="modal-phase-detail">
-                    <div className="modal-phase-header">
-                      <h4>{phase.isFinal ? "Final Phase (100%)" : `Phase ${phase.phase} (${phase.phase * 25}%)`}</h4>
-                      <span className="modal-phase-total">{formatCurrency(phase.totalAmount)}</span>
-                    </div>
-
-                    {!phase.isFinal && (
-                      <div className="modal-payments">
-                        <div className="modal-payment-item">
-                          <div className="modal-payment-info">
-                            <span>Upfront Payment (40%)</span>
-                            <span>{formatCurrency(phase.upfront.amount)}</span>
-                          </div>
-                          <div className="modal-payment-status">
-                            <Badge variant={phase.upfront.status === "released" || phase.upfront.status === "paid" ? "success" : "warning"}>
-                              {phase.upfront.status === "released" || phase.upfront.status === "paid" ? "Paid" : "Pending"}
-                            </Badge>
-                            {phase.upfront.received > 0 && <span className="received-text">{formatCurrency(phase.upfront.received)}</span>}
-                          </div>
-                        </div>
-                        <div className="modal-payment-item">
-                          <div className="modal-payment-info">
-                            <span>Completion Payment (60%)</span>
-                            <span>{formatCurrency(phase.completion.amount)}</span>
-                          </div>
-                          <div className="modal-payment-status">
-                            <Badge variant={phase.completion.status === "released" || phase.completion.status === "paid" ? "success" : "warning"}>
-                              {phase.completion.status === "released" || phase.completion.status === "paid" ? "Paid" : "Pending"}
-                            </Badge>
-                            {phase.completion.received > 0 && <span className="received-text">{formatCurrency(phase.completion.received)}</span>}
-                          </div>
-                        </div>
-                      </div>
-                    )}
-
-                    {phase.isFinal && (
-                      <div className="modal-payments">
-                        <div className="modal-payment-item">
-                          <div className="modal-payment-info">
-                            <span>Final Payment (10% of total)</span>
-                            <span>{formatCurrency(phase.final.amount)}</span>
-                          </div>
-                          <div className="modal-payment-status">
-                            <Badge variant={phase.final.status === "released" || phase.final.status === "paid" ? "success" : "warning"}>
-                              {phase.final.status === "released" || phase.final.status === "paid" ? "Paid" : "Pending"}
-                            </Badge>
-                            {phase.final.received > 0 && <span className="received-text">{formatCurrency(phase.final.received)}</span>}
-                          </div>
-                        </div>
-                      </div>
-                    )}
-
-                    <div className="modal-phase-summary">
-                      <div><span>Received:</span> <strong className="received-text">{formatCurrency(phase.totalReceived)}</strong></div>
-                      <div><span>Pending:</span> <strong className="pending-text">{formatCurrency(phase.totalPending)}</strong></div>
-                    </div>
-                  </div>
-                ))}
-                </div>
-              )}
 
               {/* Revenue Breakdown (Architect/Interior Only) */}
               {(selectedProject.projectType === 'architect' || selectedProject.projectType === 'interior') && (
