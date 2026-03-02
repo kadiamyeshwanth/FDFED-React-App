@@ -1,389 +1,1024 @@
 import React, { useEffect, useState } from "react";
-import { useParams, useNavigate } from "react-router-dom";
-import AdminLayout from "../../../components/admin/AdminLayout";
+import { useNavigate, useParams } from "react-router-dom";
 import {
-  Card, Section, DataRow, Badge, ActionButton, PageHeader, Spinner,
-} from "../../../components/admin/AdminUIComponents";
-import {
-  ArrowLeft, Trash2, Building2, User, Mail, Phone, Calendar, Clock,
-  MapPin, Target, Layers, Ruler, IndianRupee, Zap, Accessibility,
-  FileText, CheckCircle, XCircle, AlertTriangle, MessageSquare, X,
+  ArrowLeft,
+  BadgeIndianRupee,
+  Building2,
+  Calendar,
+  CheckCircle2,
+  Clock,
+  Compass,
+  Download,
+  FileText,
+  Home,
+  Layers,
+  MapPin,
+  Shield,
+  Star,
+  Users,
+  Zap,
 } from "lucide-react";
+import AdminLayout from "../../../components/admin/AdminLayout";
+import { ActionButton } from "../../../components/admin/AdminUIComponents";
+import { useAdminAuth } from "../../../context/AdminAuthContext";
+import "../AdminCustomerDetail/AdminCustomerDetail.css";
 import "./AdminConstructionProjectDetail.css";
+
+const formatCurrency = (value) =>
+  `₹${Number(value || 0).toLocaleString("en-IN")}`;
+
+const formatDate = (value) =>
+  value ? new Date(value).toLocaleDateString("en-IN") : "—";
+
+const formatDateTime = (value) =>
+  value
+    ? new Date(value).toLocaleString("en-IN", {
+        day: "2-digit",
+        month: "short",
+        year: "numeric",
+        hour: "2-digit",
+        minute: "2-digit",
+      })
+    : "—";
+
+const normalizeStatus = (value) =>
+  String(value || "")
+    .trim()
+    .toLowerCase()
+    .replace(/[_\s-]/g, "");
+
+const statusClass = (status) => {
+  const key = normalizeStatus(status);
+  if (["accepted", "completed", "approved", "released", "paid"].includes(key)) {
+    return "success";
+  }
+  if (["rejected", "cancelled", "failed"].includes(key)) {
+    return "danger";
+  }
+  if (
+    [
+      "proposalsent",
+      "inprogress",
+      "partiallypaid",
+      "partiallyreleased",
+    ].includes(key)
+  ) {
+    return "info";
+  }
+  return "warning";
+};
+
+const statusLabel = (status) => {
+  const key = normalizeStatus(status);
+  const map = {
+    pending: "Pending",
+    proposalsent: "Proposal Sent",
+    accepted: "Accepted",
+    inprogress: "In Progress",
+    completed: "Completed",
+    rejected: "Rejected",
+    unpaid: "Unpaid",
+    partiallypaid: "Partially Paid",
+    paid: "Paid",
+    pendingpayment: "Pending Payment",
+    released: "Released",
+    partiallyreleased: "Partially Released",
+    notinitiated: "Not Initiated",
+  };
+  return map[key] || String(status || "Unknown");
+};
+
+const ConstructionDetailSkeleton = () => (
+  <div className="customer360-skeleton">
+    <div className="sk-line xl" />
+    <div className="sk-line md" />
+    <div className="sk-cards">
+      {[1, 2, 3, 4, 5, 6].map((item) => (
+        <div key={item} className="sk-card" />
+      ))}
+    </div>
+    {[1, 2, 3, 4].map((item) => (
+      <div key={item} className="sk-block" />
+    ))}
+  </div>
+);
+
+const SectionHeading = ({ id, title, icon: Icon, accent = "blue" }) => (
+  <div id={id} className={`customer360-section-head ${accent}`}>
+    <h2>
+      <Icon size={18} /> {title}
+    </h2>
+  </div>
+);
 
 const AdminConstructionProjectDetail = () => {
   const { id } = useParams();
   const navigate = useNavigate();
-  const [project, setProject] = useState(null);
+  const { basePath } = useAdminAuth();
+
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [showComplaints, setShowComplaints] = useState(false);
-  const [complaints, setComplaints] = useState([]);
-  const [complaintsLoading, setComplaintsLoading] = useState(false);
-  const [complaintsError, setComplaintsError] = useState(null);
-  const [activeTab, setActiveTab] = useState("customer");
-  const [unviewedCount, setUnviewedCount] = useState(0);
+  const [fullData, setFullData] = useState(null);
+  const [activeMiniNav, setActiveMiniNav] = useState("project-basic-info");
+
+  const miniNavItems = [
+    { id: "project-basic-info", label: "Basic Info" },
+    { id: "proposal-milestones", label: "Proposal & Milestones" },
+    { id: "payment-financial", label: "Payment" },
+    { id: "updates-communication", label: "Updates" },
+    { id: "customer-review", label: "Review" },
+    { id: "timestamps-metadata", label: "Timestamps" },
+  ];
 
   useEffect(() => {
-    const fetchProject = async () => {
+    const fetchFullProject = async () => {
       setLoading(true);
       try {
-        const res = await fetch(`/api/admin/construction-project/${id}`);
-        if (!res.ok) throw new Error(`Server responded ${res.status}`);
-        const data = await res.json();
-        setProject(data.project ?? data);
+        const response = await fetch(
+          `/api/admin/construction-projects/${id}/full`,
+          {
+            credentials: "include",
+          },
+        );
+        const json = await response.json();
+        if (!response.ok) {
+          throw new Error(json.error || `Server ${response.status}`);
+        }
+        setFullData(json);
+        setError(null);
       } catch (err) {
-        setError(err.message || "Failed to load project");
+        setError(err.message || "Failed to load construction project detail");
       } finally {
         setLoading(false);
       }
     };
-    fetchProject();
+
+    fetchFullProject();
   }, [id]);
 
-  useEffect(() => {
-    const fetchUnviewedCount = async () => {
-      if (!project) return;
-      try {
-        const res = await fetch(`/api/complaints/unviewed/count`);
-        const data = await res.json();
-        if (data.success) {
-          const projectUnviewed = data.unviewedByProject.find(
-            (item) => item._id === project._id
-          );
-          setUnviewedCount(projectUnviewed ? projectUnviewed.count : 0);
-        }
-      } catch (err) {
-        console.error('Error fetching unviewed count:', err);
-      }
-    };
-    fetchUnviewedCount();
-  }, [project]);
+  const project = fullData?.project || null;
+  const summary = fullData?.summary || {};
+  const basicInfo = fullData?.basicInfo || {};
+  const floorBreakdown = fullData?.floorBreakdown || [];
+  const proposal = fullData?.proposal || {};
+  const milestones = fullData?.milestones || [];
+  const paymentSummary = fullData?.paymentSummary || {};
+  const updates = fullData?.updates || [];
+  const conversation = fullData?.conversation || [];
+  const media = fullData?.media || { siteFiles: [], completionImages: [] };
+  const customerReview = fullData?.customerReview || {};
+  const timestamps = fullData?.timestamps || {};
 
-  const fetchComplaints = async () => {
-    setComplaintsLoading(true);
-    setComplaintsError(null);
-    try {
-      const res = await fetch(`/api/complaints/${project._id}`);
-      const data = await res.json();
-      if (!data.success) throw new Error("Failed to fetch complaints");
-      setComplaints(data.complaints || []);
-    } catch (err) {
-      setComplaintsError(err.message || "Error fetching complaints");
-    } finally {
-      setComplaintsLoading(false);
-    }
-  };
+  const customerRoute = summary.customerId
+    ? `${basePath}/customer/${summary.customerId}`
+    : null;
+  const companyRoute = summary.companyId
+    ? `${basePath}/company/${summary.companyId}`
+    : null;
 
-  const handleOpenComplaints = () => {
-    setShowComplaints(true);
-    fetchComplaints();
-    setUnviewedCount(0);
-    document.body.classList.add("modal-open");
-  };
+  if (loading) {
+    return (
+      <AdminLayout>
+        <div className="customer360-page">
+          <ConstructionDetailSkeleton />
+        </div>
+      </AdminLayout>
+    );
+  }
 
-  const handleCloseComplaints = () => {
-    setShowComplaints(false);
-    document.body.classList.remove("modal-open");
-  };
+  if (error) {
+    return (
+      <AdminLayout>
+        <div className="customer360-page">
+          <div className="error-state">
+            <h2>Unable to load project details</h2>
+            <p>{error}</p>
+            <ActionButton
+              label="Back to Data Management"
+              icon={ArrowLeft}
+              variant="primary"
+              onClick={() => navigate(`${basePath}/data-management`)}
+            />
+          </div>
+        </div>
+      </AdminLayout>
+    );
+  }
 
-  useEffect(() => {
-    return () => document.body.classList.remove("modal-open");
-  }, []);
-
-  const handleDelete = async () => {
-    if (!confirm("Are you sure you want to delete this construction project?"))
-      return;
-    try {
-      const res = await fetch(`/api/admin/delete-constructionProject/${id}`, {
-        method: "DELETE",
-        headers: { "Content-Type": "application/json" },
-      });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error || "Delete failed");
-      alert(data.message || "Project deleted");
-      navigate("/admindashboard");
-    } catch (err) {
-      alert("Error deleting project: " + err.message);
-    }
-  };
-
-  if (loading) return <AdminLayout><div className="detail-loading"><Spinner size="lg" /><p>Loading project...</p></div></AdminLayout>;
-  if (error) return <AdminLayout><div className="detail-error"><p>Error: {error}</p></div></AdminLayout>;
-  if (!project) return <AdminLayout><div className="detail-empty"><p>Project not found.</p></div></AdminLayout>;
-
-  const fmt = (d) => (d ? new Date(d).toLocaleString() : "Not specified");
-  const fmtShort = (d) => (d ? new Date(d).toLocaleDateString() : "Not set");
-  const fmtNum = (n) => typeof n === "number" ? n.toLocaleString() : n ?? "Not specified";
-  const pct = Math.min(Math.max(Number(project.completionPercentage) || 0, 0), 100);
-
-  const getStatusVariant = (status) => {
-    const s = String(status).toLowerCase();
-    if (s === "completed") return "success";
-    if (s === "accepted" || s === "ongoing" || s === "in-progress") return "info";
-    if (s === "pending") return "warning";
-    if (s === "rejected" || s === "cancelled") return "danger";
-    return "default";
-  };
+  if (!project) {
+    return (
+      <AdminLayout>
+        <div className="customer360-page">
+          <div className="error-state">
+            <h2>Construction project not found</h2>
+            <ActionButton
+              label="Back to Data Management"
+              icon={ArrowLeft}
+              variant="primary"
+              onClick={() => navigate(`${basePath}/data-management`)}
+            />
+          </div>
+        </div>
+      </AdminLayout>
+    );
+  }
 
   return (
     <AdminLayout>
-      <div className="admin-detail-page">
-        <PageHeader
-          title={project.projectName ?? "Construction Project"}
-          subtitle={`Project ID: ${project._id}`}
-          actions={
-            <div className="detail-header-actions">
-              <ActionButton label="Back" icon={ArrowLeft} variant="secondary" onClick={() => navigate("/admin/admindashboard")} />
-              <div style={{ position: "relative" }}>
-                <ActionButton label="Complaints" icon={MessageSquare} variant="primary" onClick={handleOpenComplaints} />
-                {unviewedCount > 0 && <span className="notif-badge">{unviewedCount}</span>}
-              </div>
-              <ActionButton label="Delete" icon={Trash2} variant="danger" onClick={handleDelete} />
-            </div>
-          }
-        />
+      <div className="customer360-page project360-page">
+        <header className="customer360-header">
+          <div>
+            <h1>{summary.projectName || project.projectName || "Project"}</h1>
+            <p>Project ID: {project._id}</p>
+          </div>
+          <div className="customer360-header-actions">
+            <ActionButton
+              label="Export Project Details"
+              icon={Download}
+              variant="secondary"
+              onClick={() => window.print()}
+            />
+            {customerRoute && (
+              <ActionButton
+                label="View Customer"
+                icon={Users}
+                variant="secondary"
+                onClick={() => navigate(customerRoute)}
+              />
+            )}
+            {companyRoute && (
+              <ActionButton
+                label="View Company"
+                icon={Building2}
+                variant="secondary"
+                onClick={() => navigate(companyRoute)}
+              />
+            )}
+            <ActionButton
+              label="Back to Data Management"
+              icon={ArrowLeft}
+              variant="primary"
+              onClick={() => navigate(`${basePath}/data-management`)}
+            />
+          </div>
+        </header>
 
-        {/* KPI Row */}
-        <div className="detail-kpi-row">
-          <div className="detail-kpi-card kpi-blue">
-            <Target size={20} />
+        <div className="customer360-summary-grid project360-summary-grid">
+          <article className="summary-card orange">
+            <div className="summary-accent" />
+            <Building2 size={18} />
             <div>
-              <span className="kpi-val">{pct}%</span>
-              <span className="kpi-lbl">Completion</span>
+              <span>Project Name</span>
+              <strong>{summary.projectName || "—"}</strong>
             </div>
-          </div>
-          <div className="detail-kpi-card kpi-green">
-            <CheckCircle size={20} />
+          </article>
+
+          <article
+            className={`summary-card ${statusClass(summary.status) === "danger" ? "red" : statusClass(summary.status) === "warning" ? "orange" : "green"}`}
+          >
+            <div className="summary-accent" />
+            <Shield size={18} />
             <div>
-              <span className="kpi-val">{project.status ?? "—"}</span>
-              <span className="kpi-lbl">Status</span>
+              <span>Status</span>
+              <strong>{statusLabel(summary.status)}</strong>
             </div>
-          </div>
-          <div className="detail-kpi-card kpi-purple">
-            <Layers size={20} />
+          </article>
+
+          <article className="summary-card purple">
+            <div className="summary-accent" />
+            <Users size={18} />
             <div>
-              <span className="kpi-val">{project.currentPhase ?? "—"}</span>
-              <span className="kpi-lbl">Current Phase</span>
+              <span>Customer</span>
+              {customerRoute ? (
+                <button
+                  className="project-view-btn project360-inline-btn"
+                  onClick={() => navigate(customerRoute)}
+                >
+                  {summary.customerName || "Unknown"}
+                </button>
+              ) : (
+                <strong>{summary.customerName || "Unknown"}</strong>
+              )}
             </div>
-          </div>
-          <div className="detail-kpi-card kpi-orange">
-            <IndianRupee size={20} />
+          </article>
+
+          <article className="summary-card indigo">
+            <div className="summary-accent" />
+            <Building2 size={18} />
             <div>
-              <span className="kpi-val">{fmtNum(project.estimatedBudget)}</span>
-              <span className="kpi-lbl">Est. Budget</span>
+              <span>Company</span>
+              {companyRoute ? (
+                <button
+                  className="project-view-btn project360-inline-btn"
+                  onClick={() => navigate(companyRoute)}
+                >
+                  {summary.companyName || "Not Assigned"}
+                </button>
+              ) : (
+                <strong>{summary.companyName || "Not Assigned"}</strong>
+              )}
             </div>
+          </article>
+
+          <article className="summary-card amber">
+            <div className="summary-accent" />
+            <BadgeIndianRupee size={18} />
+            <div>
+              <span>Total / Contract Amount</span>
+              <strong>{formatCurrency(summary.contractAmount)}</strong>
+            </div>
+          </article>
+
+          <article className="summary-card rose">
+            <div className="summary-accent" />
+            <CheckCircle2 size={18} />
+            <div>
+              <span>Platform Fee</span>
+              <strong>
+                {formatCurrency(summary.platformFee)}
+                {summary.commissionRate ? ` (${summary.commissionRate}%)` : ""}
+              </strong>
+            </div>
+          </article>
+        </div>
+
+        <div className="customer360-mini-nav">
+          <div className="mini-nav-scroll">
+            {miniNavItems.map((item) => (
+              <button
+                key={item.id}
+                className={`mini-nav-pill ${activeMiniNav === item.id ? "active" : ""}`}
+                onClick={() => setActiveMiniNav(item.id)}
+              >
+                {item.label}
+              </button>
+            ))}
           </div>
         </div>
 
-        {/* Progress Bar */}
-        <Card className="progress-card">
-          <div className="progress-info">
-            <span className="progress-label">Project Completion</span>
-            <span className="progress-pct">{pct}%</span>
-          </div>
-          <div className="detail-progress-bar">
-            <div className="detail-progress-fill" style={{ width: `${pct}%` }}></div>
-          </div>
-        </Card>
+        {activeMiniNav === "project-basic-info" && (
+          <section
+            id="project-basic-info"
+            className="customer360-section orange"
+          >
+            <SectionHeading
+              id="project-basic-info-head"
+              title="Project Basic Information"
+              icon={FileText}
+              accent="orange"
+            />
 
-        {/* Project Status */}
-        <Section title="Project Status">
-          <Card>
-            <div className="detail-grid">
-              <DataRow label="Status">
-                <Badge variant={getStatusVariant(project.status)}>{project.status ?? "—"}</Badge>
-              </DataRow>
-              <DataRow label="Current Phase">{project.currentPhase ?? "Not specified"}</DataRow>
-              <DataRow label="Target Completion">{fmtShort(project.targetCompletionDate)}</DataRow>
-              <DataRow label="Completion">{pct}%</DataRow>
-            </div>
-          </Card>
-        </Section>
-
-        {/* Customer Info */}
-        <Section title="Customer Information">
-          <Card>
-            <div className="detail-grid">
-              <DataRow label="Customer Name">{project.customerName ?? project.customerId?.name ?? "—"}</DataRow>
-              <DataRow label="Email">{project.customerEmail ?? project.customerId?.email ?? "—"}</DataRow>
-              <DataRow label="Phone">{project.customerPhone ?? project.customerId?.phone ?? "—"}</DataRow>
-            </div>
-          </Card>
-        </Section>
-
-        {/* Project Details */}
-        <Section title="Project Details">
-          <Card>
-            <div className="detail-grid">
-              <DataRow label="Building Type">{project.buildingType ?? "—"}</DataRow>
-              <DataRow label="Total Area">{fmtNum(project.totalArea)} sq ft</DataRow>
-              <DataRow label="Total Floors">{project.totalFloors ?? "—"}</DataRow>
-              <DataRow label="Estimated Budget">₹{fmtNum(project.estimatedBudget)}</DataRow>
-              <DataRow label="Timeline">{project.projectTimeline ?? "—"} months</DataRow>
-              <DataRow label="Accessibility Needs">{project.accessibilityNeeds ?? "None"}</DataRow>
-              <DataRow label="Energy Efficiency">{project.energyEfficiency ?? "Standard"}</DataRow>
-              <DataRow label="Project Address">{project.projectAddress ?? "—"}</DataRow>
-              {project.projectLocationPincode && (
-                <DataRow label="Pincode">{project.projectLocationPincode}</DataRow>
-              )}
-              {project.specialRequirements && (
-                <DataRow label="Special Req.">{project.specialRequirements}</DataRow>
-              )}
-            </div>
-          </Card>
-        </Section>
-
-        {/* Floors */}
-        {Array.isArray(project.floors) && project.floors.length > 0 && (
-          <Section title={`Floor Details (${project.floors.length})`}>
-            <div className="detail-items-grid">
-              {project.floors.map((floor, i) => (
-                <Card key={i} className="detail-floor-card">
-                  <div className="floor-header">
-                    <Badge variant="info">Floor {floor.floorNumber}</Badge>
-                    <span className="floor-type">{floor.floorType}</span>
-                  </div>
-                  <div className="floor-area">{floor.floorArea} sq ft</div>
-                  {floor.floorDescription && <p className="floor-desc">{floor.floorDescription}</p>}
-                </Card>
-              ))}
-            </div>
-          </Section>
-        )}
-
-        {/* Milestones */}
-        {Array.isArray(project.milestones) && project.milestones.length > 0 && (
-          <Section title={`Milestones & Progress (${project.milestones.filter(m => m.isCheckpoint).length})`}>
-            {project.milestones
-              .filter((m) => m.isCheckpoint)
-              .sort((a, b) => a.percentage - b.percentage)
-              .map((milestone, idx) => {
-                const approved = milestone.isApprovedByCustomer;
-                const revision = milestone.needsRevision;
-                const variant = approved ? "success" : revision ? "danger" : "warning";
-                return (
-                  <Card key={idx} className={`detail-milestone-card milestone-${variant}`}>
-                    <div className="milestone-header">
-                      <div className="milestone-title-row">
-                        <h4>{milestone.percentage}% Milestone</h4>
-                        {approved && <Badge variant="success"><CheckCircle size={12} /> Approved</Badge>}
-                        {revision && <Badge variant="danger"><AlertTriangle size={12} /> Revision</Badge>}
-                        {!approved && !revision && <Badge variant="warning"><Clock size={12} /> Awaiting</Badge>}
-                      </div>
-                      <div className="milestone-dates">
-                        <span>Submitted: {fmt(milestone.submittedAt)}</span>
-                        {milestone.approvedAt && <span>Approved: {fmt(milestone.approvedAt)}</span>}
-                      </div>
-                    </div>
-
-                    <div className="milestone-report">
-                      <h5>Company Progress Report</h5>
-                      <p>{milestone.companyMessage}</p>
-                    </div>
-
-                    {/* Conversation History */}
-                    {milestone.conversation && milestone.conversation.length > 0 && (
-                      <div className="milestone-conversation">
-                        <h5>Conversation ({milestone.conversation.length})</h5>
-                        <div className="detail-conversation">
-                          {milestone.conversation.map((msg, msgIdx) => (
-                            <div key={msgIdx} className={`detail-msg ${msg.sender}`}>
-                              <div className="detail-msg-header">
-                                <span className="detail-msg-sender">
-                                  {msg.sender === 'company' ? 'Company' : 'Customer'}
-                                </span>
-                                <span>{new Date(msg.timestamp).toLocaleString("en-IN", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" })}</span>
-                              </div>
-                              <p style={{ margin: 0 }}>{msg.message}</p>
-                            </div>
-                          ))}
-                        </div>
-                      </div>
-                    )}
-
-                    {milestone.needsRevision && milestone.customerFeedback && (
-                      <div className="milestone-feedback">
-                        <h5>Customer Feedback for Revision</h5>
-                        <p>{milestone.customerFeedback}</p>
-                      </div>
-                    )}
-                  </Card>
-                );
-              })}
-          </Section>
-        )}
-
-        {/* Timestamps */}
-        <Section title="Timestamps">
-          <Card>
-            <div className="detail-grid">
-              <DataRow label="Created At">{fmt(project.createdAt)}</DataRow>
-              <DataRow label="Last Updated">{fmt(project.updatedAt)}</DataRow>
-            </div>
-          </Card>
-        </Section>
-      </div>
-
-      {/* Complaints Modal */}
-      {showComplaints && (
-        <div className="complaints-overlay" onClick={handleCloseComplaints}>
-          <div className="complaints-modal" onClick={(e) => e.stopPropagation()}>
-            <div className="complaints-header">
-              <h2>Project Complaints</h2>
-              <button className="complaints-close" onClick={handleCloseComplaints}>
-                <X size={20} />
-              </button>
-            </div>
-
-            <div className="complaints-tabs">
-              <button
-                className={`complaints-tab ${activeTab === "customer" ? "active" : ""}`}
-                onClick={() => setActiveTab("customer")}
-              >
-                <User size={14} /> Customer Complaints
-              </button>
-              <button
-                className={`complaints-tab ${activeTab === "company" ? "active-company" : ""}`}
-                onClick={() => setActiveTab("company")}
-              >
-                <Building2 size={14} /> Company Complaints
-              </button>
-            </div>
-
-            <div className="complaints-body">
-              {complaintsLoading ? (
-                <div className="detail-loading" style={{ minHeight: "200px" }}><Spinner /><p>Loading complaints...</p></div>
-              ) : complaintsError ? (
-                <div className="detail-error"><p>{complaintsError}</p></div>
-              ) : complaints.filter((c) => c.senderType === activeTab).length === 0 ? (
-                <div className="detail-empty" style={{ minHeight: "200px" }}>
-                  <p>No {activeTab} complaints found for this project.</p>
+            <div className="customer360-card">
+              <div className="personal-grid two-col">
+                <div>
+                  <span>Project Name</span>
+                  <strong>{summary.projectName || "—"}</strong>
                 </div>
+                <div>
+                  <span>Building Type</span>
+                  <strong>{basicInfo.buildingType || "—"}</strong>
+                </div>
+                <div>
+                  <span>Total Area</span>
+                  <strong>
+                    {Number(basicInfo.totalArea || 0).toLocaleString("en-IN")}{" "}
+                    sq ft
+                  </strong>
+                </div>
+                <div>
+                  <span>Number of Floors</span>
+                  <strong>{basicInfo.totalFloors || "—"}</strong>
+                </div>
+                <div>
+                  <span>Project Address</span>
+                  <strong>{basicInfo.projectAddress || "—"}</strong>
+                </div>
+                <div>
+                  <span>Pincode / Location</span>
+                  <strong>{basicInfo.projectLocationPincode || "—"}</strong>
+                </div>
+                <div>
+                  <span>Estimated Budget</span>
+                  <strong>{formatCurrency(basicInfo.estimatedBudget)}</strong>
+                </div>
+                <div>
+                  <span>Project Timeline</span>
+                  <strong>
+                    {basicInfo.projectTimeline
+                      ? `${basicInfo.projectTimeline} months`
+                      : "—"}
+                  </strong>
+                </div>
+                <div>
+                  <span>Special Requirements</span>
+                  <strong>{basicInfo.specialRequirements || "—"}</strong>
+                </div>
+                <div>
+                  <span>Accessibility Needs</span>
+                  <strong>{basicInfo.accessibilityNeeds || "none"}</strong>
+                </div>
+                <div>
+                  <span>Energy Efficiency Target</span>
+                  <strong>{basicInfo.energyEfficiency || "standard"}</strong>
+                </div>
+                <div>
+                  <span>Target Completion Date</span>
+                  <strong>{formatDate(basicInfo.targetCompletionDate)}</strong>
+                </div>
+              </div>
+
+              <div style={{ marginTop: 14 }}>
+                <div className="progress-label">
+                  <span>Project Progress</span>
+                  <strong>
+                    {Math.min(
+                      100,
+                      Math.max(0, Number(basicInfo.completionPercentage || 0)),
+                    )}
+                    %
+                  </strong>
+                </div>
+                <div className="progress-track">
+                  <div
+                    className="progress-fill"
+                    style={{
+                      width: `${Math.min(
+                        100,
+                        Math.max(
+                          0,
+                          Number(basicInfo.completionPercentage || 0),
+                        ),
+                      )}%`,
+                    }}
+                  />
+                </div>
+              </div>
+            </div>
+
+            {floorBreakdown.length > 0 && (
+              <div className="customer360-card">
+                <h3>
+                  <Layers size={16} /> Floors Breakdown
+                </h3>
+                <div className="table-wrap">
+                  <table>
+                    <thead>
+                      <tr>
+                        <th>Floor #</th>
+                        <th>Type</th>
+                        <th>Area</th>
+                        <th>Description</th>
+                        <th>Image</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {floorBreakdown.map((floor) => (
+                        <tr key={floor._id}>
+                          <td>{floor.floorNumber}</td>
+                          <td>{floor.floorType || "—"}</td>
+                          <td>
+                            {Number(floor.floorArea || 0).toLocaleString(
+                              "en-IN",
+                            )}{" "}
+                            sq ft
+                          </td>
+                          <td>{floor.floorDescription || "—"}</td>
+                          <td>
+                            {floor.floorImagePath ? (
+                              <a
+                                href={floor.floorImagePath}
+                                target="_blank"
+                                rel="noreferrer"
+                                className="project360-file-link"
+                              >
+                                View
+                              </a>
+                            ) : (
+                              "—"
+                            )}
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            )}
+
+            <div className="customer360-card">
+              <h3>
+                <MapPin size={16} /> Site Files & Completion Images
+              </h3>
+              <div className="project360-media-grid">
+                {(media.siteFiles || []).map((file, index) => (
+                  <a
+                    key={`${file}-${index}`}
+                    href={file}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="project360-media-link"
+                  >
+                    Site File {index + 1}
+                  </a>
+                ))}
+                {(media.completionImages || []).map((image, index) => (
+                  <a
+                    key={`${image}-${index}`}
+                    href={image}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="project360-media-link success"
+                  >
+                    Completion Image {index + 1}
+                  </a>
+                ))}
+                {(media.siteFiles || []).length === 0 &&
+                  (media.completionImages || []).length === 0 &&
+                  "No media files uploaded"}
+              </div>
+            </div>
+          </section>
+        )}
+
+        {activeMiniNav === "proposal-milestones" && (
+          <section
+            id="proposal-milestones"
+            className="customer360-section green"
+          >
+            <SectionHeading
+              id="proposal-milestones-head"
+              title="Proposal & Phases / Milestones"
+              icon={Layers}
+              accent="green"
+            />
+
+            <div className="customer360-card">
+              <h3>
+                <BadgeIndianRupee size={16} /> Proposal Details
+              </h3>
+              {proposal.price ||
+              proposal.description ||
+              (proposal.phases || []).length ? (
+                <>
+                  <div className="personal-grid two-col">
+                    <div>
+                      <span>Proposed Price</span>
+                      <strong>{formatCurrency(proposal.price)}</strong>
+                    </div>
+                    <div>
+                      <span>Sent At</span>
+                      <strong>{formatDateTime(proposal.sentAt)}</strong>
+                    </div>
+                    <div className="project360-wide-field">
+                      <span>Description</span>
+                      <strong>{proposal.description || "—"}</strong>
+                    </div>
+                  </div>
+
+                  {(proposal.phases || []).length > 0 && (
+                    <div className="table-wrap" style={{ marginTop: 12 }}>
+                      <table>
+                        <thead>
+                          <tr>
+                            <th>Phase Name</th>
+                            <th>%</th>
+                            <th>Required Months</th>
+                            <th>Amount</th>
+                            <th>Subdivisions</th>
+                            <th>Payment Schedule</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {(proposal.phases || []).map((phase) => (
+                            <tr key={phase._id}>
+                              <td>{phase.name || "—"}</td>
+                              <td>
+                                {phase.percentage
+                                  ? `${phase.percentage}%`
+                                  : "—"}
+                              </td>
+                              <td>{phase.requiredMonths || "—"}</td>
+                              <td>{formatCurrency(phase.amount)}</td>
+                              <td>
+                                {(phase.subdivisions || []).length
+                                  ? (phase.subdivisions || [])
+                                      .map(
+                                        (subdivision) =>
+                                          `${subdivision.category || "Item"}: ${subdivision.description || "—"}`,
+                                      )
+                                      .join(" | ")
+                                  : "—"}
+                              </td>
+                              <td>
+                                Upfront{" "}
+                                {phase.paymentSchedule?.upfrontPercentage || 0}%
+                                · Completion{" "}
+                                {phase.paymentSchedule?.completionPercentage ||
+                                  0}
+                                % · Final{" "}
+                                {phase.paymentSchedule?.finalPercentage || 0}%
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  )}
+                </>
               ) : (
-                complaints
-                  .filter((c) => c.senderType === activeTab)
-                  .map((c) => (
-                    <div key={c._id} className="complaint-card">
-                      <div className="complaint-header">
-                        <Badge variant="warning">
-                          {c.milestone === 0 ? 'General Complaint' : `Milestone: ${c.milestone}%`}
-                        </Badge>
-                        <span style={{ fontSize: "13px", color: "#6b7280" }}>
-                          {new Date(c.createdAt).toLocaleString('en-IN', {
-                            day: 'numeric', month: 'short', year: 'numeric',
-                            hour: '2-digit', minute: '2-digit'
-                          })}
+                <div className="empty-state">
+                  No proposal details available.
+                </div>
+              )}
+            </div>
+
+            <div className="customer360-card">
+              <h3>
+                <Layers size={16} /> Milestones
+              </h3>
+              {milestones.length === 0 ? (
+                <div className="empty-state">No milestones available.</div>
+              ) : (
+                <div className="table-wrap">
+                  <table>
+                    <thead>
+                      <tr>
+                        <th>%</th>
+                        <th>Phase Name</th>
+                        <th>Company Message</th>
+                        <th>Status</th>
+                        <th>Dates</th>
+                        <th>Feedback / Revision</th>
+                        <th>Flags</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {milestones.map((milestone) => (
+                        <tr key={milestone._id}>
+                          <td>
+                            {milestone.percentage
+                              ? `${milestone.percentage}%`
+                              : "—"}
+                          </td>
+                          <td>{milestone.phaseName || "—"}</td>
+                          <td>{milestone.companyMessage || "—"}</td>
+                          <td>
+                            <span
+                              className={`status-pill ${milestone.needsRevision ? "danger" : milestone.isApprovedByCustomer ? "success" : "warning"}`}
+                            >
+                              {milestone.needsRevision
+                                ? "Revision Requested"
+                                : milestone.isApprovedByCustomer
+                                  ? "Approved"
+                                  : "Pending"}
+                            </span>
+                          </td>
+                          <td>
+                            Submitted: {formatDateTime(milestone.submittedAt)}
+                            <br />
+                            Approved: {formatDateTime(milestone.approvedAt)}
+                          </td>
+                          <td>{milestone.customerFeedback || "—"}</td>
+                          <td>
+                            Checkpoint: {milestone.isCheckpoint ? "Yes" : "No"}
+                            <br />
+                            Needs Revision:{" "}
+                            {milestone.needsRevision ? "Yes" : "No"}
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+            </div>
+          </section>
+        )}
+
+        {activeMiniNav === "payment-financial" && (
+          <section id="payment-financial" className="customer360-section green">
+            <SectionHeading
+              id="payment-financial-head"
+              title="Payment & Payout Details"
+              icon={Shield}
+              accent="green"
+            />
+
+            <div className="project360-payment-grid">
+              <article className="summary-card blue">
+                <div className="summary-accent" />
+                <BadgeIndianRupee size={18} />
+                <div>
+                  <span>Total Project Amount</span>
+                  <strong>{formatCurrency(paymentSummary.totalAmount)}</strong>
+                </div>
+              </article>
+              <article className="summary-card rose">
+                <div className="summary-accent" />
+                <CheckCircle2 size={18} />
+                <div>
+                  <span>Platform Fee</span>
+                  <strong>{formatCurrency(paymentSummary.platformFee)}</strong>
+                </div>
+              </article>
+              <article className="summary-card emerald">
+                <div className="summary-accent" />
+                <Building2 size={18} />
+                <div>
+                  <span>Paid to Company</span>
+                  <strong>
+                    {formatCurrency(paymentSummary.amountPaidToCompany)}
+                  </strong>
+                </div>
+              </article>
+              <article className="summary-card orange">
+                <div className="summary-accent" />
+                <Shield size={18} />
+                <div>
+                  <span>Payment Status</span>
+                  <strong>{statusLabel(paymentSummary.paymentStatus)}</strong>
+                </div>
+              </article>
+            </div>
+
+            <div className="customer360-card">
+              <h3>
+                <Clock size={16} /> Milestone / Phase Payments
+              </h3>
+              {(paymentSummary.milestonePayments || []).length === 0 ? (
+                <div className="empty-state">No milestone payment entries.</div>
+              ) : (
+                <div className="table-wrap">
+                  <table>
+                    <thead>
+                      <tr>
+                        <th>%</th>
+                        <th>Phase</th>
+                        <th>Amount</th>
+                        <th>Platform Fee</th>
+                        <th>Company Payout</th>
+                        <th>Status</th>
+                        <th>Bill</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {(paymentSummary.milestonePayments || []).map((entry) => (
+                        <tr key={entry._id}>
+                          <td>
+                            {entry.milestonePercentage
+                              ? `${entry.milestonePercentage}%`
+                              : "—"}
+                          </td>
+                          <td>{entry.phaseName || "—"}</td>
+                          <td>{formatCurrency(entry.amount)}</td>
+                          <td>{formatCurrency(entry.platformFee)}</td>
+                          <td>{formatCurrency(entry.companyPayout)}</td>
+                          <td>
+                            <span
+                              className={`status-pill ${statusClass(entry.status)}`}
+                            >
+                              {statusLabel(entry.status)}
+                            </span>
+                          </td>
+                          <td>
+                            {entry.billUrl ? (
+                              <a
+                                href={entry.billUrl}
+                                target="_blank"
+                                rel="noreferrer"
+                                className="project360-file-link"
+                              >
+                                Bill
+                              </a>
+                            ) : (
+                              "—"
+                            )}
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+            </div>
+
+            <div className="customer360-card">
+              <h3>
+                <CheckCircle2 size={16} /> Payouts Released
+              </h3>
+              {(paymentSummary.releasedPayouts || []).length === 0 ? (
+                <div className="empty-state">No released payouts yet.</div>
+              ) : (
+                <div className="table-wrap">
+                  <table>
+                    <thead>
+                      <tr>
+                        <th>Phase</th>
+                        <th>Milestone %</th>
+                        <th>Amount</th>
+                        <th>Released On</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {(paymentSummary.releasedPayouts || []).map((entry) => (
+                        <tr key={entry._id}>
+                          <td>{entry.phaseName || "—"}</td>
+                          <td>
+                            {entry.milestonePercentage
+                              ? `${entry.milestonePercentage}%`
+                              : "—"}
+                          </td>
+                          <td>{formatCurrency(entry.amount)}</td>
+                          <td>{formatDateTime(entry.releaseDate)}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+            </div>
+
+            <div className="customer360-card">
+              <h3>
+                <FileText size={16} /> Transaction References
+              </h3>
+              <div className="personal-grid two-col">
+                <div>
+                  <span>Stripe Session ID</span>
+                  <strong>{paymentSummary.stripeSessionId || "—"}</strong>
+                </div>
+                <div>
+                  <span>Stripe Payment Intent ID</span>
+                  <strong>{paymentSummary.stripePaymentIntentId || "—"}</strong>
+                </div>
+              </div>
+            </div>
+          </section>
+        )}
+
+        {activeMiniNav === "updates-communication" && (
+          <section
+            id="updates-communication"
+            className="customer360-section purple"
+          >
+            <SectionHeading
+              id="updates-communication-head"
+              title="Project Updates & Communication"
+              icon={Zap}
+              accent="purple"
+            />
+
+            <div className="customer360-card">
+              <h3>
+                <FileText size={16} /> Recent Updates
+              </h3>
+              {updates.length === 0 ? (
+                <div className="empty-state">No updates posted yet.</div>
+              ) : (
+                <div className="project-grid project360-update-grid">
+                  {updates.map((update) => (
+                    <article
+                      key={update._id}
+                      className="project-card project360-update-card"
+                    >
+                      <div className="project-head">
+                        <h4>Project Update</h4>
+                        <span className="amount-pill">
+                          {formatDate(update.createdAt)}
                         </span>
                       </div>
-                      <div className="complaint-message">{c.message}</div>
-                    </div>
-                  ))
+                      <p className="project-partner">
+                        {update.updateText || "—"}
+                      </p>
+                      {update.updateImagePath ? (
+                        <a
+                          href={update.updateImagePath}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="project360-file-link"
+                        >
+                          View Update Image
+                        </a>
+                      ) : (
+                        <span className="project360-muted">No image</span>
+                      )}
+                    </article>
+                  ))}
+                </div>
               )}
             </div>
-          </div>
-        </div>
-      )}
+
+            <div className="customer360-card">
+              <h3>
+                <Users size={16} /> Conversation Entries
+              </h3>
+              {conversation.length === 0 ? (
+                <div className="empty-state">
+                  No conversation entries found.
+                </div>
+              ) : (
+                <div className="table-wrap">
+                  <table>
+                    <thead>
+                      <tr>
+                        <th>Sender</th>
+                        <th>Message</th>
+                        <th>Timestamp</th>
+                        <th>Viewed</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {conversation.map((entry) => (
+                        <tr key={entry._id}>
+                          <td>{entry.sender || "—"}</td>
+                          <td>{entry.message || "—"}</td>
+                          <td>{formatDateTime(entry.timestamp)}</td>
+                          <td>
+                            {entry.sender === "company"
+                              ? entry.viewedByCustomer
+                                ? "Viewed"
+                                : "Not Viewed"
+                              : entry.viewedByCompany
+                                ? "Viewed"
+                                : "Not Viewed"}
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+            </div>
+          </section>
+        )}
+
+        {activeMiniNav === "customer-review" && (
+          <section id="customer-review" className="customer360-section purple">
+            <SectionHeading
+              id="customer-review-head"
+              title="Customer Review"
+              icon={Star}
+              accent="purple"
+            />
+            {!customerReview?.rating ? (
+              <div className="empty-state">No review submitted yet</div>
+            ) : (
+              <div className="review-grid">
+                <article className="review-card">
+                  <div className="review-head">
+                    <h4>Customer Review</h4>
+                    <span>
+                      ⭐ {Number(customerReview.rating || 0).toFixed(1)}
+                    </span>
+                  </div>
+                  <p className="review-comment">
+                    {customerReview.reviewText || "No review text"}
+                  </p>
+                  <small>
+                    Reviewed On: {formatDate(customerReview.reviewDate)}
+                  </small>
+                </article>
+              </div>
+            )}
+          </section>
+        )}
+
+        {activeMiniNav === "timestamps-metadata" && (
+          <section
+            id="timestamps-metadata"
+            className="customer360-section orange"
+          >
+            <SectionHeading
+              id="timestamps-metadata-head"
+              title="Timestamps & Metadata"
+              icon={Calendar}
+              accent="orange"
+            />
+            <div className="customer360-card">
+              <div className="personal-grid two-col">
+                <div>
+                  <span>Created At</span>
+                  <strong>{formatDateTime(timestamps.createdAt)}</strong>
+                </div>
+                <div>
+                  <span>Last Updated</span>
+                  <strong>{formatDateTime(timestamps.updatedAt)}</strong>
+                </div>
+                <div>
+                  <span>Current Phase</span>
+                  <strong>{basicInfo.currentPhase || "—"}</strong>
+                </div>
+                <div>
+                  <span>Completion Percentage</span>
+                  <strong>
+                    {Number(basicInfo.completionPercentage || 0)}%
+                  </strong>
+                </div>
+              </div>
+            </div>
+          </section>
+        )}
+      </div>
     </AdminLayout>
   );
 };

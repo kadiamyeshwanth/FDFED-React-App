@@ -1,136 +1,138 @@
-/* AdminConstructionProjectDetail */
-@import "../AdminCompanyDetail/AdminCompanyDetail.css";
-
-/* Progress card */
-.progress-card {
-  margin-bottom: 24px;
+.project360-page {
+  background: linear-gradient(160deg, #fff7ed 0%, #eef2ff 100%);
 }
 
-.progress-info {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 8px;
-  padding: 0 4px;
+.project360-summary-grid {
+  grid-template-columns: repeat(6, minmax(0, 1fr));
 }
 
-.progress-label {
-  font-size: 14px;
-  font-weight: 600;
-  color: #374151;
+.project360-payment-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 14px;
 }
 
-.progress-pct {
-  font-size: 18px;
+.summary-card.red .summary-accent {
+  background: #ef4444;
+}
+
+.summary-card.indigo .summary-accent {
+  background: #6366f1;
+}
+
+.summary-card.amber .summary-accent {
+  background: #d97706;
+}
+
+.summary-card.rose .summary-accent {
+  background: #f43f5e;
+}
+
+.summary-card.emerald .summary-accent {
+  background: #059669;
+}
+
+.project360-inline-btn {
+  margin-top: 6px;
+  padding: 6px 10px;
+  font-size: 12px;
+}
+
+.project360-wide-field {
+  grid-column: 1 / -1;
+}
+
+.project360-file-link {
+  text-decoration: none;
+  color: #1d4ed8;
+  border: 1px solid #bfdbfe;
+  background: #dbeafe;
+  border-radius: 999px;
+  padding: 6px 10px;
+  font-size: 12px;
   font-weight: 700;
-  color: #3b82f6;
 }
 
-/* Floor cards */
-.floor-header {
+.project360-file-link:hover {
+  background: #bfdbfe;
+}
+
+.project360-media-grid {
   display: flex;
-  align-items: center;
-  gap: 10px;
-  margin-bottom: 8px;
-}
-
-.floor-type {
-  font-weight: 600;
-  color: #374151;
-  font-size: 14px;
-}
-
-.floor-area {
-  font-size: 13px;
-  color: #6b7280;
-  margin-bottom: 4px;
-}
-
-.floor-desc {
-  font-size: 13px;
-  color: #6b7280;
-  margin: 4px 0 0;
-  line-height: 1.5;
-}
-
-/* Milestones */
-.milestone-success {
-  border-left: 4px solid #10b981 !important;
-}
-
-.milestone-danger {
-  border-left: 4px solid #ef4444 !important;
-}
-
-.milestone-warning {
-  border-left: 4px solid #f59e0b !important;
-}
-
-.milestone-header {
-  margin-bottom: 14px;
-}
-
-.milestone-title-row {
-  display: flex;
-  align-items: center;
-  gap: 12px;
   flex-wrap: wrap;
-  margin-bottom: 6px;
+  gap: 8px;
+  color: #64748b;
 }
 
-.milestone-title-row h4 {
-  margin: 0;
-  font-size: 16px;
+.project360-media-link {
+  text-decoration: none;
+  color: #b45309;
+  border: 1px solid #fed7aa;
+  background: #ffedd5;
+  border-radius: 999px;
+  padding: 6px 10px;
+  font-size: 12px;
   font-weight: 700;
-  color: #1f2937;
 }
 
-.milestone-dates {
-  display: flex;
-  gap: 16px;
+.project360-media-link.success {
+  color: #065f46;
+  border-color: #86efac;
+  background: #dcfce7;
+}
+
+.project360-update-grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.project360-update-card {
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.project360-update-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 14px 24px rgba(15, 23, 42, 0.1);
+}
+
+.project360-muted {
+  color: #64748b;
   font-size: 12px;
-  color: #6b7280;
 }
 
-.milestone-report {
-  background: #f9fafb;
-  border-radius: 10px;
-  padding: 14px;
-  margin-bottom: 12px;
+.error-state {
+  background: #fff;
+  border-radius: 18px;
+  padding: 24px;
+  text-align: center;
+  box-shadow: 0 8px 20px rgba(15, 23, 42, 0.08);
 }
 
-.milestone-report h5,
-.milestone-conversation h5,
-.milestone-feedback h5 {
-  font-size: 12px;
-  font-weight: 600;
-  color: #6b7280;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
+.error-state h2 {
   margin: 0 0 8px;
+  color: #0f172a;
 }
 
-.milestone-report p {
-  margin: 0;
-  line-height: 1.6;
-  color: #374151;
-  font-size: 14px;
+.error-state p {
+  margin: 0 0 16px;
+  color: #64748b;
 }
 
-.milestone-conversation {
-  margin-bottom: 12px;
+@media (max-width: 1400px) {
+  .project360-summary-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .project360-payment-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
 }
 
-.milestone-feedback {
-  background: #fef3c7;
-  padding: 14px;
-  border-radius: 10px;
-  border: 1px solid #fcd34d;
-}
-
-.milestone-feedback p {
-  margin: 0;
-  line-height: 1.6;
-  color: #374151;
-  font-size: 14px;
+@media (max-width: 900px) {
+  .project360-summary-grid,
+  .project360-payment-grid,
+  .project360-update-grid {
+    grid-template-columns: 1fr;
+  }
 }
