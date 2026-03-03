@@ -1,10 +1,12 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { AdminAuthProvider } from "../context/AdminAuthContext";
 
-const AdminProtectedRoute = ({ children }) => {
+const AdminProtectedRoute = ({ children, allowedRoles = ["platform_manager", "admin", "superadmin"] }) => {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
   const [authenticated, setAuthenticated] = useState(false);
+  const [role, setRole] = useState(null);
 
   useEffect(() => {
     const checkAdminAuth = async () => {
@@ -23,8 +25,13 @@ const AdminProtectedRoute = ({ children }) => {
         }
         const data = await res.json();
 
-        if (res.ok && data.authenticated && data.role === "admin") {
-          setAuthenticated(true);
+        if (res.ok && data.authenticated && (data.role === "platform_manager" || data.role === "superadmin" || data.role === "admin")) {
+          if (allowedRoles.includes(data.role)) {
+            setAuthenticated(true);
+            setRole(data.role);
+          } else {
+            navigate("/unauthorized");
+          }
         } else {
           navigate("/admin-login");
         }
@@ -53,7 +60,11 @@ const AdminProtectedRoute = ({ children }) => {
     );
   }
 
-  return authenticated ? children : null;
+  return authenticated ? (
+    <AdminAuthProvider role={role}>
+      {children}
+    </AdminAuthProvider>
+  ) : null;
 };
 
 export default AdminProtectedRoute;

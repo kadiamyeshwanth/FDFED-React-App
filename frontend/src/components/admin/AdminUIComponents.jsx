@@ -9,25 +9,40 @@ export const Card = ({ children, className = "", ...props }) => (
 );
 
 /* Stat Card Component */
-export const StatCard = ({ title, value, icon: Icon, color = "blue", trend = null }) => (
-  <div className={`stat-card stat-card-${color}`}>
-    <div className="stat-header">
-      <h3 className="stat-title">{title}</h3>
-      {Icon && <Icon size={20} className="stat-icon" />}
+export const StatCard = ({
+  title,
+  value,
+  icon: Icon,
+  color = "blue",
+  trend = null,
+}) => (
+  <div className={`admin-stat-card admin-stat-card-${color}`}>
+    <div className="admin-stat-header">
+      <h3 className="admin-stat-title">{title}</h3>
+      {Icon && <Icon size={20} className="admin-stat-icon" />}
     </div>
-    <div className="stat-value">{value}</div>
-    {trend && <div className={`stat-trend ${trend > 0 ? "positive" : "negative"}`}>
-      {trend > 0 ? "↑" : "↓"} {Math.abs(trend)}% from last month
-    </div>}
+    <div className="admin-stat-value">{value}</div>
+    {trend && (
+      <div
+        className={`admin-stat-trend ${trend > 0 ? "positive" : "negative"}`}
+      >
+        {trend > 0 ? "↑" : "↓"} {Math.abs(trend)}% from last month
+      </div>
+    )}
   </div>
 );
 
 /* KPI Card Component */
-export const KPICard = ({ title, value, unit = "", description = "", icon: Icon, color = "blue" }) => (
+export const KPICard = ({
+  title,
+  value,
+  unit = "",
+  description = "",
+  icon: Icon,
+  color = "blue",
+}) => (
   <div className={`kpi-card kpi-${color}`}>
-    <div className="kpi-icon-wrapper">
-      {Icon && <Icon size={24} />}
-    </div>
+    <div className="kpi-icon-wrapper">{Icon && <Icon size={24} />}</div>
     <div className="kpi-content">
       <h4 className="kpi-title">{title}</h4>
       <div className="kpi-value">
@@ -74,17 +89,21 @@ export const DataRow = ({ label, value, children }) => (
 );
 
 /* Section Component */
-export const Section = ({ title, subtitle, children, className = "" }) => (
-  <section className={`admin-section ${className}`}>
-    {(title || subtitle) && (
-      <header className="section-header">
-        {title && <h2 className="section-title">{title}</h2>}
-        {subtitle && <p className="section-subtitle">{subtitle}</p>}
-      </header>
-    )}
-    <div className="section-content">{children}</div>
-  </section>
+export const Section = React.forwardRef(
+  ({ title, subtitle, children, className = "", ...props }, ref) => (
+    <section ref={ref} className={`admin-ui-section ${className}`} {...props}>
+      {(title || subtitle) && (
+        <header className="admin-ui-section-header">
+          {title && <h2 className="admin-ui-section-title">{title}</h2>}
+          {subtitle && <p className="admin-ui-section-subtitle">{subtitle}</p>}
+        </header>
+      )}
+      <div className="admin-ui-section-content">{children}</div>
+    </section>
+  ),
 );
+
+Section.displayName = "Section";
 
 /* Table Component */
 export const AdminTable = ({ columns, data, onRowClick, actions }) => (
@@ -109,26 +128,43 @@ export const AdminTable = ({ columns, data, onRowClick, actions }) => (
               ))}
               {actions && (
                 <td className="actions-cell">
-                  {actions.map((action, i) => (
-                    <button
-                      key={i}
-                      className={`table-action-btn table-action-${action.variant}`}
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        action.onClick(row);
-                      }}
-                    >
-                      {action.icon && <action.icon size={14} />}
-                      {action.label}
-                    </button>
-                  ))}
+                  {actions
+                    .filter((action) =>
+                      typeof action.when === "function"
+                        ? action.when(row)
+                        : true,
+                    )
+                    .map((action, i) => {
+                      const isDisabled =
+                        typeof action.disabled === "function"
+                          ? action.disabled(row)
+                          : Boolean(action.disabled);
+
+                      return (
+                        <button
+                          key={i}
+                          className={`table-action-btn table-action-${action.variant}`}
+                          disabled={isDisabled}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            if (!isDisabled) action.onClick(row);
+                          }}
+                        >
+                          {action.icon && <action.icon size={14} />}
+                          {action.label}
+                        </button>
+                      );
+                    })}
                 </td>
               )}
             </tr>
           ))
         ) : (
           <tr>
-            <td colSpan={columns.length + (actions ? 1 : 0)} className="empty-cell">
+            <td
+              colSpan={columns.length + (actions ? 1 : 0)}
+              className="empty-cell"
+            >
               No data available
             </td>
           </tr>
@@ -159,7 +195,9 @@ export const Modal = ({ isOpen, title, children, onClose, actions }) => {
         {title && (
           <header className="modal-header">
             <h2>{title}</h2>
-            <button className="modal-close" onClick={onClose}>✕</button>
+            <button className="modal-close" onClick={onClose}>
+              ✕
+            </button>
           </header>
         )}
         <div className="modal-content">{children}</div>
@@ -190,11 +228,11 @@ export const Spinner = ({ size = "md" }) => (
 
 /* Header Component */
 export const PageHeader = ({ title, subtitle, actions }) => (
-  <header className="page-header">
-    <div className="page-header-content">
-      <h1 className="page-title">{title}</h1>
-      {subtitle && <p className="page-subtitle">{subtitle}</p>}
+  <header className="admin-page-header">
+    <div className="admin-page-header-content">
+      <h1 className="admin-page-title">{title}</h1>
+      {subtitle && <p className="admin-page-subtitle">{subtitle}</p>}
     </div>
-    {actions && <div className="page-actions">{actions}</div>}
+    {actions && <div className="admin-page-actions">{actions}</div>}
   </header>
 );

@@ -9,17 +9,69 @@ import {
   Home,
   LogOut,
   ChevronRight,
+  Database,
+  User,
+  MessageSquare,
 } from "lucide-react";
+import { useAdminAuth } from "../../context/AdminAuthContext";
 import "./AdminLayout.css";
 
 const AdminLayout = ({ children }) => {
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const navigate = useNavigate();
+  const { role, isReadOnly, basePath } = useAdminAuth();
 
-  const navItems = [
-    { label: "Dashboard", icon: Home, path: "/admin/admindashboard" },
-    { label: "Revenue Analytics", icon: BarChart3, path: "/admin/revenue-analytics" },
-  ];
+  const headerLabel =
+    role === "platform_manager" ? "Platform Manager" : role === "superadmin" ? "Superadmin" : "Admin";
+  const headerSuffix = isReadOnly ? " (Read-only)" : "";
+
+  const dashboardPath =
+    role === "platform_manager"
+      ? `${basePath}/dashboard`
+      : `${basePath}/admindashboard`;
+
+  const navItems = [{ label: "Dashboard", icon: Home, path: dashboardPath }];
+
+  if (role === "platform_manager") {
+    navItems.push({
+      label: "Verification Tasks",
+      icon: Building2,
+      path: `${basePath}/verification-tasks`,
+    });
+    navItems.push({
+      label: "Assigned Complaints",
+      icon: MessageSquare,
+      path: `${basePath}/assigned-complaints`,
+    });
+    navItems.push({
+      label: "Profile",
+      icon: User,
+      path: `${basePath}/profile`,
+    });
+  }
+
+  if (role !== "platform_manager") {
+    navItems.push(
+      {
+        label: "Data Management",
+        icon: Database,
+        path: `${basePath}/data-management`,
+      },
+      {
+        label: "Revenue Analytics",
+        icon: BarChart3,
+        path: `${basePath}/revenue-analytics`,
+      },
+    );
+  }
+
+  if (role === "admin" || role === "superadmin") {
+    navItems.push({
+      label: "Platform Managers",
+      icon: Users,
+      path: `${basePath}/platform-managers`,
+    });
+  }
 
   const handleLogout = async () => {
     try {
@@ -41,7 +93,10 @@ const AdminLayout = ({ children }) => {
         <div className="sidebar-header">
           <div className="sidebar-logo">
             <Building2 size={24} />
-            <span>Admin</span>
+            <span>
+              {headerLabel}
+              {headerSuffix}
+            </span>
           </div>
           <button
             className="sidebar-toggle"
