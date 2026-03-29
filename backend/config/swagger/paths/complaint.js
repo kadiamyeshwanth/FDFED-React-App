@@ -1,5 +1,5 @@
 module.exports = {
-  "/api/complaint/submit": {
+  "/api/complaints": {
     post: {
       tags: ["complaint"],
       summary: "Submit a complaint (customer or company)",
@@ -28,7 +28,7 @@ module.exports = {
       },
     },
   },
-  "/api/complaint/unviewed/count": {
+  "/api/complaints/unviewed/count": {
     get: {
       tags: ["complaint"],
       summary: "Get count of unviewed complaints (admin dashboard)",
@@ -37,7 +37,7 @@ module.exports = {
       },
     },
   },
-  "/api/complaint/company/unviewed/count": {
+  "/api/complaints/company/unviewed/count": {
     get: {
       tags: ["complaint"],
       summary: "Get count of unviewed complaints for company",
@@ -46,7 +46,7 @@ module.exports = {
       },
     },
   },
-  "/api/complaint/{projectId}": {
+  "/api/complaints/{projectId}": {
     get: {
       tags: ["complaint"],
       summary: "Get all complaints for a project",
@@ -61,7 +61,7 @@ module.exports = {
       },
     },
   },
-  "/api/complaint/{complaintId}/reply": {
+  "/api/complaints/{complaintId}/reply": {
     post: {
       tags: ["complaint"],
       summary: "Reply to a complaint (admin/platformManager)",
