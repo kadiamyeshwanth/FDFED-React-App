@@ -86,7 +86,9 @@ const CustomerJobStatus = () => {
   const filterApplicationsByStatus = (apps, status) => {
     if (status === "all") return apps;
     return apps.filter((app) => {
-      const appStatus = app.status?.toLowerCase() || "";
+      const rawStatus = app.status?.toLowerCase() || "";
+      const appStatus =
+        rawStatus === "pending payment" ? "pending_payment" : rawStatus;
       return appStatus === status.toLowerCase();
     });
   };
@@ -95,13 +97,16 @@ const CustomerJobStatus = () => {
     const counts = {
       all: apps.length,
       pending: 0,
+      pending_payment: 0,
       accepted: 0,
       rejected: 0,
       completed: 0,
     };
 
     apps.forEach((app) => {
-      const status = app.status?.toLowerCase() || "";
+      const rawStatus = app.status?.toLowerCase() || "";
+      const status =
+        rawStatus === "pending payment" ? "pending_payment" : rawStatus;
       if (counts.hasOwnProperty(status)) {
         counts[status]++;
       }
@@ -138,6 +143,11 @@ const CustomerJobStatus = () => {
       hour: "2-digit",
       minute: "2-digit",
     });
+
+  const formatStatusLabel = (status) => {
+    if (status === "pending_payment") return "Pending Payment";
+    return status.charAt(0).toUpperCase() + status.slice(1);
+  };
 
   const handleApproveMilestone = async (
     projectId,
@@ -607,6 +617,10 @@ const CustomerJobStatus = () => {
       app.status,
     );
     const isAccepted = app.status?.toLowerCase() === "accepted";
+    const normalizedStatus = (app.status || "").toLowerCase();
+    const isPendingPayment =
+      normalizedStatus === "pending payment" ||
+      normalizedStatus === "pending_payment";
 
     if (isProposalSent && app.proposal) {
       return (
@@ -636,6 +650,26 @@ const CustomerJobStatus = () => {
         <p style={{ color: "green" }}>
           Accepted job for ₹{app.proposal.price.toLocaleString("en-IN")}
         </p>
+      );
+    }
+
+    if (isPendingPayment && (type === "architect" || type === "interior")) {
+      return (
+        <div className="cjs-proposal-section">
+          <p style={{ marginBottom: "10px", color: "#c77900" }}>
+            Proposal accepted. Initial deposit payment is pending.
+          </p>
+          <button
+            className="cjs-btn-accept-pay"
+            onClick={() =>
+              navigate(
+                `/customerdashboard/payment-checkout/${app._id}?type=${type}&payment=deposit`,
+              )
+            }
+          >
+            Pay Initial Deposit
+          </button>
+        </div>
       );
     }
 
@@ -998,23 +1032,28 @@ const CustomerJobStatus = () => {
         {/* Status Filter Tabs */}
         {applications.architect.length > 0 && (
           <div className="cjs-status-filter-tabs">
-            {["all", "pending", "accepted", "rejected", "completed"].map(
-              (status) => {
-                const counts = getStatusCounts(applications.architect);
-                const count = counts[status] || 0;
-                if (status !== "all" && count === 0) return null;
+            {[
+              "all",
+              "pending",
+              "pending_payment",
+              "accepted",
+              "rejected",
+              "completed",
+            ].map((status) => {
+              const counts = getStatusCounts(applications.architect);
+              const count = counts[status] || 0;
+              if (status !== "all" && count === 0) return null;
 
-                return (
-                  <button
-                    key={status}
-                    className={`cjs-status-filter-btn ${statusFilters.architect === status ? "active" : ""}`}
-                    onClick={() => handleStatusFilter("architect", status)}
-                  >
-                    {status.charAt(0).toUpperCase() + status.slice(1)} ({count})
-                  </button>
-                );
-              },
-            )}
+              return (
+                <button
+                  key={status}
+                  className={`cjs-status-filter-btn ${statusFilters.architect === status ? "active" : ""}`}
+                  onClick={() => handleStatusFilter("architect", status)}
+                >
+                  {formatStatusLabel(status)} ({count})
+                </button>
+              );
+            })}
           </div>
         )}
 
@@ -1051,23 +1090,28 @@ const CustomerJobStatus = () => {
         {/* Status Filter Tabs */}
         {applications.interior.length > 0 && (
           <div className="cjs-status-filter-tabs">
-            {["all", "pending", "accepted", "rejected", "completed"].map(
-              (status) => {
-                const counts = getStatusCounts(applications.interior);
-                const count = counts[status] || 0;
-                if (status !== "all" && count === 0) return null;
+            {[
+              "all",
+              "pending",
+              "pending_payment",
+              "accepted",
+              "rejected",
+              "completed",
+            ].map((status) => {
+              const counts = getStatusCounts(applications.interior);
+              const count = counts[status] || 0;
+              if (status !== "all" && count === 0) return null;
 
-                return (
-                  <button
-                    key={status}
-                    className={`cjs-status-filter-btn ${statusFilters.interior === status ? "active" : ""}`}
-                    onClick={() => handleStatusFilter("interior", status)}
-                  >
-                    {status.charAt(0).toUpperCase() + status.slice(1)} ({count})
-                  </button>
-                );
-              },
-            )}
+              return (
+                <button
+                  key={status}
+                  className={`cjs-status-filter-btn ${statusFilters.interior === status ? "active" : ""}`}
+                  onClick={() => handleStatusFilter("interior", status)}
+                >
+                  {formatStatusLabel(status)} ({count})
+                </button>
+              );
+            })}
           </div>
         )}
 

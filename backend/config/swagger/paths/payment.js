@@ -103,6 +103,40 @@ module.exports = {
       },
     },
   },
+  "/api/payment/worker/test-mark-paid": {
+    post: {
+      tags: ["payment"],
+      summary:
+        "Test mode shortcut to mark worker deposit/milestone payment as paid",
+      requestBody: {
+        required: true,
+        content: {
+          "application/json": {
+            schema: {
+              type: "object",
+              required: ["projectId", "projectType", "paymentType"],
+              properties: {
+                projectId: { type: "string" },
+                projectType: {
+                  type: "string",
+                  enum: ["architect", "interior"],
+                },
+                paymentType: { type: "string", enum: ["deposit", "milestone"] },
+                milestonePercentage: {
+                  type: "number",
+                  enum: [25, 50, 75, 100],
+                },
+              },
+            },
+          },
+        },
+      },
+      responses: {
+        200: { description: "Payment marked as paid in test mode" },
+        400: { $ref: "#/components/responses/BadRequest" },
+      },
+    },
+  },
   "/api/payment/collect-milestone": {
     post: {
       tags: ["payment"],
