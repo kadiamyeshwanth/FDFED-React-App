@@ -1,5 +1,5 @@
 module.exports = {
-  "/api/company/companydashboard": {
+  "/api/companydashboard": {
     get: {
       tags: ["company"],
       summary: "Get company dashboard data",
@@ -10,7 +10,7 @@ module.exports = {
       },
     },
   },
-  "/api/company/companyongoing_projects": {
+  "/api/companyongoing_projects": {
     get: {
       tags: ["company"],
       summary: "Get ongoing projects for company",
@@ -21,7 +21,7 @@ module.exports = {
       },
     },
   },
-  "/api/company/project_requests": {
+  "/api/project_requests": {
     get: {
       tags: ["company"],
       summary: "Get project requests for company",
@@ -32,24 +32,14 @@ module.exports = {
       },
     },
   },
-  "/api/company/projects/{projectId}/{status}": {
+  "/api/projects/{projectId}/{status}": {
     patch: {
       tags: ["company"],
       summary: "Update project status",
       security: [{ cookieAuth: [] }],
       parameters: [
-        {
-          name: "projectId",
-          in: "path",
-          required: true,
-          schema: { type: "string" },
-        },
-        {
-          name: "status",
-          in: "path",
-          required: true,
-          schema: { type: "string" },
-        },
+        { name: "projectId", in: "path", required: true, schema: { type: "string" } },
+        { name: "status", in: "path", required: true, schema: { type: "string" } },
       ],
       responses: {
         200: { description: "Project status updated" },
@@ -58,7 +48,7 @@ module.exports = {
       },
     },
   },
-  "/api/company/companyhiring": {
+  "/api/companyhiring": {
     get: {
       tags: ["company"],
       summary: "Get hiring requests for company",
@@ -80,12 +70,9 @@ module.exports = {
           "multipart/form-data": {
             schema: {
               type: "object",
-              required: ["position", "location", "salary", "workerId"],
               properties: {
-                position: { type: "string" },
-                location: { type: "string" },
-                salary: { type: "number" },
                 workerId: { type: "string" },
+                projectId: { type: "string" },
               },
             },
           },
@@ -98,7 +85,7 @@ module.exports = {
       },
     },
   },
-  "/api/company/companysettings": {
+  "/api/companysettings": {
     get: {
       tags: ["company"],
       summary: "Get company settings",
@@ -109,7 +96,7 @@ module.exports = {
       },
     },
   },
-  "/api/company/companybids": {
+  "/api/companybids": {
     get: {
       tags: ["company"],
       summary: "Get bids for company projects",
@@ -120,7 +107,7 @@ module.exports = {
       },
     },
   },
-  "/api/company/companyrevenue": {
+  "/api/companyrevenue": {
     get: {
       tags: ["company"],
       summary: "Get company revenue summary",
@@ -131,7 +118,7 @@ module.exports = {
       },
     },
   },
-  "/api/company/my-employees": {
+  "/api/my-employees": {
     get: {
       tags: ["company"],
       summary: "Get company employees list",
@@ -142,29 +129,24 @@ module.exports = {
       },
     },
   },
-  "/api/company/revenue_form": {
+  "/api/revenue_form": {
     get: {
       tags: ["company"],
-      summary: "Get company revenue form view metadata",
+      summary: "Get revenue form view",
       security: [{ cookieAuth: [] }],
       responses: {
-        200: { description: "Revenue form metadata retrieved" },
+        200: { description: "Revenue form view retrieved" },
         401: { $ref: "#/components/responses/Unauthorized" },
       },
     },
   },
-  "/api/company/worker-request/{requestId}": {
+  "/api/worker-request/{requestId}": {
     patch: {
       tags: ["company"],
       summary: "Handle worker request (accept/reject)",
       security: [{ cookieAuth: [] }],
       parameters: [
-        {
-          name: "requestId",
-          in: "path",
-          required: true,
-          schema: { type: "string" },
-        },
+        { name: "requestId", in: "path", required: true, schema: { type: "string" } },
       ],
       requestBody: {
         required: true,
@@ -198,35 +180,12 @@ module.exports = {
           "multipart/form-data": {
             schema: {
               type: "object",
-              required: ["profileType"],
               properties: {
-                profileType: {
-                  type: "string",
-                  enum: ["worker", "customer"],
-                },
-                companyLocation: { type: "string" },
-                companySize: { type: "string" },
-                specializations: { type: "string" },
-                aboutCompany: { type: "string" },
-                whyJoinUs: { type: "string" },
-                currentOpenings: { type: "string" },
-                projectsCompleted: { type: "string" },
-                yearsInBusiness: { type: "string" },
-                customerAboutCompany: { type: "string" },
-                didYouKnow: { type: "string" },
-                completedProjects: { type: "string" },
-                projectBeforeImages: {
-                  type: "array",
-                  items: { type: "string", format: "binary" },
-                },
-                projectAfterImages: {
-                  type: "array",
-                  items: { type: "string", format: "binary" },
-                },
-                certificateFiles: {
-                  type: "array",
-                  items: { type: "string", format: "binary" },
-                },
+                companyName: { type: "string" },
+                businessType: { type: "string" },
+                description: { type: "string" },
+                phone: { type: "string" },
+                avatar: { type: "string", format: "binary" },
               },
             },
           },
@@ -250,12 +209,11 @@ module.exports = {
           "application/json": {
             schema: {
               type: "object",
-              required: ["bidId", "bidPrice", "companyName", "companyId"],
+              required: ["designRequestId", "bidAmount", "deliveryDays"],
               properties: {
-                bidId: { type: "string" },
-                bidPrice: { type: "number" },
-                companyName: { type: "string" },
-                companyId: { type: "string" },
+                designRequestId: { type: "string" },
+                bidAmount: { type: "number" },
+                deliveryDays: { type: "number" },
               },
             },
           },
@@ -279,25 +237,12 @@ module.exports = {
           "application/json": {
             schema: {
               type: "object",
-              required: ["projectId", "price", "description", "phases"],
+              required: ["projectId", "proposalAmount", "timeline"],
               properties: {
                 projectId: { type: "string" },
-                price: { type: "number" },
-                description: { type: "string" },
-                phases: {
-                  type: "array",
-                  minItems: 4,
-                  maxItems: 4,
-                  items: {
-                    type: "object",
-                    properties: {
-                      name: { type: "string" },
-                      percentage: { type: "number", enum: [25] },
-                      amount: { type: "number" },
-                      description: { type: "string" },
-                    },
-                  },
-                },
+                proposalAmount: { type: "number" },
+                timeline: { type: "string" },
+                notes: { type: "string" },
               },
             },
           },
@@ -314,6 +259,8 @@ module.exports = {
     post: {
       tags: ["company"],
       summary: "Update company password",
+      description:
+        "Company is resolved from authenticated user token (req.user.user_id). Do not send companyId in request body.",
       security: [{ cookieAuth: [] }],
       requestBody: {
         required: true,
@@ -351,10 +298,7 @@ module.exports = {
               required: ["projectId", "milestonePercentage", "invoice"],
               properties: {
                 projectId: { type: "string" },
-                milestonePercentage: {
-                  type: "number",
-                  enum: [25, 50, 75, 100],
-                },
+                milestonePercentage: { type: "number", enum: [25, 50, 75, 100] },
                 invoice: { type: "string", format: "binary" },
               },
             },

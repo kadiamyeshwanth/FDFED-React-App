@@ -1,8 +1,8 @@
 module.exports = {
   "/api/payment/initialize-escrow": {
     post: {
-      tags: ["payment"],
-      summary: "Initialize escrow tracking for a project payment flow",
+      tags: ["payment", "customer"],
+      summary: "Customer initializes escrow for architect/interior project",
       requestBody: {
         required: true,
         content: {
@@ -29,8 +29,8 @@ module.exports = {
   },
   "/api/payment/worker/create-order": {
     post: {
-      tags: ["payment"],
-      summary: "Create Razorpay order for worker deposit or milestone",
+      tags: ["payment", "customer"],
+      summary: "Customer creates Razorpay order for worker deposit or milestone",
       requestBody: {
         required: true,
         content: {
@@ -62,8 +62,8 @@ module.exports = {
   },
   "/api/payment/worker/verify-payment": {
     post: {
-      tags: ["payment"],
-      summary: "Verify worker Razorpay payment and collect escrow funds",
+      tags: ["payment", "customer"],
+      summary: "Customer verifies worker payment and updates escrow",
       requestBody: {
         required: true,
         content: {
@@ -105,7 +105,7 @@ module.exports = {
   },
   "/api/payment/worker/test-mark-paid": {
     post: {
-      tags: ["payment"],
+      tags: ["payment", "customer"],
       summary:
         "Test mode shortcut to mark worker deposit/milestone payment as paid",
       requestBody: {
@@ -139,8 +139,8 @@ module.exports = {
   },
   "/api/payment/collect-milestone": {
     post: {
-      tags: ["payment"],
-      summary: "Collect milestone payment into escrow",
+      tags: ["payment", "customer"],
+      summary: "Customer collects milestone payment into escrow",
       requestBody: {
         required: true,
         content: {
@@ -171,8 +171,8 @@ module.exports = {
   },
   "/api/payment/release-milestone": {
     post: {
-      tags: ["payment"],
-      summary: "Release escrowed milestone payment",
+      tags: ["payment", "customer"],
+      summary: "Customer releases escrowed milestone payment",
       requestBody: {
         required: true,
         content: {
@@ -253,6 +253,32 @@ module.exports = {
       tags: ["payment"],
       summary: "Get worker transaction history",
       security: [{ cookieAuth: [] }],
+      parameters: [
+        {
+          name: "page",
+          in: "query",
+          required: false,
+          schema: { type: "integer", minimum: 1, default: 1 },
+        },
+        {
+          name: "limit",
+          in: "query",
+          required: false,
+          schema: { type: "integer", minimum: 1, default: 20 },
+        },
+        {
+          name: "type",
+          in: "query",
+          required: false,
+          schema: { type: "string" },
+        },
+        {
+          name: "status",
+          in: "query",
+          required: false,
+          schema: { type: "string" },
+        },
+      ],
       responses: {
         200: { description: "Transaction history retrieved" },
         401: { $ref: "#/components/responses/Unauthorized" },
@@ -261,7 +287,7 @@ module.exports = {
   },
   "/api/payment/company/create-order": {
     post: {
-      tags: ["payment"],
+      tags: ["payment", "customer"],
       summary:
         "Create Razorpay order for company phase payment (75/25 split, 5% platform fee)",
       requestBody: {
@@ -290,8 +316,8 @@ module.exports = {
   },
   "/api/payment/company/verify-payment": {
     post: {
-      tags: ["payment"],
-      summary: "Verify company Razorpay payment and release initial 75%",
+      tags: ["payment", "customer"],
+      summary: "Verify company Razorpay payment and process phase payout",
       requestBody: {
         required: true,
         content: {
@@ -300,7 +326,6 @@ module.exports = {
               type: "object",
               required: [
                 "projectId",
-                "milestonePercentage",
                 "razorpay_order_id",
                 "razorpay_payment_id",
                 "razorpay_signature",
@@ -310,6 +335,8 @@ module.exports = {
                 milestonePercentage: {
                   type: "number",
                   enum: [25, 50, 75, 100],
+                  description:
+                    "Optional for normal verify flow (resolved by order ID). Required when using test bypass endpoint.",
                 },
                 razorpay_order_id: { type: "string" },
                 razorpay_payment_id: { type: "string" },
@@ -327,7 +354,7 @@ module.exports = {
   },
   "/api/payment/company/test-mark-paid": {
     post: {
-      tags: ["payment"],
+      tags: ["payment", "customer"],
       summary: "Test-mode mark installment as paid",
       requestBody: {
         required: true,
@@ -356,7 +383,7 @@ module.exports = {
   },
   "/api/payment/company/release-milestone": {
     post: {
-      tags: ["payment"],
+      tags: ["payment", "customer"],
       summary: "Release held 25% to company and mark platform fee due",
       requestBody: {
         required: true,
@@ -484,8 +511,8 @@ module.exports = {
   },
   "/api/payment/company/summary/{projectId}": {
     get: {
-      tags: ["payment"],
-      summary: "Get company project payment summary",
+      tags: ["payment", "customer"],
+      summary: "Customer view of company project payment summary",
       parameters: [
         {
           name: "projectId",
