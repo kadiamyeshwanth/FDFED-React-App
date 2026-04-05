@@ -268,10 +268,12 @@
     "yallist": "^4.0.0"
   },
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "sync:indexes": "node scripts/sync-indexes.js",
-    "sync:indexes:dry-run": "node scripts/sync-indexes.js --dry-run",
-    "sync:indexes:full": "node scripts/sync-indexes.js --full-sync"
+  "start": "node app.js",
+  "dev": "nodemon app.js",
+  "test": "echo \"Error: no test specified\" && exit 1",
+  "sync:indexes": "node scripts/sync-indexes.js",
+  "sync:indexes:dry-run": "node scripts/sync-indexes.js --dry-run",
+  "sync:indexes:full": "node scripts/sync-indexes.js --full-sync"
   },
   "keywords": [],
   "author": "",
