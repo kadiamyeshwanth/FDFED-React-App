@@ -1,12 +1,13 @@
 // src/pages/company/CompanyOngoing.jsx
 import React, { useCallback, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import MetricsCard from './components/MetricsCard';
-import ProjectCard from './components/ProjectCard';
-import ProjectDetails from './components/ProjectDetails';
-import ProjectUpdates from './components/ProjectUpdates';
-import FilterSidebar from './components/FilterSidebar';
-import ComplaintModal from './components/ComplaintModal';
+import MetricsCard from "./components/MetricsCard";
+import ProjectCard from "./components/ProjectCard";
+import ProjectDetails from "./components/ProjectDetails";
+import ProjectUpdates from "./components/ProjectUpdates";
+import FilterSidebar from "./components/FilterSidebar";
+import ComplaintModal from "./components/ComplaintModal";
+import { useGlobalChat } from "../../../../context/GlobalChatContext";
 import "./CompanyOngoing.css";
 
 const CompanyOngoing = () => {
@@ -27,46 +28,70 @@ const CompanyOngoing = () => {
   const [unviewedComplaints, setUnviewedComplaints] = useState({}); // { projectId: count }
 
   const navigate = useNavigate();
+  const { openChat } = useGlobalChat();
+
+  const handleMessageCustomer = (project) => {
+    openChat({
+      projectId: project._id,
+      projectType: "company",
+      projectName: project.projectName,
+      otherUserName:
+        project.customerName ||
+        project.customerDetails?.fullName ||
+        project.customerId?.name ||
+        "Customer",
+      userRole: "company",
+    });
+  };
 
   /* -------------------------------------------------
    *  Load data
    * -------------------------------------------------*/
   const fetchData = useCallback(async () => {
-      try {
-        setLoading(true);
-        const res = await fetch("http://localhost:3000/api/companyongoing_projects", {
+    try {
+      setLoading(true);
+      const res = await fetch(
+        "http://localhost:3000/api/companyongoing_projects",
+        {
           credentials: "include",
-        });
-        if (!res.ok) throw new Error("Failed to fetch ongoing projects");
-        const data = await res.json();
-        setProjects(data.projects || []);
-        setMetrics(data.metrics || null);
-        
-        // Fetch unviewed complaints count (from customers)
-        try {
-          const complaintsRes = await fetch('http://localhost:3000/api/company/unviewed-customer-messages', {
-            credentials: 'include'
+        },
+      );
+      if (!res.ok) throw new Error("Failed to fetch ongoing projects");
+      const data = await res.json();
+      setProjects(data.projects || []);
+      setMetrics(data.metrics || null);
+
+      // Fetch unviewed complaints count (from customers)
+      try {
+        const complaintsRes = await fetch(
+          "http://localhost:3000/api/company/unviewed-customer-messages",
+          {
+            credentials: "include",
+          },
+        );
+        if (complaintsRes.ok) {
+          const complaintsData = await complaintsRes.json();
+          console.log("🔔 Unviewed customer messages data:", complaintsData);
+          const complaintsMap = {};
+          complaintsData.unviewedByProject.forEach((item) => {
+            complaintsMap[item._id] = item.count;
           });
-          if (complaintsRes.ok) {
-            const complaintsData = await complaintsRes.json();
-            console.log('🔔 Unviewed customer messages data:', complaintsData);
-            const complaintsMap = {};
-            complaintsData.unviewedByProject.forEach(item => {
-              complaintsMap[item._id] = item.count;
-            });
-            console.log('🔔 Messages map:', complaintsMap);
-            setUnviewedComplaints(complaintsMap);
-          }
-        } catch (complaintsErr) {
-          console.error('Error fetching unviewed customer messages:', complaintsErr);
+          console.log("🔔 Messages map:", complaintsMap);
+          setUnviewedComplaints(complaintsMap);
         }
-      } catch (err) {
-        console.error(err);
-        setError(err.message || String(err));
-      } finally {
-        setLoading(false);
+      } catch (complaintsErr) {
+        console.error(
+          "Error fetching unviewed customer messages:",
+          complaintsErr,
+        );
       }
-    }, []);
+    } catch (err) {
+      console.error(err);
+      setError(err.message || String(err));
+    } finally {
+      setLoading(false);
+    }
+  }, []);
 
   useEffect(() => {
     fetchData();
@@ -100,28 +125,31 @@ const CompanyOngoing = () => {
     const wasExpanded = expandedUpdates[id];
     setExpandedUpdates((prev) => ({ ...prev, [id]: !prev[id] }));
     setExpandedDetails((prev) => ({ ...prev, [id]: false }));
-    
+
     // Mark customer messages as viewed when opening milestone details
     if (!wasExpanded && unviewedComplaints[id]) {
       // Clear the notification immediately for better UX
-      setUnviewedComplaints(prev => {
+      setUnviewedComplaints((prev) => {
         const updated = { ...prev };
         delete updated[id];
         return updated;
       });
-      
+
       try {
-        await fetch(`http://localhost:3000/api/company/mark-messages-viewed/${id}`, {
-          method: 'POST',
-          credentials: 'include'
-        });
-        console.log('✅ Messages marked as viewed for project:', id);
+        await fetch(
+          `http://localhost:3000/api/company/mark-messages-viewed/${id}`,
+          {
+            method: "POST",
+            credentials: "include",
+          },
+        );
+        console.log("✅ Messages marked as viewed for project:", id);
       } catch (err) {
-        console.error('Error marking messages as viewed:', err);
+        console.error("Error marking messages as viewed:", err);
         // Restore notification if marking failed
-        setUnviewedComplaints(prev => ({
+        setUnviewedComplaints((prev) => ({
           ...prev,
-          [id]: 1
+          [id]: 1,
         }));
       }
     }
@@ -185,21 +213,21 @@ const CompanyOngoing = () => {
     setComplaintLoading(true);
     setComplaintError(null);
     try {
-      await fetch('/api/complaints', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        credentials: 'include',
+      await fetch("/api/complaints", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
         body: JSON.stringify({
           projectId,
-          milestone: milestone === 'general' ? 0 : milestone,
-          message: complaintText[`${projectId}_${milestone}`]
-        })
+          milestone: milestone === "general" ? 0 : milestone,
+          message: complaintText[`${projectId}_${milestone}`],
+        }),
       });
       setComplaintSuccess(true);
       setComplaintText({});
       await fetchComplaintHistory(projectId, milestone);
     } catch (err) {
-      setComplaintError('Failed to submit complaint');
+      setComplaintError("Failed to submit complaint");
     }
     setComplaintLoading(false);
   };
@@ -243,6 +271,7 @@ const CompanyOngoing = () => {
                   toggleUpdates={toggleUpdates}
                   handleOpenComplaint={handleOpenComplaint}
                   formatDate={formatDate}
+                  onChatClick={handleMessageCustomer}
                 />
 
                 {/* ----- EXPANDED DETAILS ----- */}
@@ -261,7 +290,10 @@ const CompanyOngoing = () => {
             ))
           ) : (
             <div className="ongoing-no-projects">
-              <p>No ongoing projects found. All accepted projects will appear here.</p>
+              <p>
+                No ongoing projects found. All accepted projects will appear
+                here.
+              </p>
             </div>
           )}
         </div>

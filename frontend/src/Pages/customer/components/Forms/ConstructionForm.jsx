@@ -7,6 +7,7 @@ import { fetchCustomerProfile } from "../../../../store/slices/customerProfileSl
 import axios from "axios";
 import "./ConstructionForm.css";
 import { useValidation } from "../../../../context/ValidationContext";
+import CustomerPageLoader from "../common/CustomerPageLoader";
 
 const MAX_FLOOR_FILES = 3;
 const ALLOWED_FLOOR_FILE_TYPES = ["image/jpeg", "image/png", "application/pdf"];
@@ -485,7 +486,7 @@ const ConstructionForm = () => {
   };
 
   if (loadingExistingRequest) {
-    return <div className="constructionform-container">Loading request...</div>;
+    return <CustomerPageLoader message="Loading request..." />;
   }
 
   return (

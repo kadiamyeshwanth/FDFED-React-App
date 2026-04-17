@@ -4,9 +4,12 @@ import { Link, useNavigate } from "react-router-dom";
 import "./CustomerJobStatus.css";
 import ReviewModal from "../../../../components/ReviewModal/ReviewModal";
 import ReviewDisplay from "../../../../components/ReviewDisplay/ReviewDisplay";
+import CustomerPageLoader from "../common/CustomerPageLoader";
+import { useGlobalChat } from "../../../../context/GlobalChatContext";
 
 const CustomerJobStatus = () => {
   const navigate = useNavigate();
+  const { openChat } = useGlobalChat();
   const [activeTab, setActiveTab] = useState("cjs-architect-section");
   const [statusFilters, setStatusFilters] = useState({
     architect: "all",
@@ -51,6 +54,33 @@ const CustomerJobStatus = () => {
     isOpen: false,
     project: null,
   });
+
+  const navigateToServiceDetails = (app, type) => {
+    if (type === "architect") {
+      const workerId = app.assignedWorkerDetails?._id || app.worker?._id;
+      if (workerId) {
+        navigate(`/customerdashboard/architect?workerId=${workerId}`);
+      }
+      return;
+    }
+
+    if (type === "interior") {
+      const workerId = app.assignedWorkerDetails?._id || app.workerId?._id;
+      if (workerId) {
+        navigate(`/customerdashboard/interior_designer?workerId=${workerId}`);
+      }
+      return;
+    }
+
+    if (type === "company") {
+      const companyId = app.assignedCompanyDetails?._id || app.companyId?._id;
+      if (companyId) {
+        navigate(
+          `/customerdashboard/construction_companies_list?companyId=${companyId}`,
+        );
+      }
+    }
+  };
 
   const fetchJobStatus = async () => {
     try {
@@ -151,6 +181,33 @@ const CustomerJobStatus = () => {
   const formatStatusLabel = (status) => {
     if (status === "pending_payment") return "Pending Payment";
     return status.charAt(0).toUpperCase() + status.slice(1);
+  };
+
+  const jobStatusSections = {
+    "cjs-architect-section": {
+      tabLabel: "Architecture",
+      icon: "🏛️",
+      title: "My Architect Applications",
+      subtitle: "Monitor your architect hiring requests and project progress",
+      emptyMessage: "You haven't submitted any architect applications yet.",
+    },
+    "cjs-interior-section": {
+      tabLabel: "Interior Design",
+      icon: "🛋️",
+      title: "My Interior Design Requests",
+      subtitle: "Monitor your interior design requests and project progress",
+      emptyMessage:
+        "You haven't submitted any interior designer applications yet.",
+    },
+    "cjs-company-section": {
+      tabLabel: "Construction",
+      icon: "🏗️",
+      title: "My Construction Projects",
+      subtitle:
+        "Track your construction company applications and project status",
+      emptyMessage:
+        "You haven't submitted any construction company applications yet.",
+    },
   };
 
   const handleApproveMilestone = async (
@@ -339,7 +396,13 @@ const CustomerJobStatus = () => {
     }
   };
 
-  const renderCollapsibleButtons = (appId, hasMilestones, hasUpdates) => {
+  const renderCollapsibleButtons = (
+    appId,
+    hasMilestones,
+    hasUpdates,
+    chatConfig = null,
+    showChat = true,
+  ) => {
     return (
       <div className="cjs-collapsible-buttons">
         <button
@@ -365,8 +428,38 @@ const CustomerJobStatus = () => {
             {isSectionExpanded(appId, "updates") ? "▼" : "▶"} Project Updates
           </button>
         )}
+        {showChat && chatConfig?.enabled && (
+          <button
+            className="cjs-section-btn cjs-chat-btn"
+            onClick={() =>
+              openChatModal(
+                chatConfig.projectId,
+                chatConfig.projectType,
+                chatConfig.projectName,
+                chatConfig.otherUserName,
+              )
+            }
+          >
+            Message Worker
+          </button>
+        )}
       </div>
     );
+  };
+
+  const openChatModal = (
+    projectId,
+    projectType,
+    projectName,
+    otherUserName,
+  ) => {
+    openChat({
+      projectId,
+      projectType,
+      projectName,
+      otherUserName,
+      userRole: "customer",
+    });
   };
 
   const renderMilestones = (app, projectType) => {
@@ -793,6 +886,20 @@ const CustomerJobStatus = () => {
     );
   };
 
+  const renderCardToggle = (appId, sectionLabel) => {
+    const isExpanded = isSectionExpanded(appId, "card");
+
+    return (
+      <button
+        type="button"
+        className="cjs-card-toggle"
+        onClick={() => toggleSection(appId, "card")}
+      >
+        {isExpanded ? "▼" : "▶"} {sectionLabel}
+      </button>
+    );
+  };
+
   const formatLocation = (location) => {
     if (!location) return "Not available";
     if (typeof location === "string") return location;
@@ -847,7 +954,17 @@ const CustomerJobStatus = () => {
           </p>
           <p>
             <strong>Company Name:</strong>{" "}
-            {company?.companyName || "Not assigned yet"}
+            {company?.companyName ? (
+              <button
+                type="button"
+                className="cjs-name-link"
+                onClick={() => navigateToServiceDetails(app, "company")}
+              >
+                {company.companyName}
+              </button>
+            ) : (
+              "Not assigned yet"
+            )}
           </p>
           <p>
             <strong>Contact Person:</strong>{" "}
@@ -878,7 +995,18 @@ const CustomerJobStatus = () => {
           <strong>Status:</strong> {hiringStatus}
         </p>
         <p>
-          <strong>Name:</strong> {worker?.name || "Not assigned yet"}
+          <strong>Name:</strong>{" "}
+          {worker?.name ? (
+            <button
+              type="button"
+              className="cjs-name-link"
+              onClick={() => navigateToServiceDetails(app, type)}
+            >
+              {worker.name}
+            </button>
+          ) : (
+            "Not assigned yet"
+          )}
         </p>
         <p>
           <strong>Email:</strong> {worker?.email || "Not available"}
@@ -903,25 +1031,45 @@ const CustomerJobStatus = () => {
   const renderArchitectApp = (app) => {
     const hasMilestones = app.milestones && app.milestones.length > 0;
     const hasUpdates = app.projectUpdates && app.projectUpdates.length > 0;
-    const hasImages = app.additionalDetails?.referenceImages?.length > 0;
     const pendingMilestones = hasMilestones
       ? app.milestones.filter((m) => m.status === "Pending").length
       : 0;
+    const workerName =
+      app.assignedWorkerDetails?.name || app.worker?.name || "Worker";
 
     return (
       <div key={app._id} className="cjs-application cjs-architect-app">
         <div className="cjs-status-container">
           <div className="cjs-status cjs-architect-status">{app.status}</div>
+          {renderCardToggle(app._id, "Card Details")}
         </div>
 
         <div className="cjs-project-header-row">
           <h3>
             <span className="cjs-project-name">{app.projectName}</span>
-            {app.worker?.name && ` with ${app.worker.name}`}
           </h3>
 
-          <div className="cjs-proposal-container cjs-proposal-corner">
-            {renderProposal(app, "architect")}
+          <div className="cjs-proposal-corner cjs-proposal-actions">
+            <div className="cjs-proposal-container">
+              {renderProposal(app, "architect")}
+            </div>
+
+            {isHiredOrAccepted(app.status) && (
+              <button
+                type="button"
+                className="cjs-section-btn cjs-chat-btn"
+                onClick={() =>
+                  openChatModal(
+                    app._id,
+                    "architect",
+                    app.projectName,
+                    workerName,
+                  )
+                }
+              >
+                Message Worker
+              </button>
+            )}
           </div>
         </div>
 
@@ -929,148 +1077,165 @@ const CustomerJobStatus = () => {
           Submitted: {formatDate(app.createdAt)}
         </div>
 
-        {renderEditAction(app, "architect")}
+        {isSectionExpanded(app._id, "card") && (
+          <>
+            {renderEditAction(app, "architect")}
 
-        {renderHireDetails(app, "architect", "cjs-hire-details-inline")}
+            {renderHireDetails(app, "architect", "cjs-hire-details-inline")}
 
-        {pendingMilestones > 0 && (
-          <div className="cjs-pending-notice">
-            ⚠️ {pendingMilestones} milestone{pendingMilestones > 1 ? "s" : ""}{" "}
-            pending your approval
-          </div>
-        )}
+            {pendingMilestones > 0 && (
+              <div className="cjs-pending-notice">
+                ⚠️ {pendingMilestones} milestone
+                {pendingMilestones > 1 ? "s" : ""} pending your approval
+              </div>
+            )}
 
-        {renderCollapsibleButtons(
-          app._id,
-          hasMilestones,
-          hasUpdates,
-          hasImages,
-        )}
+            {renderCollapsibleButtons(
+              app._id,
+              hasMilestones,
+              hasUpdates,
+              {
+                enabled: isHiredOrAccepted(app.status),
+                projectId: app._id,
+                projectType: "architect",
+                projectName: app.projectName,
+                otherUserName: workerName,
+              },
+              false,
+            )}
 
-        {isSectionExpanded(app._id, "details") && (
-          <div className="cjs-application-data-section">
-            <div className="cjs-application-data">
-              <div className="cjs-section-title">Customer Details</div>
-              <p>
-                <strong>Name:</strong> {app.customerDetails?.fullName}
-              </p>
-              <p>
-                <strong>Email:</strong> {app.customerDetails?.email}
-              </p>
-              <p>
-                <strong>Contact:</strong> {app.customerDetails?.contactNumber}
-              </p>
-            </div>
-
-            <div className="cjs-application-data">
-              <div className="cjs-section-title">Customer Address</div>
-              <p>
-                <strong>Street:</strong> {app.customerAddress?.streetAddress}
-              </p>
-              <p>
-                <strong>City:</strong> {app.customerAddress?.city}
-              </p>
-              <p>
-                <strong>State:</strong> {app.customerAddress?.state}
-              </p>
-              <p>
-                <strong>Zip Code:</strong> {app.customerAddress?.zipCode}
-              </p>
-            </div>
-
-            <div className="cjs-application-data">
-              <div className="cjs-section-title">Plot Information</div>
-              <p>
-                <strong>Location:</strong> {app.plotInformation?.plotLocation}
-              </p>
-              <p>
-                <strong>Size:</strong> {app.plotInformation?.plotSize}
-              </p>
-              <p>
-                <strong>Orientation:</strong>{" "}
-                {app.plotInformation?.plotOrientation}
-              </p>
-            </div>
-
-            <div className="cjs-application-data">
-              <div className="cjs-section-title">Design Requirements</div>
-              <p>
-                <strong>Type:</strong> {app.designRequirements?.designType}
-              </p>
-              <p>
-                <strong>Floors:</strong> {app.designRequirements?.numFloors}
-              </p>
-              <p>
-                <strong>Special Features:</strong>{" "}
-                {app.designRequirements?.specialFeatures || "None specified"}
-              </p>
-              <p>
-                <strong>Style:</strong>{" "}
-                {app.designRequirements?.architecturalStyle}
-              </p>
-            </div>
-
-            {app.designRequirements?.floorRequirements?.length > 0 && (
-              <div className="cjs-application-data">
-                <div className="cjs-section-title">Floor Requirements</div>
-                {app.designRequirements.floorRequirements.map((floor, i) => (
-                  <p key={i}>
-                    <strong>Floor {floor.floorNumber}:</strong> {floor.details}
+            {isSectionExpanded(app._id, "details") && (
+              <div className="cjs-application-data-section">
+                <div className="cjs-application-data">
+                  <div className="cjs-section-title">Customer Details</div>
+                  <p>
+                    <strong>Name:</strong> {app.customerDetails?.fullName}
                   </p>
-                ))}
-              </div>
-            )}
-
-            <div className="cjs-application-data">
-              <div className="cjs-section-title">Additional Details</div>
-              <p>
-                <strong>Budget:</strong>{" "}
-                {app.additionalDetails?.budget || "Not specified"}
-              </p>
-              <p>
-                <strong>Completion Date:</strong>{" "}
-                {app.additionalDetails?.completionDate
-                  ? formatDate(app.additionalDetails.completionDate)
-                  : "Not specified"}
-              </p>
-              {app.additionalDetails?.referenceImages?.length > 0 && (
-                <p>
-                  <strong>Images:</strong>{" "}
-                  {app.additionalDetails.referenceImages.length} uploaded
-                </p>
-              )}
-            </div>
-
-            {/* Reference Images */}
-            {app.additionalDetails?.referenceImages?.length > 0 && (
-              <div
-                className="cjs-application-data"
-                style={{ gridColumn: "1 / -1" }}
-              >
-                <div className="cjs-section-title">Reference Images</div>
-                <div className="cjs-images-grid">
-                  {app.additionalDetails.referenceImages.map((img, i) => (
-                    <img
-                      key={i}
-                      src={typeof img === "string" ? img : img.url}
-                      alt={`Reference ${i + 1}`}
-                      className="cjs-grid-image"
-                      onClick={() =>
-                        setLightboxImage(
-                          typeof img === "string" ? img : img.url,
-                        )
-                      }
-                    />
-                  ))}
+                  <p>
+                    <strong>Email:</strong> {app.customerDetails?.email}
+                  </p>
+                  <p>
+                    <strong>Contact:</strong>{" "}
+                    {app.customerDetails?.contactNumber}
+                  </p>
                 </div>
+
+                <div className="cjs-application-data">
+                  <div className="cjs-section-title">Customer Address</div>
+                  <p>
+                    <strong>Street:</strong>{" "}
+                    {app.customerAddress?.streetAddress}
+                  </p>
+                  <p>
+                    <strong>City:</strong> {app.customerAddress?.city}
+                  </p>
+                  <p>
+                    <strong>State:</strong> {app.customerAddress?.state}
+                  </p>
+                  <p>
+                    <strong>Zip Code:</strong> {app.customerAddress?.zipCode}
+                  </p>
+                </div>
+
+                <div className="cjs-application-data">
+                  <div className="cjs-section-title">Plot Information</div>
+                  <p>
+                    <strong>Location:</strong>{" "}
+                    {app.plotInformation?.plotLocation}
+                  </p>
+                  <p>
+                    <strong>Size:</strong> {app.plotInformation?.plotSize}
+                  </p>
+                  <p>
+                    <strong>Orientation:</strong>{" "}
+                    {app.plotInformation?.plotOrientation}
+                  </p>
+                </div>
+
+                <div className="cjs-application-data">
+                  <div className="cjs-section-title">Design Requirements</div>
+                  <p>
+                    <strong>Type:</strong> {app.designRequirements?.designType}
+                  </p>
+                  <p>
+                    <strong>Floors:</strong> {app.designRequirements?.numFloors}
+                  </p>
+                  <p>
+                    <strong>Special Features:</strong>{" "}
+                    {app.designRequirements?.specialFeatures ||
+                      "None specified"}
+                  </p>
+                  <p>
+                    <strong>Style:</strong>{" "}
+                    {app.designRequirements?.architecturalStyle}
+                  </p>
+                </div>
+
+                {app.designRequirements?.floorRequirements?.length > 0 && (
+                  <div className="cjs-application-data">
+                    <div className="cjs-section-title">Floor Requirements</div>
+                    {app.designRequirements.floorRequirements.map(
+                      (floor, i) => (
+                        <p key={i}>
+                          <strong>Floor {floor.floorNumber}:</strong>{" "}
+                          {floor.details}
+                        </p>
+                      ),
+                    )}
+                  </div>
+                )}
+
+                <div className="cjs-application-data">
+                  <div className="cjs-section-title">Additional Details</div>
+                  <p>
+                    <strong>Budget:</strong>{" "}
+                    {app.additionalDetails?.budget || "Not specified"}
+                  </p>
+                  <p>
+                    <strong>Completion Date:</strong>{" "}
+                    {app.additionalDetails?.completionDate
+                      ? formatDate(app.additionalDetails.completionDate)
+                      : "Not specified"}
+                  </p>
+                  {app.additionalDetails?.referenceImages?.length > 0 && (
+                    <p>
+                      <strong>Images:</strong>{" "}
+                      {app.additionalDetails.referenceImages.length} uploaded
+                    </p>
+                  )}
+                </div>
+
+                {app.additionalDetails?.referenceImages?.length > 0 && (
+                  <div
+                    className="cjs-application-data"
+                    style={{ gridColumn: "1 / -1" }}
+                  >
+                    <div className="cjs-section-title">Reference Images</div>
+                    <div className="cjs-images-grid">
+                      {app.additionalDetails.referenceImages.map((img, i) => (
+                        <img
+                          key={i}
+                          src={typeof img === "string" ? img : img.url}
+                          alt={`Reference ${i + 1}`}
+                          className="cjs-grid-image"
+                          onClick={() =>
+                            setLightboxImage(
+                              typeof img === "string" ? img : img.url,
+                            )
+                          }
+                        />
+                      ))}
+                    </div>
+                  </div>
+                )}
               </div>
             )}
-          </div>
-        )}
 
-        {isSectionExpanded(app._id, "milestones") &&
-          renderMilestones(app, "architect")}
-        {isSectionExpanded(app._id, "updates") && renderUpdates(app)}
+            {isSectionExpanded(app._id, "milestones") &&
+              renderMilestones(app, "architect")}
+            {isSectionExpanded(app._id, "updates") && renderUpdates(app)}
+          </>
+        )}
       </div>
     );
   };
@@ -1082,22 +1247,43 @@ const CustomerJobStatus = () => {
       app.currentRoomImages && app.currentRoomImages.length > 0;
     const hasInspirationImages =
       app.inspirationImages && app.inspirationImages.length > 0;
-    const hasImages = hasCurrentImages || hasInspirationImages;
     const pendingMilestones = hasMilestones
       ? app.milestones.filter((m) => m.status === "Pending").length
       : 0;
+    const workerName =
+      app.assignedWorkerDetails?.name || app.workerId?.name || "Worker";
 
     return (
       <div key={app._id} className="cjs-application cjs-interior-app">
         <div className="cjs-status-container">
           <div className="cjs-status cjs-interior-status">{app.status}</div>
+          {renderCardToggle(app._id, "Card Details")}
         </div>
 
         <div className="cjs-project-header-row">
           <h3 className="cjs-project-name">{app.projectName}</h3>
 
-          <div className="cjs-proposal-container cjs-proposal-corner">
-            {renderProposal(app, "interior")}
+          <div className="cjs-proposal-corner cjs-proposal-actions">
+            <div className="cjs-proposal-container">
+              {renderProposal(app, "interior")}
+            </div>
+
+            {isHiredOrAccepted(app.status) && (
+              <button
+                type="button"
+                className="cjs-section-btn cjs-chat-btn"
+                onClick={() =>
+                  openChatModal(
+                    app._id,
+                    "interior",
+                    app.projectName,
+                    workerName,
+                  )
+                }
+              >
+                Message Worker
+              </button>
+            )}
           </div>
         </div>
 
@@ -1105,82 +1291,96 @@ const CustomerJobStatus = () => {
           <strong>Email:</strong> {app.email}
         </p>
 
-        {renderEditAction(app, "interior")}
-
-        {renderHireDetails(app, "interior", "cjs-hire-details-inline")}
-
-        {pendingMilestones > 0 && (
-          <div className="cjs-pending-notice">
-            ⚠️ {pendingMilestones} milestone{pendingMilestones > 1 ? "s" : ""}{" "}
-            pending your approval
-          </div>
-        )}
-
-        {renderCollapsibleButtons(app._id, hasMilestones, hasUpdates)}
-
-        {isSectionExpanded(app._id, "details") && (
+        {isSectionExpanded(app._id, "card") && (
           <>
-            <div className="cjs-section-title">Room Details</div>
-            <p>
-              <strong>Type:</strong> {app.roomType}
-            </p>
-            <p>
-              <strong>Size:</strong> {app.roomSize?.length}×
-              {app.roomSize?.width}
-              {app.roomSize?.unit}
-            </p>
-            <p>
-              <strong>Ceiling:</strong> {app.ceilingHeight?.height}
-              {app.ceilingHeight?.unit}
-            </p>
-            <p>
-              <strong>Preference:</strong> {app.designPreference}
-            </p>
-            <p>
-              <strong>Description:</strong> {app.projectDescription}
-            </p>
+            {renderEditAction(app, "interior")}
 
-            {/* Current Room Images */}
-            {hasCurrentImages && (
-              <div style={{ marginTop: "20px" }}>
-                <div className="cjs-section-title">Current Room Images</div>
-                <div className="cjs-images-grid">
-                  {app.currentRoomImages.map((img, i) => (
-                    <img
-                      key={i}
-                      src={img}
-                      alt={`Current ${i + 1}`}
-                      className="cjs-grid-image"
-                      onClick={() => setLightboxImage(img)}
-                    />
-                  ))}
-                </div>
+            {renderHireDetails(app, "interior", "cjs-hire-details-inline")}
+
+            {pendingMilestones > 0 && (
+              <div className="cjs-pending-notice">
+                ⚠️ {pendingMilestones} milestone
+                {pendingMilestones > 1 ? "s" : ""} pending your approval
               </div>
             )}
 
-            {/* Inspiration Images */}
-            {hasInspirationImages && (
-              <div style={{ marginTop: "20px" }}>
-                <div className="cjs-section-title">Inspiration Images</div>
-                <div className="cjs-images-grid">
-                  {app.inspirationImages.map((img, i) => (
-                    <img
-                      key={i}
-                      src={img}
-                      alt={`Inspiration ${i + 1}`}
-                      className="cjs-grid-image"
-                      onClick={() => setLightboxImage(img)}
-                    />
-                  ))}
-                </div>
-              </div>
+            {renderCollapsibleButtons(
+              app._id,
+              hasMilestones,
+              hasUpdates,
+              {
+                enabled: isHiredOrAccepted(app.status),
+                projectId: app._id,
+                projectType: "interior",
+                projectName: app.projectName,
+                otherUserName: workerName,
+              },
+              false,
             )}
+
+            {isSectionExpanded(app._id, "details") && (
+              <>
+                <div className="cjs-section-title">Room Details</div>
+                <p>
+                  <strong>Type:</strong> {app.roomType}
+                </p>
+                <p>
+                  <strong>Size:</strong> {app.roomSize?.length}×
+                  {app.roomSize?.width}
+                  {app.roomSize?.unit}
+                </p>
+                <p>
+                  <strong>Ceiling:</strong> {app.ceilingHeight?.height}
+                  {app.ceilingHeight?.unit}
+                </p>
+                <p>
+                  <strong>Preference:</strong> {app.designPreference}
+                </p>
+                <p>
+                  <strong>Description:</strong> {app.projectDescription}
+                </p>
+
+                {hasCurrentImages && (
+                  <div style={{ marginTop: "20px" }}>
+                    <div className="cjs-section-title">Current Room Images</div>
+                    <div className="cjs-images-grid">
+                      {app.currentRoomImages.map((img, i) => (
+                        <img
+                          key={i}
+                          src={img}
+                          alt={`Current ${i + 1}`}
+                          className="cjs-grid-image"
+                          onClick={() => setLightboxImage(img)}
+                        />
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {hasInspirationImages && (
+                  <div style={{ marginTop: "20px" }}>
+                    <div className="cjs-section-title">Inspiration Images</div>
+                    <div className="cjs-images-grid">
+                      {app.inspirationImages.map((img, i) => (
+                        <img
+                          key={i}
+                          src={img}
+                          alt={`Inspiration ${i + 1}`}
+                          className="cjs-grid-image"
+                          onClick={() => setLightboxImage(img)}
+                        />
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </>
+            )}
+
+            {isSectionExpanded(app._id, "milestones") &&
+              renderMilestones(app, "interior")}
+            {isSectionExpanded(app._id, "updates") && renderUpdates(app)}
           </>
         )}
-
-        {isSectionExpanded(app._id, "milestones") &&
-          renderMilestones(app, "interior")}
-        {isSectionExpanded(app._id, "updates") && renderUpdates(app)}
       </div>
     );
   };
@@ -1189,89 +1389,123 @@ const CustomerJobStatus = () => {
     <div key={app._id} className="cjs-application cjs-company-app">
       <div className="cjs-status-container">
         <div className="cjs-status cjs-company-status">{app.status}</div>
+        {renderCardToggle(app._id, "Card Details")}
       </div>
 
-      <h3>
-        <span className="cjs-project-name">{app.projectName}</span>
-      </h3>
+      <div className="cjs-project-header-row">
+        <h3>
+          <span className="cjs-project-name">{app.projectName}</span>
+        </h3>
+
+        <div className="cjs-proposal-corner cjs-proposal-actions">
+          <div className="cjs-proposal-container">
+            {renderProposal(app, "company")}
+          </div>
+
+          {isHiredOrAccepted(app.status) && (
+            <button
+              type="button"
+              className="cjs-section-btn cjs-chat-btn"
+              onClick={() =>
+                openChatModal(
+                  app._id,
+                  "company",
+                  app.projectName,
+                  app.assignedCompanyDetails?.companyName ||
+                    app.companyId?.companyName ||
+                    app.companyName ||
+                    "Company",
+                )
+              }
+            >
+              Message Company
+            </button>
+          )}
+        </div>
+      </div>
 
       <div className="cjs-date-info">
         Submitted: {formatDate(app.createdAt)}
       </div>
 
-      {renderEditAction(app, "company")}
+      {isSectionExpanded(app._id, "card") && (
+        <>
+          {renderHireDetails(app, "company", "cjs-hire-details-inline")}
 
-      {/* Project Details Section */}
-      <div className="cjs-company-details-grid">
-        <div className="cjs-company-detail-item">
-          <span className="cjs-detail-label">Project Type:</span>
-          <span className="cjs-detail-value">
-            {app.projectType || app.buildingType || "Not specified"}
-          </span>
-        </div>
-        <div className="cjs-company-detail-item">
-          <span className="cjs-detail-label">Budget:</span>
-          <span className="cjs-detail-value">
-            ₹{app.estimatedBudget?.toLocaleString("en-IN")}
-          </span>
-        </div>
-        <div className="cjs-company-detail-item">
-          <span className="cjs-detail-label">Timeline:</span>
-          <span className="cjs-detail-value">{app.projectTimeline} months</span>
-        </div>
-      </div>
+          {renderEditAction(app, "company")}
 
-      {renderHireDetails(app, "company")}
+          <div className="cjs-company-details-grid">
+            <div className="cjs-company-detail-item">
+              <span className="cjs-detail-label">Project Type:</span>
+              <span className="cjs-detail-value">
+                {app.projectType || app.buildingType || "Not specified"}
+              </span>
+            </div>
+            <div className="cjs-company-detail-item">
+              <span className="cjs-detail-label">Budget:</span>
+              <span className="cjs-detail-value">
+                ₹{app.estimatedBudget?.toLocaleString("en-IN")}
+              </span>
+            </div>
+            <div className="cjs-company-detail-item">
+              <span className="cjs-detail-label">Timeline:</span>
+              <span className="cjs-detail-value">
+                {app.projectTimeline} months
+              </span>
+            </div>
+          </div>
 
-      <button
-        type="button"
-        className="cjs-btn-view-details"
-        onClick={() =>
-          setCompanyDetailsModal({
-            isOpen: true,
-            project: app,
-          })
-        }
-      >
-        View Details
-      </button>
-
-      {/* Proposal Section */}
-      {renderProposal(app, "company")}
+          <button
+            type="button"
+            className="cjs-btn-view-details"
+            onClick={() =>
+              setCompanyDetailsModal({
+                isOpen: true,
+                project: app,
+              })
+            }
+          >
+            View Details
+          </button>
+        </>
+      )}
     </div>
   );
 
   if (loading) {
-    return <div className="cjs-loading">Loading...</div>;
+    return <CustomerPageLoader message="Loading job status..." />;
   }
 
   return (
     <div className="cjs-container">
-      <div className="cjs-tab-container">
-        <div
-          className={`cjs-tab ${
-            activeTab === "cjs-architect-section" ? "cjs-active" : ""
-          }`}
-          onClick={() => handleTabClick("cjs-architect-section")}
-        >
-          Architecture Services
-        </div>
-        <div
-          className={`cjs-tab ${
-            activeTab === "cjs-interior-section" ? "cjs-active" : ""
-          }`}
-          onClick={() => handleTabClick("cjs-interior-section")}
-        >
-          Interior Design
-        </div>
-        <div
-          className={`cjs-tab ${
-            activeTab === "cjs-company-section" ? "cjs-active" : ""
-          }`}
-          onClick={() => handleTabClick("cjs-company-section")}
-        >
-          Construction Projects
-        </div>
+      <div className="cjs-page-header">
+        <h1>My Job Status</h1>
+        <p>
+          Track all your service requests, milestones, and project updates in
+          one place.
+        </p>
+      </div>
+
+      <div
+        className="cjs-tab-container"
+        role="tablist"
+        aria-label="Job status sections"
+      >
+        {Object.entries(jobStatusSections).map(([sectionId, section]) => (
+          <button
+            key={sectionId}
+            type="button"
+            role="tab"
+            aria-selected={activeTab === sectionId}
+            className={`cjs-tab ${activeTab === sectionId ? "cjs-active" : ""}`}
+            onClick={() => handleTabClick(sectionId)}
+          >
+            <span className="cjs-tab-icon" aria-hidden="true">
+              {section.icon}
+            </span>
+            {section.tabLabel}
+          </button>
+        ))}
       </div>
 
       <div
@@ -1280,8 +1514,17 @@ const CustomerJobStatus = () => {
           activeTab === "cjs-architect-section" ? "cjs-active" : ""
         }`}
       >
-        <h2 className="cjs-architect-heading">My Architect Applications</h2>
-        <p>Monitor your architect hiring requests and project progress</p>
+        <div className="cjs-section-hero cjs-architect-hero">
+          <div className="cjs-section-hero-icon" aria-hidden="true">
+            {jobStatusSections["cjs-architect-section"].icon}
+          </div>
+          <div>
+            <h2 className="cjs-architect-heading">
+              {jobStatusSections["cjs-architect-section"].title}
+            </h2>
+            <p>{jobStatusSections["cjs-architect-section"].subtitle}</p>
+          </div>
+        </div>
 
         {/* Status Filter Tabs */}
         {applications.architect.length > 0 && (
@@ -1327,7 +1570,7 @@ const CustomerJobStatus = () => {
           )
         ) : (
           <div className="cjs-no-applications">
-            <p>You haven't submitted any architect applications yet.</p>
+            <p>{jobStatusSections["cjs-architect-section"].emptyMessage}</p>
           </div>
         )}
       </div>
@@ -1338,8 +1581,17 @@ const CustomerJobStatus = () => {
           activeTab === "cjs-interior-section" ? "cjs-active" : ""
         }`}
       >
-        <h2 className="cjs-interior-heading">My Interior Design Requests</h2>
-        <p>Monitor your interior design requests and project progress</p>
+        <div className="cjs-section-hero cjs-interior-hero">
+          <div className="cjs-section-hero-icon" aria-hidden="true">
+            {jobStatusSections["cjs-interior-section"].icon}
+          </div>
+          <div>
+            <h2 className="cjs-interior-heading">
+              {jobStatusSections["cjs-interior-section"].title}
+            </h2>
+            <p>{jobStatusSections["cjs-interior-section"].subtitle}</p>
+          </div>
+        </div>
 
         {/* Status Filter Tabs */}
         {applications.interior.length > 0 && (
@@ -1385,7 +1637,7 @@ const CustomerJobStatus = () => {
           )
         ) : (
           <div className="cjs-no-applications">
-            <p>You haven't submitted any interior designer applications yet.</p>
+            <p>{jobStatusSections["cjs-interior-section"].emptyMessage}</p>
           </div>
         )}
       </div>
@@ -1396,8 +1648,17 @@ const CustomerJobStatus = () => {
           activeTab === "cjs-company-section" ? "cjs-active" : ""
         }`}
       >
-        <h2 className="cjs-company-heading">My Construction Projects</h2>
-        <p>Track your construction company applications and project status</p>
+        <div className="cjs-section-hero cjs-company-hero">
+          <div className="cjs-section-hero-icon" aria-hidden="true">
+            {jobStatusSections["cjs-company-section"].icon}
+          </div>
+          <div>
+            <h2 className="cjs-company-heading">
+              {jobStatusSections["cjs-company-section"].title}
+            </h2>
+            <p>{jobStatusSections["cjs-company-section"].subtitle}</p>
+          </div>
+        </div>
 
         {/* Status Filter Tabs */}
         {applications.company.length > 0 && (
@@ -1440,9 +1701,7 @@ const CustomerJobStatus = () => {
           )
         ) : (
           <div className="cjs-no-applications">
-            <p>
-              You haven't submitted any construction company applications yet.
-            </p>
+            <p>{jobStatusSections["cjs-company-section"].emptyMessage}</p>
           </div>
         )}
       </div>

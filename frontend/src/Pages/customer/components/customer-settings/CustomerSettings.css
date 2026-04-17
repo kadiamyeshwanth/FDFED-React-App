@@ -2,7 +2,7 @@
 /* All class names prefixed with 'cs-' to prevent global conflicts */
 
 .cs-container {
-  background-color: #f4f4f4;
+  background-color: #ffffff;
   min-height: 100vh;
   padding: 1rem;
 }

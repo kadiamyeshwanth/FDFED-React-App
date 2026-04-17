@@ -2,6 +2,7 @@
 import React, { useState, useEffect, useCallback } from "react";
 import axios from "axios";
 import { Link } from "react-router-dom";
+import CustomerPageLoader from "../common/CustomerPageLoader";
 import "./CustomerBidspace.css";
 
 const CustomerBidspace = () => {
@@ -38,7 +39,7 @@ const CustomerBidspace = () => {
       const res = await axios.post(
         "/api/customer/decline-bid",
         { bidId, companyBidId },
-        { withCredentials: true }
+        { withCredentials: true },
       );
       if (res.data.success) {
         alert("Bid declined successfully!");
@@ -233,13 +234,7 @@ const CustomerBidspace = () => {
   );
 
   if (loading) {
-    return (
-      <div className="cb-container">
-        <div className="cb-section">
-          <div className="cb-no-bids">Loading your bids…</div>
-        </div>
-      </div>
-    );
+    return <CustomerPageLoader message="Loading your bids..." />;
   }
 
   return (
@@ -290,8 +285,8 @@ const CustomerBidspace = () => {
                         bid.status === "open"
                           ? "var(--status-open)"
                           : bid.status === "awarded"
-                          ? "var(--status-awarded)"
-                          : "var(--status-declined)",
+                            ? "var(--status-awarded)"
+                            : "var(--status-declined)",
                     }}
                   >
                     {bid.status?.charAt(0).toUpperCase() + bid.status?.slice(1)}

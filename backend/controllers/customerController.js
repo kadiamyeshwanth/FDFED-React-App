@@ -442,12 +442,20 @@ const submitBidForm = async (req, res) => {
     energyEfficiency,
     floors,
   } = req.body;
+  const MIN_BID_BUDGET = 10000000;
 
   try {
     if (!req.user || !req.user.user_id) {
       return res
         .status(401)
         .json({ error: "Authentication required to submit a bid request." });
+    }
+
+    const budgetValue = Number(estimatedBudget);
+    if (!Number.isFinite(budgetValue) || budgetValue < MIN_BID_BUDGET) {
+      return res.status(400).json({
+        error: "Minimum bid budget is ₹1,00,00,000.",
+      });
     }
 
     let parsedFloors = floors || [];
@@ -472,7 +480,7 @@ const submitBidForm = async (req, res) => {
       projectLocation,
       totalArea: Number(totalArea),
       buildingType,
-      estimatedBudget: Number(estimatedBudget) || 0,
+      estimatedBudget: budgetValue,
       projectTimeline: Number(projectTimeline) || 0,
       totalFloors: Number(totalFloors),
       floors: finalFloors,
@@ -1450,12 +1458,10 @@ const updateEditableRequest = async (req, res) => {
       };
 
       await project.save();
-      return res
-        .status(200)
-        .json({
-          success: true,
-          message: "Architect request updated successfully",
-        });
+      return res.status(200).json({
+        success: true,
+        message: "Architect request updated successfully",
+      });
     }
 
     if (type === "interior") {
@@ -1530,12 +1536,10 @@ const updateEditableRequest = async (req, res) => {
       ];
 
       await project.save();
-      return res
-        .status(200)
-        .json({
-          success: true,
-          message: "Interior request updated successfully",
-        });
+      return res.status(200).json({
+        success: true,
+        message: "Interior request updated successfully",
+      });
     }
 
     if (type === "company") {
@@ -1615,12 +1619,10 @@ const updateEditableRequest = async (req, res) => {
       }
 
       await project.save();
-      return res
-        .status(200)
-        .json({
-          success: true,
-          message: "Construction request updated successfully",
-        });
+      return res.status(200).json({
+        success: true,
+        message: "Construction request updated successfully",
+      });
     }
 
     return res.status(400).json({ error: "Invalid request type" });

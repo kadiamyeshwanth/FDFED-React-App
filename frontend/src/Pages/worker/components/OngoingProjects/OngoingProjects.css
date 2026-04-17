@@ -46,8 +46,12 @@
 }
 
 @keyframes wkopFadeIn {
-  from { opacity: 0; }
-  to { opacity: 1; }
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
 }
 
 .wkop-tab-pane {
@@ -103,6 +107,18 @@
   background: #e0f2fe;
   border-color: #7dd3fc;
   color: #0c4a6e;
+}
+
+.wkop-btn-chat {
+  background: #e879f9;
+  border-color: #f5d0fe;
+  color: #701a75;
+}
+
+.wkop-btn-chat:hover {
+  background: #f0abfc;
+  border-color: #e879f9;
+  color: #581c87;
 }
 
 .wkop-project-body {
@@ -337,7 +353,9 @@
   height: auto;
   border-radius: 6px;
   object-fit: contain;
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease;
 }
 
 .wkop-activity-image img:hover {
@@ -842,7 +860,9 @@
   border-radius: 8px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
   cursor: pointer;
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  transition:
+    transform 0.3s ease,
+    box-shadow 0.3s ease;
 }
 
 .wkop-milestone-image img:hover {
@@ -1389,7 +1409,8 @@
 }
 
 @keyframes pulse {
-  0%, 100% {
+  0%,
+  100% {
     transform: scale(1);
   }
   50% {

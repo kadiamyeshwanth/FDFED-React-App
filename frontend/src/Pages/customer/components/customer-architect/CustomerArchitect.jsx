@@ -1,13 +1,16 @@
 import React, { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import axios from "axios";
+import CustomerPageLoader from "../common/CustomerPageLoader";
 import "./CustomerArchitect.css";
 
 const CustomerArchitect = () => {
   const [architects, setArchitects] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [selectedArchitectId, setSelectedArchitectId] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [filterSpecialty, setFilterSpecialty] = useState("all");
+  const [searchParams] = useSearchParams();
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -18,7 +21,8 @@ const CustomerArchitect = () => {
       })
       .catch((error) => {
         console.error("Error fetching architects:", error);
-      });
+      })
+      .finally(() => setLoading(false));
   }, []);
 
   const specialties = [
@@ -59,6 +63,18 @@ const CustomerArchitect = () => {
   const selectedArchitect = architects.find(
     (arch) => arch._id === selectedArchitectId,
   );
+
+  useEffect(() => {
+    const workerId = searchParams.get("workerId");
+    if (workerId) {
+      setSelectedArchitectId(workerId);
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+  }, [searchParams, architects]);
+
+  if (loading) {
+    return <CustomerPageLoader message="Loading architects..." />;
+  }
 
   return (
     <div className="architect-page">

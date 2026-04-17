@@ -3,84 +3,87 @@
 /* Theme: professional cool palette. Hover animations/transitions removed. */
 
 :root {
-  --cjs-bg: #f3f6fb;
+  --cjs-bg: #eef3fb;
   --cjs-surface: #ffffff;
   --cjs-surface-soft: #f7fafd;
-  --cjs-text: #0f172a;
-  --cjs-muted: #526072;
-  --cjs-border: #d7e0ea;
-  --cjs-primary: #2563eb;
-  --cjs-primary-soft: #e8f0ff;
-  --cjs-shadow: 0 12px 28px rgba(15, 23, 42, 0.08);
+  --cjs-text: #223070;
+  --cjs-muted: #64738a;
+  --cjs-border: #dbe3ef;
+  --cjs-primary: #24379a;
+  --cjs-primary-soft: #e7ebff;
+  --cjs-shadow: 0 14px 32px rgba(21, 31, 73, 0.09);
 }
 
 .cjs-container {
-  max-width: 1480px;
+  max-width: 1500px;
   margin: 0 auto;
-  padding: clamp(20px, 2.8vw, 42px);
+  padding: clamp(28px, 3vw, 48px);
   min-height: 100vh;
-  background:
-    radial-gradient(
-      circle at top right,
-      rgba(29, 78, 216, 0.06),
-      transparent 32%
-    ),
-    radial-gradient(
-      circle at bottom left,
-      rgba(14, 116, 144, 0.07),
-      transparent 34%
-    ),
-    var(--cjs-bg);
+  background: linear-gradient(180deg, #f6f8fe 0%, #eef3fb 100%);
 }
 
-.cjs-header {
-  margin-bottom: 24px;
+.cjs-page-header {
+  margin-bottom: 26px;
 }
 
-.cjs-header h1 {
-  font-size: 2.5rem;
+.cjs-page-header h1 {
+  font-size: clamp(1.8rem, 2.2vw, 2.45rem);
   font-weight: 700;
-  color: #1e293b;
-  margin-bottom: 8px;
+  color: #23318b;
+  letter-spacing: -0.03em;
+  margin: 0 0 8px;
 }
 
-.cjs-header p {
-  font-size: 1.1rem;
-  color: #64748b;
+.cjs-page-header p {
+  font-size: 0.98rem;
+  color: var(--cjs-muted);
+  margin: 0;
 }
 
 .cjs-tab-container {
   display: flex;
-  gap: 10px;
-  margin-bottom: 26px;
+  gap: 0;
+  margin-bottom: 28px;
   border: 1px solid var(--cjs-border);
   background: var(--cjs-surface);
-  border-radius: 14px;
+  border-radius: 20px;
   padding: 8px;
   box-shadow: var(--cjs-shadow);
+  overflow: hidden;
 }
 
 .cjs-tab {
-  padding: 13px 22px;
+  flex: 1;
+  min-height: 58px;
+  padding: 13px 18px;
   cursor: pointer;
-  border: 1px solid transparent;
+  border: 0;
   font-weight: 600;
-  color: #5b6b80;
-  font-size: 0.96rem;
+  color: #64738a;
+  font-size: 0.98rem;
   background: transparent;
-  border-radius: 10px;
+  border-radius: 14px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  letter-spacing: -0.01em;
 }
 
 .cjs-tab:hover {
-  color: var(--cjs-text);
-  background: var(--cjs-surface-soft);
+  color: #23318b;
+  background: #f3f6ff;
 }
 
 .cjs-tab.cjs-active {
-  border-color: rgba(29, 78, 216, 0.24);
-  font-weight: 600;
-  color: var(--cjs-primary);
-  background: var(--cjs-primary-soft);
+  color: #ffffff;
+  background: linear-gradient(135deg, #24379a 0%, #3847b0 100%);
+  box-shadow: 0 10px 22px rgba(36, 55, 154, 0.26);
+}
+
+.cjs-tab-icon {
+  font-size: 1rem;
+  line-height: 1;
 }
 
 /* Status Filter Tabs */
@@ -129,73 +132,90 @@
 
 .cjs-content-section {
   display: none;
+  margin-top: 10px;
 }
 
 .cjs-content-section.cjs-active {
   display: block;
 }
 
-.cjs-content-section > h2 {
-  font-size: 1.75rem;
-  color: #1e293b;
-  margin-bottom: 12px;
-  font-weight: 700;
-}
-
-.cjs-content-section > p {
-  font-size: 1rem;
-  color: #64748b;
-  margin-bottom: 32px;
-}
-
 .cjs-architect-heading {
-  color: var(--cjs-text);
-  margin-bottom: 16px;
+  color: #23318b;
+  margin: 0;
   font-weight: 700;
   font-size: 1.55rem;
-  box-shadow: var(--cjs-shadow);
-  padding: 12px 16px;
-  border-radius: 12px;
-  border: 1px solid #bed4ff;
-  background: linear-gradient(95deg, #eef4ff 0%, #f7faff 100%);
 }
 
 .cjs-interior-heading {
-  color: var(--cjs-text);
-  margin-bottom: 16px;
+  color: #5c31b4;
+  margin: 0;
   font-weight: 700;
   font-size: 1.55rem;
-  box-shadow: var(--cjs-shadow);
-  padding: 12px 16px;
-  border-radius: 12px;
-  border: 1px solid #d7caf9;
-  background: linear-gradient(95deg, #f5f0ff 0%, #faf8ff 100%);
 }
 
 .cjs-company-heading {
-  color: var(--cjs-text);
-  margin-bottom: 16px;
+  color: #1f6677;
+  margin: 0;
   font-weight: 700;
   font-size: 1.55rem;
+}
+
+.cjs-section-hero {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 14px 18px;
+  border-radius: 18px;
+  border: 1px solid var(--cjs-border);
   box-shadow: var(--cjs-shadow);
-  padding: 12px 16px;
+  margin-bottom: 12px;
+}
+
+.cjs-section-hero p {
+  margin: 5px 0 0;
+  color: var(--cjs-muted);
+  font-size: 0.92rem;
+}
+
+.cjs-section-hero-icon {
+  width: 38px;
+  height: 38px;
   border-radius: 12px;
-  border: 1px solid #bfdde9;
-  background: linear-gradient(95deg, #eaf8ff 0%, #f5fbff 100%);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.15rem;
+  flex: 0 0 38px;
+  background: rgba(255, 255, 255, 0.72);
+}
+
+.cjs-architect-hero {
+  background: linear-gradient(135deg, #eef3ff 0%, #f8faff 100%);
+  border-color: #cdd8ff;
+}
+
+.cjs-interior-hero {
+  background: linear-gradient(135deg, #f4efff 0%, #fbf9ff 100%);
+  border-color: #d8c9ff;
+}
+
+.cjs-company-hero {
+  background: linear-gradient(135deg, #eaf9ff 0%, #f7fdff 100%);
+  border-color: #bbe4f0;
 }
 
 .cjs-application {
   background: var(--cjs-surface);
   border-radius: 16px;
-  padding: 32px;
-  margin-bottom: 24px;
+  padding: 18px 20px;
+  margin-bottom: 18px;
   box-shadow: var(--cjs-shadow);
   border: 1px solid var(--cjs-border);
   position: relative;
   overflow: hidden;
   display: flex;
   flex-direction: column;
-  gap: 20px;
+  gap: 12px;
   /* no hover transform or animated before bar */
 }
 
@@ -222,14 +242,15 @@
 .cjs-status-container {
   display: flex;
   align-items: center;
-  gap: 12px;
-  margin-bottom: 16px;
+  gap: 10px;
+  justify-content: space-between;
+  margin-bottom: 8px;
 }
 
 .cjs-status {
-  padding: 7px 14px;
+  padding: 6px 12px;
   border-radius: 999px;
-  font-size: 0.8rem;
+  font-size: 0.74rem;
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.4px;
@@ -289,11 +310,11 @@
 }
 
 .cjs-application h3 {
-  font-size: 1.5rem;
-  color: #1e293b;
+  font-size: 1.08rem;
+  color: #23318b;
   font-weight: 700;
-  margin: 0 0 8px 0;
-  line-height: 1.4;
+  margin: 0 0 6px 0;
+  line-height: 1.25;
 }
 
 .cjs-project-header-row {
@@ -301,12 +322,19 @@
   justify-content: space-between;
   align-items: flex-start;
   gap: 18px;
+  flex-wrap: wrap;
 }
 
 .cjs-proposal-corner {
   margin-top: 0;
-  min-width: 280px;
-  max-width: 420px;
+  min-width: 240px;
+  max-width: 360px;
+}
+
+.cjs-proposal-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
 }
 
 .cjs-proposal-corner p {
@@ -318,14 +346,36 @@
   color: var(--cjs-primary);
 }
 
+.cjs-name-link {
+  border: none;
+  background: transparent;
+  color: #1d4ed8;
+  font: inherit;
+  font-weight: 700;
+  padding: 0;
+  cursor: pointer;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.cjs-name-link:hover {
+  color: #1e40af;
+}
+
+.cjs-name-link:focus-visible {
+  outline: 2px solid #93c5fd;
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
 .cjs-section-title {
-  font-size: 1.1rem;
+  font-size: 0.98rem;
   font-weight: 700;
   color: #1e293b;
   margin-top: 0;
-  margin-bottom: 16px;
+  margin-bottom: 10px;
   position: relative;
-  padding-bottom: 12px;
+  padding-bottom: 8px;
   border-bottom: 2px solid #e2e8f0;
 }
 
@@ -341,23 +391,23 @@
 }
 
 .cjs-application p {
-  margin: 8px 0;
+  margin: 4px 0;
   color: #64748b;
-  font-size: 0.95rem;
-  line-height: 1.6;
+  font-size: 0.88rem;
+  line-height: 1.45;
 }
 
 .cjs-application p strong {
   color: #334155;
   font-weight: 600;
-  min-width: 120px;
+  min-width: 104px;
   display: inline-block;
 }
 
 .cjs-date-info {
-  font-size: 0.95rem;
+  font-size: 0.86rem;
   color: #64748b;
-  margin-top: 8px;
+  margin-top: 2px;
   display: flex;
   align-items: center;
   gap: 8px;
@@ -365,12 +415,12 @@
 
 .cjs-no-applications {
   text-align: center;
-  padding: 80px 40px;
+  padding: 70px 40px;
   color: #64748b;
   font-size: 1.1rem;
-  background: white;
-  border-radius: 16px;
-  border: 2px dashed #e2e8f0;
+  background: rgba(255, 255, 255, 0.86);
+  border-radius: 18px;
+  border: 2px dashed #dbe3ef;
   margin-top: 24px;
 }
 
@@ -381,12 +431,12 @@
 
 .cjs-company-app-container {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
-  gap: 24px;
+  grid-template-columns: 1fr;
+  gap: 18px;
 }
 
 .cjs-application.cjs-company-app {
-  margin-bottom: 0;
+  margin-bottom: 18px;
 }
 
 /* Company Details Grid */
@@ -394,8 +444,8 @@
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
   gap: 16px;
-  margin: 20px 0;
-  padding: 20px;
+  margin: 16px 0;
+  padding: 16px;
   background: #f8fbff;
   border-radius: 12px;
   border: 1px solid var(--cjs-border);
@@ -424,9 +474,9 @@
 .cjs-application-data-section {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-  gap: 24px;
-  margin-top: 24px;
-  padding: 24px;
+  gap: 18px;
+  margin-top: 18px;
+  padding: 18px;
   background: #f7fafc;
   border-radius: 12px;
   border: 1px solid var(--cjs-border);
@@ -435,7 +485,7 @@
 .cjs-application-data {
   background-color: var(--cjs-surface);
   border-radius: 12px;
-  padding: 20px;
+  padding: 16px;
   min-width: 300px;
   border: 1px solid var(--cjs-border);
 }
@@ -444,7 +494,7 @@
   background-color: #f8fbff;
   border: 1px solid var(--cjs-border);
   border-radius: 12px;
-  padding: 20px;
+  padding: 16px;
 }
 
 .cjs-worker-details-card .cjs-section-title {
@@ -494,8 +544,8 @@
   background-color: var(--cjs-surface);
   border: 1px solid var(--cjs-border);
   border-radius: 10px;
-  padding: 14px;
-  margin-top: 15px;
+  padding: 12px;
+  margin-top: 10px;
 }
 
 .cjs-room-image {
@@ -521,7 +571,7 @@
 }
 
 .cjs-proposal-price {
-  font-size: 1.75rem;
+  font-size: 1.35rem;
   font-weight: 700;
   color: #1e293b;
 }
@@ -561,14 +611,14 @@
   background: #fef3c7;
   border: 2px solid #f59e0b;
   border-radius: 12px;
-  padding: 16px 20px;
-  margin: 20px 0;
+  padding: 12px 16px;
+  margin: 12px 0;
   color: #92400e;
   font-weight: 600;
   display: flex;
   align-items: center;
   gap: 12px;
-  font-size: 0.95rem;
+  font-size: 0.88rem;
   box-shadow:
     0 4px 8px rgba(245, 158, 11, 0.1),
     inset 0 0 0 1px #f59e0b;
@@ -577,10 +627,10 @@
 /* Collapsible Buttons */
 .cjs-collapsible-buttons {
   display: flex;
-  gap: 12px;
+  gap: 10px;
   flex-wrap: wrap;
-  margin: 24px 0;
-  padding: 16px;
+  margin: 16px 0;
+  padding: 12px;
   background: #f8fbff;
   border-radius: 12px;
   border: 1px solid var(--cjs-border);
@@ -590,8 +640,8 @@
   background: var(--cjs-surface);
   border: 1px solid var(--cjs-border);
   border-radius: 10px;
-  padding: 12px 20px;
-  font-size: 0.95rem;
+  padding: 10px 16px;
+  font-size: 0.88rem;
   font-weight: 600;
   color: #475569;
   cursor: pointer;
@@ -634,6 +684,28 @@
 .cjs-updates-btn:active {
   background: #6d28d9;
   box-shadow: 0 2px 4px rgba(139, 92, 246, 0.2);
+}
+
+.cjs-chat-btn {
+  background: #ec4899;
+  color: white;
+  border: none;
+}
+
+.cjs-chat-btn:hover {
+  background: #db2777;
+}
+
+.cjs-chat-btn:active {
+  background: #be185d;
+  box-shadow: 0 2px 4px rgba(236, 72, 153, 0.25);
+}
+
+.cjs-company-action-buttons {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin: 12px 0 4px;
 }
 
 .cjs-images-btn {
@@ -698,6 +770,26 @@
   box-shadow:
     0 4px 20px rgba(245, 158, 11, 0.25),
     inset 0 0 0 2px #f59e0b;
+}
+.cjs-card-toggle {
+  border: 1px solid #cbd8ee;
+  background: #f8fbff;
+  color: #1f3b8f;
+  border-radius: 999px;
+  padding: 8px 14px;
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  cursor: pointer;
+  white-space: nowrap;
+}
+.cjs-card-toggle:hover {
+  background: #edf3ff;
+  border-color: #9fb7e9;
+}
+.cjs-card-toggle:focus-visible {
+  outline: 2px solid #7aa2ff;
+  outline-offset: 2px;
 }
 
 .cjs-milestone-approved {
@@ -1034,6 +1126,25 @@
 }
 
 @media (max-width: 768px) {
+  .cjs-page-header h1 {
+    font-size: 1.8rem;
+  }
+
+  .cjs-tab-container {
+    padding: 6px;
+  }
+
+  .cjs-tab {
+    font-size: 0.86rem;
+    min-height: 50px;
+    padding: 10px 12px;
+  }
+
+  .cjs-section-hero {
+    padding: 12px 14px;
+    align-items: flex-start;
+  }
+
   .cjs-project-header-row {
     flex-direction: column;
     gap: 10px;

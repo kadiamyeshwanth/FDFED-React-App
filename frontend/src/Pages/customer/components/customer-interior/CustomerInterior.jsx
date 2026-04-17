@@ -1,13 +1,16 @@
 import React, { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import axios from "axios";
+import CustomerPageLoader from "../common/CustomerPageLoader";
 import "./CustomerInterior.css";
 
 const CustomerInterior = () => {
   const [designers, setDesigners] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [selectedDesignerId, setSelectedDesignerId] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [filterSpecialty, setFilterSpecialty] = useState("all");
+  const [searchParams] = useSearchParams();
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -18,7 +21,8 @@ const CustomerInterior = () => {
       })
       .catch((error) => {
         console.error("Error fetching designers:", error);
-      });
+      })
+      .finally(() => setLoading(false));
   }, []);
 
   const specialties = [
@@ -59,6 +63,18 @@ const CustomerInterior = () => {
   const selectedDesigner = designers.find(
     (des) => des._id === selectedDesignerId,
   );
+
+  useEffect(() => {
+    const workerId = searchParams.get("workerId");
+    if (workerId) {
+      setSelectedDesignerId(workerId);
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+  }, [searchParams, designers]);
+
+  if (loading) {
+    return <CustomerPageLoader message="Loading designers..." />;
+  }
 
   return (
     <div className="designer-page">

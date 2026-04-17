@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
+import CustomerPageLoader from "../common/CustomerPageLoader";
 import "./CustomerSettings.css";
 
 const CustomerSettings = () => {
@@ -88,7 +89,7 @@ const CustomerSettings = () => {
     } catch (err) {
       alert(
         "Failed to update profile: " +
-          (err.response?.data?.message || err.message)
+          (err.response?.data?.message || err.message),
       );
     }
   };
@@ -114,14 +115,14 @@ const CustomerSettings = () => {
       const res = await axios.post(
         "/api/customer/password/update",
         { currentPassword, newPassword },
-        { withCredentials: true }
+        { withCredentials: true },
       );
       alert(res.data.message);
       e.target.reset();
     } catch (err) {
       alert(
         "Error: " +
-          (err.response?.data?.message || "Failed to update password.")
+          (err.response?.data?.message || "Failed to update password."),
       );
     }
   };
@@ -133,7 +134,7 @@ const CustomerSettings = () => {
       const res = await axios.put(
         "/api/2fa/status",
         { enabled: targetValue },
-        { withCredentials: true }
+        { withCredentials: true },
       );
       setTwoFactorEnabled(targetValue);
       alert(res.data.message || "Two-factor setting updated");
@@ -157,13 +158,7 @@ const CustomerSettings = () => {
   };
 
   if (loading) {
-    return (
-      <div className="cs-container">
-        <div style={{ textAlign: "center", padding: "40px", color: "#666" }}>
-          Loading settings...
-        </div>
-      </div>
-    );
+    return <CustomerPageLoader message="Loading settings..." />;
   }
 
   return (
@@ -400,8 +395,8 @@ const CustomerSettings = () => {
                     {updatingTwoFactor
                       ? "Updating..."
                       : twoFactorEnabled
-                      ? "Disable 2FA"
-                      : "Enable 2FA"}
+                        ? "Disable 2FA"
+                        : "Enable 2FA"}
                   </button>
                 </div>
               </form>

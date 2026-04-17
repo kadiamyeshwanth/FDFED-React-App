@@ -1,4 +1,4 @@
- /* src/Pages/customer/components/customer-bidspace/CustomerBidspace.css */
+/* src/Pages/customer/components/customer-bidspace/CustomerBidspace.css */
 
 :root {
   --primary-dark: #1a365d;
@@ -22,7 +22,7 @@
 }
 
 body {
-  background-color: #f8f9fa;
+  background-color: #ffffff;
 }
 
 .cb-container {

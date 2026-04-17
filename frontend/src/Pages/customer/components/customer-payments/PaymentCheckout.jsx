@@ -2,6 +2,7 @@
 import React, { useState, useEffect } from "react";
 import { useParams, useNavigate, useSearchParams } from "react-router-dom";
 import axios from "axios";
+import CustomerPageLoader from "../common/CustomerPageLoader";
 import "./PaymentCheckout.css";
 
 const PLATFORM_FEE_COMMISSION = 5;
@@ -301,14 +302,7 @@ const PaymentCheckout = () => {
   };
 
   if (loading) {
-    return (
-      <div className="copck-container">
-        <div className="copck-loading">
-          <div className="copck-spinner"></div>
-          <p>Loading payment details...</p>
-        </div>
-      </div>
-    );
+    return <CustomerPageLoader message="Loading payment details..." />;
   }
 
   if (error && !project) {

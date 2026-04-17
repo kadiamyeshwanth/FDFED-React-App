@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import axios from "axios";
+import CustomerPageLoader from "../common/CustomerPageLoader";
 import "./CustomerConstruction.css";
 
 const CustomerConstruction = () => {
@@ -10,6 +11,7 @@ const CustomerConstruction = () => {
   const [selectedCompany, setSelectedCompany] = useState(null);
   const [sortBy, setSortBy] = useState("name");
   const [showAllReviews, setShowAllReviews] = useState(false);
+  const [searchParams] = useSearchParams();
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -72,6 +74,13 @@ const CustomerConstruction = () => {
     };
   }, []);
 
+  useEffect(() => {
+    const companyId = searchParams.get("companyId");
+    if (companyId && companies.length > 0) {
+      showDetails(companyId);
+    }
+  }, [searchParams, companies]);
+
   const showDetails = (companyId) => {
     setSelectedCompany(companies.find((c) => c._id === companyId));
     setShowAllReviews(false);
@@ -101,12 +110,10 @@ const CustomerConstruction = () => {
 
   if (loading) {
     return (
-      <div className="construction-page">
-        <div className="status-message loading">
-          <div className="spinner"></div>
-          <p>Loading companies...</p>
-        </div>
-      </div>
+      <CustomerPageLoader
+        className="construction-page"
+        message="Loading companies..."
+      />
     );
   }
 

@@ -3,12 +3,13 @@ import axios from "axios";
 import "./BidForm.css";
 import { useNavigate } from "react-router-dom";
 import { useValidation } from "../../../../context/ValidationContext";
-import { useDispatch, useSelector } from 'react-redux';
-import { fetchCustomerProfile } from '../../../../store/slices/customerProfileSlice';
+import { useDispatch, useSelector } from "react-redux";
+import { fetchCustomerProfile } from "../../../../store/slices/customerProfileSlice";
 
 const MAX_FLOOR_FILES = 5;
 const ALLOWED_FILE_TYPES = ["application/pdf", "image/jpeg", "image/png"];
 const MAX_FILE_MB = 5;
+const MIN_BID_BUDGET = 10000000;
 
 const BidForm = () => {
   const navigate = useNavigate();
@@ -56,7 +57,12 @@ const BidForm = () => {
 
   // Fetch profile on mount if not loaded yet
   useEffect(() => {
-    if (!customerProfile.name && !customerProfile.email && !customerProfile.phone && customerProfile.status !== 'loading') {
+    if (
+      !customerProfile.name &&
+      !customerProfile.email &&
+      !customerProfile.phone &&
+      customerProfile.status !== "loading"
+    ) {
       dispatch(fetchCustomerProfile());
     }
     // eslint-disable-next-line
@@ -98,7 +104,7 @@ const BidForm = () => {
 
   const updateFloor = (id, field, value) => {
     setFloors((prev) =>
-      prev.map((f) => (f.id === id ? { ...f, [field]: value } : f))
+      prev.map((f) => (f.id === id ? { ...f, [field]: value } : f)),
     );
     setErrors((prev) => {
       const copy = { ...prev };
@@ -126,8 +132,8 @@ const BidForm = () => {
     reader.onloadend = () => {
       setFloors((prev) =>
         prev.map((f) =>
-          f.id === id ? { ...f, floorImage: file, preview: reader.result } : f
-        )
+          f.id === id ? { ...f, floorImage: file, preview: reader.result } : f,
+        ),
       );
       setErrors((prev) => {
         const copy = { ...prev };
@@ -192,7 +198,11 @@ const BidForm = () => {
     if (areaErr) newErrors.totalArea = areaErr;
 
     const budgetErr = validateBudget(estimatedBudget, 1000000000);
-    if (budgetErr) newErrors.estimatedBudget = budgetErr;
+    if (budgetErr) {
+      newErrors.estimatedBudget = budgetErr;
+    } else if (Number(estimatedBudget) < MIN_BID_BUDGET) {
+      newErrors.estimatedBudget = "Minimum bid budget is ₹1,00,00,000";
+    }
 
     const timelineErr = validateNumber(projectTimeline, "Project timeline", 1);
     if (timelineErr) newErrors.projectTimeline = timelineErr;
@@ -200,17 +210,17 @@ const BidForm = () => {
     if (validateRequired(specialRequirements, "Special requirements"))
       newErrors.specialRequirements = validateRequired(
         specialRequirements,
-        "Special requirements"
+        "Special requirements",
       );
     if (validateRequired(accessibilityNeeds, "Accessibility needs"))
       newErrors.accessibilityNeeds = validateRequired(
         accessibilityNeeds,
-        "Accessibility needs"
+        "Accessibility needs",
       );
     if (validateRequired(energyEfficiency, "Energy efficiency"))
       newErrors.energyEfficiency = validateRequired(
         energyEfficiency,
-        "Energy efficiency"
+        "Energy efficiency",
       );
 
     const floorCount = parseInt(totalFloors, 10);
@@ -228,7 +238,7 @@ const BidForm = () => {
           const fileErr = validateFile(
             f.floorImage,
             ALLOWED_FILE_TYPES,
-            MAX_FILE_MB
+            MAX_FILE_MB,
           );
           if (fileErr) newErrors[`floorImage-${f.id}`] = fileErr;
         }
@@ -264,56 +274,56 @@ const BidForm = () => {
 
     formData.append(
       "projectName",
-      document.getElementById("projectName").value.trim()
+      document.getElementById("projectName").value.trim(),
     );
     formData.append(
       "buildingType",
-      document.getElementById("buildingType").value.trim()
+      document.getElementById("buildingType").value.trim(),
     );
     formData.append(
       "customerName",
-      document.getElementById("customerName").value.trim()
+      document.getElementById("customerName").value.trim(),
     );
     formData.append(
       "customerEmail",
-      document.getElementById("customerEmail").value.trim()
+      document.getElementById("customerEmail").value.trim(),
     );
     formData.append(
       "customerPhone",
-      document.getElementById("customerPhone").value.trim()
+      document.getElementById("customerPhone").value.trim(),
     );
     formData.append(
       "projectAddress",
-      document.getElementById("projectAddress").value.trim()
+      document.getElementById("projectAddress").value.trim(),
     );
     formData.append(
       "projectLocation",
-      document.getElementById("projectLocation").value.trim()
+      document.getElementById("projectLocation").value.trim(),
     );
     formData.append(
       "totalArea",
-      document.getElementById("totalArea").value.trim()
+      document.getElementById("totalArea").value.trim(),
     );
     formData.append(
       "estimatedBudget",
-      document.getElementById("estimatedBudget").value.trim()
+      document.getElementById("estimatedBudget").value.trim(),
     );
     formData.append(
       "projectTimeline",
-      document.getElementById("projectTimeline").value.trim()
+      document.getElementById("projectTimeline").value.trim(),
     );
     formData.append("totalFloors", totalFloors);
     formData.append(
       "specialRequirements",
-      document.getElementById("specialRequirements").value.trim()
+      document.getElementById("specialRequirements").value.trim(),
     );
     formData.append(
       "accessibilityNeeds",
-      document.getElementById("accessibilityNeeds").value.trim()
+      document.getElementById("accessibilityNeeds").value.trim(),
     );
     formData.append(
       "energyEfficiency",
-      document.getElementById("energyEfficiency").value.trim()
+      document.getElementById("energyEfficiency").value.trim(),
     );
 
     floors.forEach((f, i) => {
@@ -327,7 +337,7 @@ const BidForm = () => {
     const siteFilesInput2 = document.getElementById("siteFiles");
     if (siteFilesInput2?.files) {
       Array.from(siteFilesInput2.files).forEach((file) =>
-        formData.append("siteFiles", file)
+        formData.append("siteFiles", file),
       );
     }
 
@@ -338,17 +348,17 @@ const BidForm = () => {
       });
 
       if (response.data && response.data.success) {
-        alert("Project submitted successfully!");
+        alert("Bid submitted successfully!");
         navigate(-1);
       } else {
         setFormError(
-          response.data?.error || "Submission failed. Please try again."
+          response.data?.error || "Submission failed. Please try again.",
         );
       }
     } catch (err) {
       console.error("Submission error:", err.response?.data || err);
       setFormError(
-        err.response?.data?.error || "Submission failed. Please try again."
+        err.response?.data?.error || "Submission failed. Please try again.",
       );
     } finally {
       setSubmitting(false);
@@ -358,7 +368,7 @@ const BidForm = () => {
   return (
     <div className="bf-container">
       <div className="bf-title-block">
-        <h1>Construction Project Submission</h1>
+        <h1>Bid Form</h1>
       </div>
 
       <form
@@ -411,10 +421,10 @@ const BidForm = () => {
               <label htmlFor="customerName" className="bf-required">
                 Full Name
               </label>
-              <input 
-                type="text" 
-                id="customerName" 
-                name="customerName" 
+              <input
+                type="text"
+                id="customerName"
+                name="customerName"
                 value={formData.customerName}
                 onChange={handleInputChange}
               />
@@ -429,10 +439,10 @@ const BidForm = () => {
               <label htmlFor="customerEmail" className="bf-required">
                 Email Address
               </label>
-              <input 
-                type="email" 
-                id="customerEmail" 
-                name="customerEmail" 
+              <input
+                type="email"
+                id="customerEmail"
+                name="customerEmail"
                 value={formData.customerEmail}
                 onChange={handleInputChange}
               />
@@ -448,10 +458,10 @@ const BidForm = () => {
             <label htmlFor="customerPhone" className="bf-required">
               Phone Number
             </label>
-            <input 
-              type="tel" 
-              id="customerPhone" 
-              name="customerPhone" 
+            <input
+              type="tel"
+              id="customerPhone"
+              name="customerPhone"
               value={formData.customerPhone}
               onChange={handleInputChange}
             />
@@ -526,7 +536,7 @@ const BidForm = () => {
                 type="number"
                 id="estimatedBudget"
                 name="estimatedBudget"
-                min="1"
+                min={MIN_BID_BUDGET}
               />
               <div
                 className="bf-error-message"

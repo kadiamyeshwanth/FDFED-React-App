@@ -5,6 +5,7 @@ import { useNavigate, useLocation } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { fetchCustomerProfile } from "../../../../store/slices/customerProfileSlice";
 import axios from "axios";
+import CustomerPageLoader from "../common/CustomerPageLoader";
 import "./InteriorDesignForm.css";
 
 const InteriorDesignForm = () => {
@@ -371,7 +372,7 @@ const InteriorDesignForm = () => {
   };
 
   if (loadingExistingRequest) {
-    return <div className="interior-form-container">Loading request...</div>;
+    return <CustomerPageLoader message="Loading request..." />;
   }
 
   return (
