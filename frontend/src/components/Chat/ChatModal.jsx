@@ -47,7 +47,7 @@ const ChatModal = ({
           socketRef.current = null;
         }
 
-        socketRef.current = io("https://fdfed-react-app.onrender.com", {
+        socketRef.current = io("https://build-beyond.onrender.com", {
           withCredentials: true,
         });
 

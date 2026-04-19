@@ -52,7 +52,7 @@ const CompanyChat = () => {
     const userId = data.userId;
     const userRole = data.userRole || 'company';
 
-    socketRef.current = io('https://fdfed-react-app.onrender.com', {
+    socketRef.current = io('https://build-beyond.onrender.com', {
       withCredentials: true,
     });
 

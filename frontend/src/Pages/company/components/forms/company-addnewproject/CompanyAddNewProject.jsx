@@ -49,7 +49,7 @@ const CompanyAddNewProject = () => {
       if (!projectId) return;
       try {
         setLoading(true);
-        const res = await fetch("https://fdfed-react-app.onrender.com/api/companyongoing_projects", { credentials: "include" });
+        const res = await fetch("https://build-beyond.onrender.com/api/companyongoing_projects", { credentials: "include" });
         if (!res.ok) throw new Error("Failed to load projects");
         const json = await res.json();
         const found = (json.projects || []).find((p) => p._id === projectId);
@@ -211,7 +211,7 @@ const CompanyAddNewProject = () => {
       if (updateImage) formData.append("updateImages", updateImage);
 
       // original EJS used action "/api/projects/update"; keep that path
-      const res = await fetch("https://fdfed-react-app.onrender.com/api/projects/update", {
+      const res = await fetch("https://build-beyond.onrender.com/api/projects/update", {
         method: "POST",
         credentials: "include",
         body: formData,

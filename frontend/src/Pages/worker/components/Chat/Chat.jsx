@@ -52,7 +52,7 @@ const Chat = () => {
   };
 
   const initializeSocket = (data) => {
-    socketRef.current = io('https://fdfed-react-app.onrender.com', {
+    socketRef.current = io('https://build-beyond.onrender.com', {
       withCredentials: true
     });
 

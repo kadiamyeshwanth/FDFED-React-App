@@ -19,7 +19,7 @@ const CompanyPublicProfile = () => {
     setLoading(true);
     setError(null);
     try {
-      const response = await fetch("https://fdfed-react-app.onrender.com/api/companysettings", {
+      const response = await fetch("https://build-beyond.onrender.com/api/companysettings", {
         credentials: "include"
       });
 

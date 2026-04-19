@@ -24,7 +24,7 @@ import "./AdminCompanyDetail.css";
 const getDocumentUrl = (path) => {
   if (!path) return "";
   if (path.startsWith("http")) return path;
-  return `https://fdfed-react-app.onrender.com${path.startsWith("/") ? "" : "/"}${path}`;
+  return `https://build-beyond.onrender.com${path.startsWith("/") ? "" : "/"}${path}`;
 };
 
 const timeFilters = [

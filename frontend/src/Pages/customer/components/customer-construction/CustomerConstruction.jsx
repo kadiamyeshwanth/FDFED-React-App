@@ -571,12 +571,12 @@ const CustomerConstruction = () => {
                                     (img, imgIdx) => (
                                       <img
                                         key={imgIdx}
-                                        src={`https://fdfed-react-app.onrender.com/${img}`}
+                                        src={`https://build-beyond.onrender.com/${img}`}
                                         alt={`Completion ${imgIdx + 1}`}
                                         className="completion-image"
                                         onClick={() =>
                                           window.open(
-                                            `https://fdfed-react-app.onrender.com/${img}`,
+                                            `https://build-beyond.onrender.com/${img}`,
                                             "_blank",
                                           )
                                         }

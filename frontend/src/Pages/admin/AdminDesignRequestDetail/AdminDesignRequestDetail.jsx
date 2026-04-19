@@ -24,7 +24,7 @@ import { useAdminAuth } from "../../../context/AdminAuthContext";
 import "../AdminCustomerDetail/AdminCustomerDetail.css";
 import "./AdminDesignRequestDetail.css";
 
-const BACKEND_BASE_URL = "https://fdfed-react-app.onrender.com";
+const BACKEND_BASE_URL = "https://build-beyond.onrender.com";
 
 const formatCurrency = (value) =>
   `₹${Number(value || 0).toLocaleString("en-IN")}`;

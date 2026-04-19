@@ -9,7 +9,7 @@ const CompanyEmployees = () => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetch("https://fdfed-react-app.onrender.com/api/my-employees", {
+    fetch("https://build-beyond.onrender.com/api/my-employees", {
       method: "GET",
       credentials: "include"
     })

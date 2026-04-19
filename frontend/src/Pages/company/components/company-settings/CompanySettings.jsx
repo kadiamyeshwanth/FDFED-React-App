@@ -6,8 +6,8 @@ import ProfileSection from "./components/ProfileSection";
 import SecuritySection from "./components/SecuritySection";
 import HelpSection from "./components/HelpSection";
 
-const API_GET = "https://fdfed-react-app.onrender.com/api/companysettings";
-const API_POST_UPDATE = "https://fdfed-react-app.onrender.com/api/update-company-profile";
+const API_GET = "https://build-beyond.onrender.com/api/companysettings";
+const API_POST_UPDATE = "https://build-beyond.onrender.com/api/update-company-profile";
 
 export default function CompanySettings() {
   const [loading, setLoading] = useState(true);

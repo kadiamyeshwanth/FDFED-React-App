@@ -2,11 +2,11 @@
   "rewrites": [
     {
       "source": "/api/(.*)",
-      "destination": "https://fdfed-react-app.onrender.com/api/$1"
+      "destination": "https://build-beyond.onrender.com/api/$1"
     },
     {
       "source": "/uploads/(.*)",
-      "destination": "https://fdfed-react-app.onrender.com/uploads/$1"
+      "destination": "https://build-beyond.onrender.com/uploads/$1"
     },
     {
       "source": "/(.*)",
