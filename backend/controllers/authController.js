@@ -17,6 +17,15 @@ const LOGIN_2FA_TOKEN_MINUTES = Number(process.env.LOGIN_2FA_TOKEN_MINUTES || 10
 const GOOGLE_CLIENT_ID = process.env.GOOGLE_CLIENT_ID;
 const googleOAuthClient = GOOGLE_CLIENT_ID ? new OAuth2Client(GOOGLE_CLIENT_ID) : null;
 
+const isProduction = process.env.NODE_ENV === 'production';
+const authCookieOptions = {
+  httpOnly: true,
+  secure: isProduction,
+  maxAge: 1000 * 60 * 60 * 24,
+  sameSite: isProduction ? 'none' : 'lax',
+  path: '/',
+};
+
 const normalizeEmail = (email) => String(email || '').trim().toLowerCase();
 
 const getModelForRole = (role) => {
@@ -48,12 +57,7 @@ const getRedirectByRole = (role) => {
 
 const setAuthCookie = (res, user) => {
   const token = jwt.sign({ user_id: user._id.toString(), role: user.role }, JWT_SECRET, { expiresIn: '1d' });
-  res.cookie('token', token, {
-    httpOnly: true,
-    secure: process.env.NODE_ENV === 'production',
-    maxAge: 1000 * 60 * 60 * 24,
-    sameSite: 'lax',
-  });
+  res.cookie('token', token, authCookieOptions);
 };
 
 const upsertOtpRecord = async ({ email, purpose, otp }) => {

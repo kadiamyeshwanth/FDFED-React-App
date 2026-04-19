@@ -152,3 +152,41 @@ For existing data, run the milestone migration:
 - Make sure MongoDB is running before starting the backend.
 - Run both backend and frontend for a fully working app.
 - CORS are configured for the Vite dev server (5173).
+
+## Docker Setup
+
+The repository now includes container support for both apps:
+
+- Backend image: [backend/Dockerfile](backend/Dockerfile)
+- Frontend image: [frontend/Dockerfile](frontend/Dockerfile)
+- Compose orchestration: [docker-compose.yml](docker-compose.yml)
+
+### Run With Containers
+
+From the project root:
+
+- Build and start: `docker compose up --build`
+- Stop and remove: `docker compose down`
+
+### Access URLs
+
+- Frontend: http://localhost:5174
+- Backend API: http://localhost:3001
+
+These defaults avoid conflicts with local dev servers that often use 5173/3000.
+
+### Optional Port Overrides
+
+You can override host ports without editing compose:
+
+- `BACKEND_HOST_PORT` (default `3001`)
+- `FRONTEND_HOST_PORT` (default `5174`)
+
+Example:
+
+- `BACKEND_HOST_PORT=3000 FRONTEND_HOST_PORT=5173 docker compose up --build`
+
+### Service Linking
+
+- Frontend calls backend through Docker network using `http://backend:3000`.
+- This is configured via `VITE_BACKEND_TARGET` in [docker-compose.yml](docker-compose.yml) and consumed in [frontend/vite.config.js](frontend/vite.config.js).

@@ -2,6 +2,8 @@
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
 
+const backendTarget = process.env.VITE_BACKEND_TARGET || "http://localhost:3000";
+
 export default defineConfig({
   plugins: [react()],
   server: {
@@ -9,28 +11,28 @@ export default defineConfig({
     proxy: {
       // Proxy all /api, /login, /signup, /session, etc. to backend
       "/login": {
-        target: "http://localhost:3000",
+        target: backendTarget,
         changeOrigin: true,
         secure: false,
       },
       "/signup": {
-        target: "http://localhost:3000",
+        target: backendTarget,
         changeOrigin: true,
         secure: false,
       },
       "/session": {
-        target: "http://localhost:3000",
+        target: backendTarget,
         changeOrigin: true,
         secure: false,
       },
       "/logout": {
-        target: "http://localhost:3000",
+        target: backendTarget,
         changeOrigin: true,
         secure: false,
       },
       // Or better: proxy ALL /api and auth routes
       "^/(api|login|signup|session|logout)/.*": {
-        target: "http://localhost:3000",
+        target: backendTarget,
         changeOrigin: true,
         secure: false,
       },

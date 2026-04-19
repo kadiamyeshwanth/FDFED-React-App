@@ -8,6 +8,15 @@ const {
 } = require("../config/constants");
 const { PlatformManager } = require("../models");
 
+const isProduction = process.env.NODE_ENV === "production";
+const adminCookieOptions = {
+  httpOnly: true,
+  sameSite: isProduction ? "none" : "lax",
+  secure: isProduction,
+  maxAge: 8 * 60 * 60 * 1000,
+  path: "/",
+};
+
 module.exports = async function authAdmin(req, res, next) {
   try {
     // Handle admin/platform-manager login
@@ -19,13 +28,7 @@ module.exports = async function authAdmin(req, res, next) {
         const token = jwt.sign({ role: "superadmin", email: ADMIN_EMAIL }, JWT_SECRET, {
           expiresIn: "8h",
         });
-        res.cookie("admin_token", token, {
-          httpOnly: true,
-          sameSite: "lax",
-          secure: false,
-          maxAge: 8 * 60 * 60 * 1000,
-          path: "/",
-        });
+        res.cookie("admin_token", token, adminCookieOptions);
         return res.json({ message: "Superadmin authenticated", token, role: "superadmin" });
       }
 
@@ -65,13 +68,7 @@ module.exports = async function authAdmin(req, res, next) {
         { expiresIn: "8h" }
       );
       
-      res.cookie("admin_token", token, {
-        httpOnly: true,
-        sameSite: "lax",
-        secure: false,
-        maxAge: 8 * 60 * 60 * 1000,
-        path: "/",
-      });
+      res.cookie("admin_token", token, adminCookieOptions);
       
       return res.json({ 
         message: "Platform manager authenticated", 

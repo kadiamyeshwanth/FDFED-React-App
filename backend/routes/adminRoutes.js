@@ -51,7 +51,13 @@ router.get("/admin/verify-session", authadmin, (req, res) => {
 
 // Admin logout route
 router.post("/admin/logout", (req, res) => {
-  res.clearCookie("admin_token", { path: "/" });
+  const isProduction = process.env.NODE_ENV === "production";
+  res.clearCookie("admin_token", {
+    httpOnly: true,
+    sameSite: isProduction ? "none" : "lax",
+    secure: isProduction,
+    path: "/",
+  });
   res.json({ message: "Logged out successfully" });
 });
 

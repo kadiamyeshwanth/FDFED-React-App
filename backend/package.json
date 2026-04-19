@@ -277,8 +277,12 @@
     "ids:list": "node scripts/get-model-ids.js",
     "indexes:transaction:drop": "node scripts/drop-transaction-indexes.js",
     "indexes:drop:all": "node scripts/drop-all-indexes.js",
+    "smtp:check": "node scripts/smtp-health-check.js",
     "perf:transaction:capture": "node scripts/transaction-history-perf.js --mode capture",
     "perf:transaction:compare": "node scripts/transaction-history-perf.js --mode compare",
+    "perf:redis:capture": "node scripts/redis-cache-perf.js --mode capture",
+    "perf:redis:live": "node scripts/redis-cache-perf.js --mode capture --logEach true --statsEach true",
+    "perf:redis:compare": "node scripts/redis-cache-perf.js --mode compare",
     "perf:query-planning": "node scripts/query-planning/top-query-explain.js",
     "perf:query-planning:heavy": "node scripts/query-planning/top-query-explain.js --profile heavy",
     "perf:query-planning:compare": "node scripts/query-planning/compare-query-planning.js"

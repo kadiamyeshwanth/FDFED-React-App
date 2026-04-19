@@ -27,7 +27,7 @@ const {
   CLOUDINARY_CLOUD_NAME,
   CLOUDINARY_API_KEY,
   CLOUDINARY_API_SECRET,
-  FRONTEND_URL,
+  FRONTEND_ORIGINS,
 } = require("./config/constants");
 const { ChatRoom } = require("./models");
 const { authorizeChatAccess } = require("./controllers/chatController");
@@ -40,9 +40,18 @@ cloudinary.config({
 
 const app = express();
 const server = http.createServer(app);
+
+const allowedOrigins = new Set(FRONTEND_ORIGINS || []);
+const corsOriginValidator = (origin, callback) => {
+  // Allow same-origin/server-to-server calls where Origin header may be absent.
+  if (!origin) return callback(null, true);
+  if (allowedOrigins.has(origin)) return callback(null, true);
+  return callback(new Error(`CORS blocked for origin: ${origin}`));
+};
+
 const io = new Server(server, {
   cors: {
-    origin: FRONTEND_URL,
+    origin: Array.from(allowedOrigins),
     methods: ["GET", "POST"],
     credentials: true,
   },
@@ -63,7 +72,7 @@ app.use(express.static("Final Pages"));
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 app.use(
   cors({
-    origin: FRONTEND_URL,
+    origin: corsOriginValidator,
     credentials: true,
   }),
 );
@@ -86,7 +95,13 @@ app.get("/adminpage", (req, res) => {
 });
 
 app.get("/logout", (req, res) => {
-  res.clearCookie("token", { httpOnly: true, sameSite: "lax", path: "/" });
+  const isProduction = process.env.NODE_ENV === "production";
+  res.clearCookie("token", {
+    httpOnly: true,
+    sameSite: isProduction ? "none" : "lax",
+    secure: isProduction,
+    path: "/",
+  });
   res.status(200).json({ redirect: "/" });
 });
 
