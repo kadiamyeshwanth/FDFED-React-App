@@ -63,7 +63,13 @@ router.get("/architect", getArchitects);
 router.get("/architect_form", getArchitectForm);
 router.get("/design_ideas", getDesignIdeas);
 router.get("/constructionform", getConstructionForm);
-router.post("/constructionform", auth, requireRole("customer"), postConstructionForm);
+router.post(
+  "/constructionform",
+  auth,
+  requireRole("customer"),
+  upload.any(),
+  postConstructionForm,
+);
 router.post(
   "/bidForm_Submit",
   auth,
