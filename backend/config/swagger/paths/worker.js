@@ -124,7 +124,6 @@ module.exports = {
                 "primarySkills",
                 "workExperience",
                 "termsAgree",
-                "companyId",
                 "resume",
               ],
               properties: {
@@ -141,7 +140,6 @@ module.exports = {
                 },
                 workExperience: { type: "string" },
                 termsAgree: { type: "boolean" },
-                companyId: { type: "string" },
                 resume: { type: "string", format: "binary" },
               },
             },

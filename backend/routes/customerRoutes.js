@@ -28,11 +28,11 @@ const {
   rejectMilestone,
   requestMilestoneRevision,
   reportMilestoneToAdmin,
-  getEditableRequestDetails,
-  updateEditableRequest,
   getArchitectHiringDetails,
   getDesignRequestDetails,
   getPaymentHistory,
+  getEditableRequestDetails,
+  updateEditableRequest,
 } = require("../controllers/customerController");
 
 const {
@@ -41,9 +41,10 @@ const {
 } = require("../controllers/reviewController");
 const { upload } = require("../middlewares/upload");
 const auth = require("../middlewares/auth");
+const { requireRole } = require("../middlewares/requireRole");
 
 // Route to get logged-in customer profile
-router.get("/customer/profile", auth, async (req, res) => {
+router.get("/customer/profile", auth, requireRole("customer"), async (req, res) => {
   try {
     const { Customer } = require("../models");
     const user = await Customer.findById(req.user.user_id).lean();
@@ -62,10 +63,11 @@ router.get("/architect", getArchitects);
 router.get("/architect_form", getArchitectForm);
 router.get("/design_ideas", getDesignIdeas);
 router.get("/constructionform", getConstructionForm);
-router.post("/constructionform", auth, postConstructionForm);
+router.post("/constructionform", auth, requireRole("customer"), postConstructionForm);
 router.post(
   "/bidForm_Submit",
   auth,
+  requireRole("customer"),
   upload.fields([
     { name: "siteFiles", maxCount: 10 },
     { name: "floorImages", maxCount: 100 },
@@ -75,75 +77,85 @@ router.post(
 router.get("/bidform", getBidForm);
 
 // Protected routes (require authentication)
-router.get("/job_status", auth, getJobRequestStatus);
-router.get("/construction_companies_list", auth, getConstructionCompaniesList);
-router.get("/ongoing_projects", auth, getOngoingProjects);
-router.get("/interiordesign_form", auth, getInteriorDesignForm);
-router.get("/interior_designer", auth, getInteriorDesigners);
-router.get("/customersettings", auth, getSettings);
-router.post("/customersettings/update", auth, updateCustomerSettings);
-router.get("/bidspace", auth, getBidSpace);
-router.get("/customer/accept-proposal/:type/:id", auth, acceptProposal);
-router.get("/customer/accept-bid/:bidId/:companyBidId", auth, acceptCompanyBid);
+router.get("/job_status", auth, requireRole("customer"), getJobRequestStatus);
+router.get("/construction_companies_list", auth, requireRole("customer"), getConstructionCompaniesList);
+router.get("/ongoing_projects", auth, requireRole("customer"), getOngoingProjects);
+router.get("/interiordesign_form", auth, requireRole("customer"), getInteriorDesignForm);
+router.get("/interior_designer", auth, requireRole("customer"), getInteriorDesigners);
+router.get("/customersettings", auth, requireRole("customer"), getSettings);
+router.post("/customersettings/update", auth, requireRole("customer"), updateCustomerSettings);
+router.get("/bidspace", auth, requireRole("customer"), getBidSpace);
+router.get("/customer/accept-proposal/:type/:id", auth, requireRole("customer"), acceptProposal);
+router.get("/customer/accept-bid/:bidId/:companyBidId", auth, requireRole("customer"), acceptCompanyBid);
 router.get(
   "/customer/accept-company-proposal/:projectId",
   auth,
+  requireRole("customer"),
   acceptCompanyProposal,
 );
-router.post("/customer/accept-proposal", auth, acceptConstructionProposal);
+router.post("/customer/accept-proposal", auth, requireRole("customer"), acceptConstructionProposal);
 router.post(
   "/customer/reject-company-proposal/:projectId",
   auth,
+  requireRole("customer"),
   rejectCompanyProposal,
 );
-router.post("/customer/reject-proposal/:type/:projectId", auth, rejectProposal);
-router.post("/customer/password/update", auth, updatePassword);
+router.post("/customer/reject-proposal/:type/:projectId", auth, requireRole("customer"), rejectProposal);
+router.post("/customer/password/update", auth, requireRole("customer"), updatePassword);
 router.post(
   "/customer/milestone/approve/:projectId/:milestoneId",
   auth,
+  requireRole("customer"),
   approveMilestone,
 );
 router.post(
   "/customer/milestone/reject/:projectId/:milestoneId",
   auth,
+  requireRole("customer"),
   rejectMilestone,
 );
 router.post(
   "/customer/milestone/request-revision/:projectId/:milestoneId",
   auth,
+  requireRole("customer"),
   requestMilestoneRevision,
 );
 router.post(
   "/customer/milestone/report-to-admin/:projectId/:milestoneId",
   auth,
+  requireRole("customer"),
   reportMilestoneToAdmin,
 );
 
+// Review routes
+router.post("/customer/review", auth, requireRole("customer"), submitCustomerReview);
+router.get(
+  "/customer/review-status/:projectType/:projectId",
+  auth,
+  requireRole("customer"),
+  getProjectReviewStatus,
+);
+
+// Payment checkout - get project details
+router.get("/architect-hiring/:projectId", auth, requireRole("customer"), getArchitectHiringDetails);
+router.get("/design-request/:projectId", auth, requireRole("customer"), getDesignRequestDetails);
+
+// Payment history
+router.get("/customer/payment-history", auth, requireRole("customer"), getPaymentHistory);
+
+// Editable request routes
 router.get(
   "/customer/editable-request/:type/:projectId",
   auth,
+  requireRole("customer"),
   getEditableRequestDetails,
 );
 router.put(
   "/customer/editable-request/:type/:projectId",
   auth,
+  requireRole("customer"),
   upload.any(),
   updateEditableRequest,
 );
-
-// Review routes
-router.post("/customer/review", auth, submitCustomerReview);
-router.get(
-  "/customer/review-status/:projectType/:projectId",
-  auth,
-  getProjectReviewStatus,
-);
-
-// Payment checkout - get project details
-router.get("/architect-hiring/:projectId", auth, getArchitectHiringDetails);
-router.get("/design-request/:projectId", auth, getDesignRequestDetails);
-
-// Payment history
-router.get("/customer/payment-history", auth, getPaymentHistory);
 
 module.exports = router;

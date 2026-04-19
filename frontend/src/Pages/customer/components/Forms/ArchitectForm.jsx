@@ -33,6 +33,12 @@ const ArchitectForm = () => {
     readClipboard(clipboardKey),
   );
 
+  const formatDateForInput = (value) => {
+    if (!value) return "";
+    if (typeof value === "string") return value.slice(0, 10);
+    return new Date(value).toISOString().slice(0, 10);
+  };
+
   useEffect(() => {
     const params = new URLSearchParams(location.search);
     setWorkerId(params.get("workerId") || "");
@@ -116,7 +122,7 @@ const ArchitectForm = () => {
           plotOrientation: request.plotOrientation || "",
           numFloors: request.numFloors ? String(request.numFloors) : "",
           budget: request.budget || "",
-          completionDate: request.completionDate || "",
+          completionDate: formatDateForInput(request.completionDate),
           specialFeatures: request.specialFeatures || "",
           floorRequirements: request.floorRequirements || [],
         }));
@@ -412,6 +418,7 @@ const ArchitectForm = () => {
   // ---------- Submit ----------
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (isSubmitting) return;
     if (!validate()) return;
 
     setIsSubmitting(true);
@@ -419,10 +426,7 @@ const ArchitectForm = () => {
     fd.append("workerId", workerId);
     Object.entries(form).forEach(([k, v]) => {
       if (k === "floorRequirements") {
-        v.forEach((floor, i) => {
-          fd.append(`floorRequirements[${i}][floorNumber]`, floor.floorNumber);
-          fd.append(`floorRequirements[${i}][details]`, floor.details);
-        });
+        fd.append("floorRequirements", JSON.stringify(v));
       } else {
         fd.append(k, v);
       }
@@ -723,7 +727,7 @@ const ArchitectForm = () => {
 
             {/* ---------- Customer Address ---------- */}
             <div className="architect-form-section">
-              <h2 className="architect-rection-title">Customer Address</h2>
+              <h2 className="architect-form-section-title">Customer Address</h2>
 
               <div className="architect-form-form-group">
                 <label htmlFor="streetAddress">Street Address*</label>

@@ -304,8 +304,9 @@ const createWorkerRequest = async (req, res) => {
       primarySkills,
       workExperience,
       termsAgree,
-      companyId,
     } = req.body;
+
+    const resolvedCompanyId = req.params.companyId;
 
     if (
       !fullName ||
@@ -318,7 +319,7 @@ const createWorkerRequest = async (req, res) => {
       !workExperience ||
       !termsAgree ||
       !workerId ||
-      !companyId ||
+      !resolvedCompanyId ||
       !req.file
     ) {
       return res.status(400).json({
@@ -334,17 +335,17 @@ const createWorkerRequest = async (req, res) => {
           workExperience: !workExperience,
           termsAgree: !termsAgree,
           workerId: !workerId,
-          companyId: !companyId,
+          companyId: !resolvedCompanyId,
           resume: !req.file,
         },
       });
     }
 
-    if (!mongoose.Types.ObjectId.isValid(companyId)) {
+    if (!mongoose.Types.ObjectId.isValid(resolvedCompanyId)) {
       return res.status(400).json({ error: "Invalid companyId format" });
     }
 
-    const company = await Company.findById(companyId);
+    const company = await Company.findById(resolvedCompanyId);
     if (!company) {
       return res.status(404).json({ error: "Company not found" });
     }
@@ -365,7 +366,7 @@ const createWorkerRequest = async (req, res) => {
       resume: req.file.path,
       termsAgree: termsAgree === "true" || termsAgree === true,
       workerId,
-      companyId,
+      companyId: resolvedCompanyId,
       compName,
     });
 

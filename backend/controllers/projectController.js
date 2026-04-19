@@ -9,6 +9,50 @@ const {
 } = require("../models");
 const upload = require("../middlewares/upload").upload;
 
+const parseArchitectFloorRequirements = (body) => {
+  const jsonValue = body.floorRequirements;
+  if (jsonValue) {
+    try {
+      const parsed =
+        typeof jsonValue === "string" ? JSON.parse(jsonValue) : jsonValue;
+      if (Array.isArray(parsed)) {
+        return parsed
+          .map((floor, index) => ({
+            floorNumber: Number(floor.floorNumber || index + 1),
+            details: (floor.details || "").toString(),
+          }))
+          .filter((floor) => floor.floorNumber > 0);
+      }
+    } catch (error) {
+      // Fall through to bracket-format parsing
+    }
+  }
+
+  const floorMap = {};
+  Object.keys(body || {}).forEach((key) => {
+    const match = key.match(
+      /^floorRequirements\[(\d+)\]\[(floorNumber|details)\]$/,
+    );
+    if (!match) return;
+
+    const index = Number(match[1]);
+    const field = match[2];
+    if (!floorMap[index]) floorMap[index] = {};
+    floorMap[index][field] = body[key];
+  });
+
+  return Object.keys(floorMap)
+    .sort((a, b) => Number(a) - Number(b))
+    .map((k, idx) => {
+      const floor = floorMap[k];
+      return {
+        floorNumber: Number(floor.floorNumber || idx + 1),
+        details: (floor.details || "").toString(),
+      };
+    })
+    .filter((floor) => floor.floorNumber > 0);
+};
+
 const submitArchitect = async (req, res) => {
   try {
     const customer = req.user.user_id;
@@ -37,19 +81,7 @@ const submitArchitect = async (req, res) => {
       completionDate,
     } = req.body;
 
-    let parsedFloorRequirements = [];
-    if (floorRequirements) {
-      try {
-        parsedFloorRequirements =
-          typeof floorRequirements === "string"
-            ? JSON.parse(floorRequirements)
-            : floorRequirements;
-      } catch (err) {
-        return res
-          .status(400)
-          .json({ message: "Invalid floorRequirements format" });
-      }
-    }
+    const parsedFloorRequirements = parseArchitectFloorRequirements(req.body);
 
     const referenceImages =
       req.files && req.files.length > 0
