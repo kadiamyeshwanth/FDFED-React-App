@@ -186,6 +186,31 @@ Example:
 
 - `BACKEND_HOST_PORT=3000 FRONTEND_HOST_PORT=5173 docker compose up --build`
 
+## CI/CD Pipeline (GitHub Actions)
+
+This repository includes a CI/CD workflow at [.github/workflows/ci-cd.yml](.github/workflows/ci-cd.yml).
+
+### What It Does
+
+- Runs backend CI on every push/pull request:
+    - Install dependencies
+    - Syntax checks for backend entry and SMTP utilities
+- Runs frontend CI on every push/pull request:
+    - Install dependencies
+    - Production build check
+- On `main` branch pushes (after CI passes):
+    - Triggers backend deploy on Render via deploy hook
+    - Triggers frontend deploy on Vercel via deploy hook
+
+### Required GitHub Repository Secrets
+
+Add these in GitHub repo settings under Secrets and variables > Actions:
+
+- `RENDER_DEPLOY_HOOK_URL`
+- `VERCEL_DEPLOY_HOOK_URL`
+
+If either secret is missing, the deploy job fails with a clear message.
+
 ### Service Linking
 
 - Frontend calls backend through Docker network using `http://backend:3000`.
