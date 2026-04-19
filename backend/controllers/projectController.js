@@ -6,6 +6,7 @@ const {
   Bid,
   CompanytoWorker,
   WorkerToCompany,
+  Complaint,
 } = require("../models");
 const upload = require("../middlewares/upload").upload;
 
@@ -1323,6 +1324,7 @@ const submitProjectReview = async (req, res) => {
 const getProjectsWithUnviewedCustomerMessages = async (req, res) => {
   try {
     const projects = await ConstructionProjectSchema.find({
+      companyId: req.user.user_id,
       "milestones.conversation": { $exists: true, $ne: [] },
     });
 
@@ -1364,7 +1366,10 @@ const markCustomerMessagesViewed = async (req, res) => {
   try {
     const { projectId } = req.params;
 
-    const project = await ConstructionProjectSchema.findById(projectId);
+    const project = await ConstructionProjectSchema.findOne({
+      _id: projectId,
+      companyId: req.user.user_id,
+    });
     if (!project) {
       return res.status(404).json({ error: "Project not found" });
     }
@@ -1381,6 +1386,15 @@ const markCustomerMessagesViewed = async (req, res) => {
     });
 
     await project.save();
+    await Complaint.updateMany(
+      {
+        projectId,
+        hasUnviewedAdminReplyForCompany: true,
+      },
+      {
+        $set: { hasUnviewedAdminReplyForCompany: false },
+      },
+    );
     res.json({ success: true });
   } catch (err) {
     console.error("Error marking messages as viewed:", err);
@@ -1392,6 +1406,7 @@ const markCustomerMessagesViewed = async (req, res) => {
 const getProjectsWithUnviewedCompanyMessages = async (req, res) => {
   try {
     const projects = await ConstructionProjectSchema.find({
+      customerId: req.user.user_id,
       "milestones.conversation": { $exists: true, $ne: [] },
     });
 
@@ -1433,7 +1448,10 @@ const markCompanyMessagesViewed = async (req, res) => {
   try {
     const { projectId } = req.params;
 
-    const project = await ConstructionProjectSchema.findById(projectId);
+    const project = await ConstructionProjectSchema.findOne({
+      _id: projectId,
+      customerId: req.user.user_id,
+    });
     if (!project) {
       return res.status(404).json({ error: "Project not found" });
     }
@@ -1454,6 +1472,81 @@ const markCompanyMessagesViewed = async (req, res) => {
   } catch (err) {
     console.error("Error marking company messages as viewed:", err);
     res.status(500).json({ error: "Failed to mark messages as viewed" });
+  }
+};
+
+const getCompanyNotifications = async (req, res) => {
+  try {
+    const companyId = req.user.user_id;
+    const projects = await ConstructionProjectSchema.find({ companyId }).select(
+      "_id projectName milestones.percentage milestones.conversation",
+    );
+
+    const projectNameMap = new Map();
+    const projectIds = [];
+    const notifications = [];
+
+    projects.forEach((project) => {
+      const projectId = project._id.toString();
+      projectIds.push(project._id);
+      projectNameMap.set(projectId, project.projectName || "Project");
+
+      (project.milestones || []).forEach((milestone) => {
+        (milestone.conversation || []).forEach((message, messageIndex) => {
+          if (message.sender !== "customer" || message.viewedByCompany) return;
+
+          notifications.push({
+            id: `customer-${projectId}-${milestone.percentage}-${messageIndex}`,
+            type: "customer_message",
+            title: "New message from customer",
+            message: message.message,
+            projectId,
+            projectName: project.projectName || "Project",
+            milestone: milestone.percentage,
+            createdAt: message.timestamp || new Date(),
+          });
+        });
+      });
+    });
+
+    if (projectIds.length > 0) {
+      const complaintDocs = await Complaint.find({
+        projectId: { $in: projectIds },
+        hasUnviewedAdminReplyForCompany: true,
+      }).select("projectId milestone replies updatedAt");
+
+      complaintDocs.forEach((complaint) => {
+        const reply = (complaint.replies || []).slice().sort((a, b) => {
+          return new Date(b.createdAt || 0) - new Date(a.createdAt || 0);
+        })[0];
+
+        if (!reply) return;
+
+        const projectId = complaint.projectId?.toString();
+        notifications.push({
+          id: `admin-reply-${complaint._id}`,
+          type: "platform_reply",
+          title: "Reply from platform admin",
+          message: reply.message,
+          projectId,
+          projectName: projectNameMap.get(projectId) || "Project",
+          milestone: complaint.milestone,
+          createdAt: reply.createdAt || complaint.updatedAt || new Date(),
+        });
+      });
+    }
+
+    notifications.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+    const limitedNotifications = notifications.slice(0, 30);
+
+    return res.json({
+      success: true,
+      totalUnread: limitedNotifications.length,
+      notifications: limitedNotifications,
+    });
+  } catch (err) {
+    console.error("Error getting company notifications:", err);
+    return res.status(500).json({ error: "Failed to get company notifications" });
   }
 };
 
@@ -1478,4 +1571,5 @@ module.exports = {
   markCustomerMessagesViewed,
   getProjectsWithUnviewedCompanyMessages,
   markCompanyMessagesViewed,
+  getCompanyNotifications,
 };

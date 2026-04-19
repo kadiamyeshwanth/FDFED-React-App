@@ -7,6 +7,7 @@ const complaintSchema = new mongoose.Schema({
   senderId: { type: mongoose.Schema.Types.ObjectId, required: true },
   message: { type: String, required: true },
   isViewed: { type: Boolean, default: false },
+  hasUnviewedAdminReplyForCompany: { type: Boolean, default: false },
   assignedTo: { type: mongoose.Schema.Types.ObjectId, ref: 'PlatformManager' },
   status: { type: String, enum: ['pending', 'in-progress', 'resolved', 'unassigned'], default: 'unassigned' },
   resolvedBy: { type: mongoose.Schema.Types.ObjectId, ref: 'PlatformManager' },

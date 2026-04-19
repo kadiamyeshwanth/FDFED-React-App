@@ -1,6 +1,6 @@
 // src/pages/company/CompanyOngoing.jsx
 import React, { useCallback, useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import MetricsCard from "./components/MetricsCard";
 import ProjectCard from "./components/ProjectCard";
 import ProjectDetails from "./components/ProjectDetails";
@@ -28,6 +28,7 @@ const CompanyOngoing = () => {
   const [unviewedComplaints, setUnviewedComplaints] = useState({}); // { projectId: count }
 
   const navigate = useNavigate();
+  const location = useLocation();
   const { openChat } = useGlobalChat();
 
   const handleMessageCustomer = (project) => {
@@ -96,6 +97,29 @@ const CompanyOngoing = () => {
   useEffect(() => {
     fetchData();
   }, [fetchData]);
+
+  useEffect(() => {
+    if (!projects.length) return;
+
+    const searchParams = new URLSearchParams(location.search);
+    const projectId = searchParams.get("projectId");
+
+    if (!projectId) return;
+
+    setExpandedUpdates((prev) => ({ ...prev, [projectId]: true }));
+    setExpandedDetails((prev) => ({ ...prev, [projectId]: false }));
+
+    const targetId = `project-card-${projectId}`;
+    const scrollToProject = () => {
+      const target = document.getElementById(targetId);
+      if (target) {
+        target.scrollIntoView({ behavior: "smooth", block: "center" });
+      }
+    };
+
+    const timerId = setTimeout(scrollToProject, 150);
+    return () => clearTimeout(timerId);
+  }, [projects, location.search]);
 
   /* -------------------------------------------------
    *  Filter

@@ -21,6 +21,7 @@ const {
   markCustomerMessagesViewed,
   getProjectsWithUnviewedCompanyMessages,
   markCompanyMessagesViewed,
+  getCompanyNotifications,
 } = require("../controllers/projectController");
 
 const isAuthenticated = require("../middlewares/auth");
@@ -81,6 +82,12 @@ router.get(
   isAuthenticated,
   requireRole("company"),
   getProjectsWithUnviewedCustomerMessages,
+);
+router.get(
+  "/company/notifications",
+  isAuthenticated,
+  requireRole("company"),
+  getCompanyNotifications,
 );
 router.post(
   "/company/mark-messages-viewed/:projectId",

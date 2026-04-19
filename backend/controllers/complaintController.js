@@ -65,6 +65,19 @@ exports.submitComplaint = async (req, res) => {
 exports.getProjectComplaints = async (req, res) => {
   try {
     const { projectId } = req.params;
+    const project = await ConstructionProjectSchema.findById(projectId).select('companyId customerId');
+    if (!project) {
+      return res.status(404).json({ error: 'Project not found' });
+    }
+
+    if (req.user?.role === 'company' && project.companyId?.toString() !== req.user.user_id?.toString()) {
+      return res.status(403).json({ error: 'Unauthorized for this project' });
+    }
+
+    if (req.user?.role === 'customer' && project.customerId?.toString() !== req.user.user_id?.toString()) {
+      return res.status(403).json({ error: 'Unauthorized for this project' });
+    }
+
     const complaints = await Complaint.find({ projectId })
       .sort({ createdAt: -1 });
 
@@ -90,10 +103,12 @@ exports.getProjectComplaints = async (req, res) => {
     });
     
     // Mark all complaints as viewed
-    await Complaint.updateMany(
-      { projectId, isViewed: false },
-      { $set: { isViewed: true } }
-    );
+    const markViewedUpdate = { isViewed: true };
+    if (req.user?.role === 'company') {
+      markViewedUpdate.hasUnviewedAdminReplyForCompany = false;
+    }
+
+    await Complaint.updateMany({ projectId }, { $set: markViewedUpdate });
     
     res.json({ success: true, complaints: complaintsWithReplyDetails });
   } catch (err) {
@@ -153,6 +168,7 @@ exports.replyToComplaint = async (req, res) => {
     const complaint = await Complaint.findById(complaintId);
     if (!complaint) return res.status(404).json({ error: 'Complaint not found' });
     complaint.replies.push({ adminId, message });
+    complaint.hasUnviewedAdminReplyForCompany = true;
     await complaint.save();
     res.json({ success: true, complaint });
   } catch (err) {

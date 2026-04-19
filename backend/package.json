@@ -271,6 +271,7 @@
     "start": "node app.js",
     "dev": "nodemon app.js",
     "test": "node --test tests/**/*.test.js",
+    "test:junit": "node scripts/run-junit-tests.js",
     "sync:indexes": "node scripts/sync-indexes.js",
     "sync:indexes:dry-run": "node scripts/sync-indexes.js --dry-run",
     "sync:indexes:full": "node scripts/sync-indexes.js --full-sync",
@@ -290,5 +291,8 @@
   "keywords": [],
   "author": "",
   "license": "ISC",
-  "type": "commonjs"
+  "type": "commonjs",
+  "devDependencies": {
+    "supertest": "^7.2.2"
+  }
 }

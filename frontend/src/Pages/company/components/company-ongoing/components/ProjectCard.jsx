@@ -28,7 +28,7 @@ const ProjectCard = ({
   const navigate = useNavigate();
 
   return (
-    <div className="ongoing-project-display">
+    <div className="ongoing-project-display" id={`project-card-${project._id}`}>
       {/* IMAGE */}
       <div className="ongoing-project-image">
         <img

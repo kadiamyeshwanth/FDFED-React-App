@@ -209,6 +209,7 @@ Add these in GitHub repo settings under Secrets and variables > Actions:
 - `RENDER_DEPLOY_HOOK_URL`
 - `VERCEL_DEPLOY_HOOK_URL`
 - `BACKEND_HEALTHCHECK_URL` (optional; defaults to `https://build-beyond.onrender.com/health`)
+- `FRONTEND_HEALTHCHECK_URL` (optional; recommended if your Vercel deploy hook URL does not expose your production hostname)
 
 If either deploy hook secret is missing, the deploy job fails with a clear message. The healthcheck URL can be omitted.
 

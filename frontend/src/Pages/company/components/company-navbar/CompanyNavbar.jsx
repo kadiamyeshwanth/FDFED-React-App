@@ -1,30 +1,88 @@
 // src/components/company-navbar/CompanyNavbar.jsx
-import { Link } from "react-router-dom";
-import { useState, useEffect } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import { useState, useEffect, useRef } from "react";
 import "./CompanyNavbar.css";
 
 const CompanyNavbar = () => {
-  const [hasUnviewedComplaints, setHasUnviewedComplaints] = useState(false);
+  const [notifications, setNotifications] = useState([]);
+  const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
+  const notificationsRef = useRef(null);
+  const navigate = useNavigate();
 
   useEffect(() => {
-    const fetchUnviewedComplaints = async () => {
+    const fetchNotifications = async () => {
       try {
-        const res = await fetch('/api/company/unviewed-customer-messages', {
-          credentials: 'include'
+        const res = await fetch("/api/company/notifications", {
+          credentials: "include",
         });
         if (!res.ok) return;
 
         const data = await res.json();
-        setHasUnviewedComplaints(data.unviewedByProject && data.unviewedByProject.length > 0);
+        setNotifications(Array.isArray(data.notifications) ? data.notifications : []);
       } catch (err) {
-        setHasUnviewedComplaints(false);
+        setNotifications([]);
       }
     };
-    fetchUnviewedComplaints();
-    // Poll every 30 seconds for new messages
-    const interval = setInterval(fetchUnviewedComplaints, 30000);
+
+    fetchNotifications();
+    const interval = setInterval(fetchNotifications, 30000);
     return () => clearInterval(interval);
   }, []);
+
+  useEffect(() => {
+    const handleOutsideClick = (event) => {
+      if (
+        notificationsRef.current &&
+        !notificationsRef.current.contains(event.target)
+      ) {
+        setIsNotificationsOpen(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleOutsideClick);
+    return () => {
+      document.removeEventListener("mousedown", handleOutsideClick);
+    };
+  }, []);
+
+  const unreadCount = notifications.length;
+
+  const formatRelativeTime = (dateString) => {
+    if (!dateString) return "Just now";
+
+    const diffMs = Date.now() - new Date(dateString).getTime();
+    const diffMin = Math.floor(diffMs / 60000);
+    if (diffMin < 1) return "Just now";
+    if (diffMin < 60) return `${diffMin}m ago`;
+
+    const diffHrs = Math.floor(diffMin / 60);
+    if (diffHrs < 24) return `${diffHrs}h ago`;
+
+    const diffDays = Math.floor(diffHrs / 24);
+    return `${diffDays}d ago`;
+  };
+
+  const handleNotificationClick = async (notification) => {
+    if (!notification?.projectId) return;
+
+    try {
+      await fetch(`/api/company/mark-messages-viewed/${notification.projectId}`, {
+        method: "POST",
+        credentials: "include",
+      });
+    } catch (err) {
+      // Navigate anyway to keep UX responsive.
+    }
+
+    const params = new URLSearchParams({
+      projectId: notification.projectId,
+      milestone: String(notification.milestone ?? ""),
+      notificationType: notification.type || "customer_message",
+    });
+
+    setIsNotificationsOpen(false);
+    navigate(`/companydashboard/companyongoing_projects?${params.toString()}`);
+  };
 
   return (
     <div className="company_navbar">
@@ -42,17 +100,8 @@ const CompanyNavbar = () => {
           </Link>
           <Link to="/companydashboard/companyongoing_projects" className="company_navbar_navLink" style={{ position: 'relative' }}>
             Ongoing Projects
-            {hasUnviewedComplaints && (
-              <span style={{
-                position: 'absolute',
-                top: '5px',
-                right: '-5px',
-                width: '10px',
-                height: '10px',
-                backgroundColor: '#dc3545',
-                borderRadius: '50%',
-                border: '2px solid white'
-              }}></span>
+            {unreadCount > 0 && (
+              <span className="company_navbar_dotBadge"></span>
             )}
           </Link>
           <Link to="/companydashboard/project_requests" className="company_navbar_navLink">
@@ -70,6 +119,69 @@ const CompanyNavbar = () => {
         </div>
 
         <div className="company_navbar_settingsContainer">
+          <div className="company_navbar_notificationContainer" ref={notificationsRef}>
+            <button
+              type="button"
+              className="company_navbar_bellBtn"
+              onClick={() => setIsNotificationsOpen((prev) => !prev)}
+            >
+              <svg
+                className="company_navbar_bellSvg"
+                viewBox="0 0 24 24"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path d="M12 2a6 6 0 0 0-6 6v3.76l-1.56 2.6A1 1 0 0 0 5.3 16h13.4a1 1 0 0 0 .86-1.64L18 11.76V8a6 6 0 0 0-6-6zm0 20a3 3 0 0 0 2.82-2H9.18A3 3 0 0 0 12 22z" />
+              </svg>
+              {unreadCount > 0 && (
+                <span className="company_navbar_notificationBadge">
+                  {unreadCount > 99 ? "99+" : unreadCount}
+                </span>
+              )}
+            </button>
+
+            {isNotificationsOpen && (
+              <div className="company_navbar_notificationDropdown">
+                <div className="company_navbar_notificationHeader">
+                  Notifications
+                </div>
+                {notifications.length === 0 ? (
+                  <div className="company_navbar_notificationEmpty">
+                    No new notifications
+                  </div>
+                ) : (
+                  <div className="company_navbar_notificationList">
+                    {notifications.map((notification) => (
+                      <button
+                        key={notification.id}
+                        type="button"
+                        className="company_navbar_notificationItem"
+                        onClick={() => handleNotificationClick(notification)}
+                      >
+                        <div className="company_navbar_notificationTitle">
+                          {notification.title}
+                        </div>
+                        <div className="company_navbar_notificationText">
+                          {notification.projectName}
+                          {typeof notification.milestone === "number"
+                            ? ` • ${notification.milestone}%`
+                            : ""}
+                        </div>
+                        {notification.message && (
+                          <div className="company_navbar_notificationMessage">
+                            {notification.message}
+                          </div>
+                        )}
+                        <div className="company_navbar_notificationTime">
+                          {formatRelativeTime(notification.createdAt)}
+                        </div>
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+
           <Link to="/companydashboard/companySettings" className="company_navbar_settingsBtn">
             <div className="company_navbar_settingsIcon">
               <svg
