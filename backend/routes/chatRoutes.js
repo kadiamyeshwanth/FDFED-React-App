@@ -5,12 +5,13 @@ const {
   getChatRoomByProject,
 } = require("../controllers/chatController");
 const isAuthenticated = require("../middlewares/auth");
+const { requireRole } = require("../middlewares/requireRole");
 
 // Get or create customer-worker chat room by project context
 router.get(
   "/chat/room/:projectId/:projectType",
   isAuthenticated,
-  getChatRoomByProject,
+  getChatRoomByProject
 );
 
 // Render the chat page for a specific room ID
