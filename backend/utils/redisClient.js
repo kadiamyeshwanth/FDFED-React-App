@@ -12,14 +12,28 @@ const initRedis = async () => {
     return null;
   }
 
-  if (!REDIS_URL) {
-    console.log('Redis not configured (REDIS_URL missing); continuing without cache');
-    return null;
-  }
-
   if (client) return client;
 
-  client = createClient({ url: REDIS_URL });
+  const redisHost = process.env.REDIS_HOST;
+  const redisPort = Number(process.env.REDIS_PORT || 0);
+  const redisUsername = process.env.REDIS_USERNAME;
+  const redisPassword = process.env.REDIS_PASSWORD;
+
+  if (REDIS_URL) {
+    client = createClient({ url: REDIS_URL });
+  } else if (redisHost && redisPort) {
+    client = createClient({
+      username: redisUsername,
+      password: redisPassword,
+      socket: {
+        host: redisHost,
+        port: redisPort,
+      },
+    });
+  } else {
+    console.log('Redis not configured (set REDIS_URL or REDIS_HOST/REDIS_PORT); continuing without cache');
+    return null;
+  }
 
   client.on('error', (error) => {
     redisReady = false;

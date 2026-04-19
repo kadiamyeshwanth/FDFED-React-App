@@ -9,16 +9,15 @@ const CompanyNavbar = () => {
   useEffect(() => {
     const fetchUnviewedComplaints = async () => {
       try {
-        const res = await fetch('http://localhost:3000/api/company/unviewed-customer-messages', {
+        const res = await fetch('/api/company/unviewed-customer-messages', {
           credentials: 'include'
         });
-        if (res.ok) {
-          const data = await res.json();
-          console.log('🔴 Navbar - Unviewed customer messages:', data);
-          setHasUnviewedComplaints(data.unviewedByProject && data.unviewedByProject.length > 0);
-        }
+        if (!res.ok) return;
+
+        const data = await res.json();
+        setHasUnviewedComplaints(data.unviewedByProject && data.unviewedByProject.length > 0);
       } catch (err) {
-        console.error('Error fetching unviewed customer messages:', err);
+        setHasUnviewedComplaints(false);
       }
     };
     fetchUnviewedComplaints();
@@ -31,7 +30,7 @@ const CompanyNavbar = () => {
     <div className="company_navbar">
       <nav className="company_navbar_navbar">
         <Link to="/companydashboard/companydashboard" className="company_navbar_brand">
-          Build & Beyond
+          Build and Beyond
         </Link>
 
         <div className="company_navbar_navLinks">

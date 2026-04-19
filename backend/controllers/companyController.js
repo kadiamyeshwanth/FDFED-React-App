@@ -321,6 +321,13 @@ const getCompanyRevenue = async (req, res) => {
       phase4: { total: 0, received: 0, pending: 0, count: 0 }
     };
 
+    const ensurePhaseBucket = (phaseId) => {
+      if (!phaseAnalytics[phaseId]) {
+        phaseAnalytics[phaseId] = { total: 0, received: 0, pending: 0, count: 0 };
+      }
+      return phaseAnalytics[phaseId];
+    };
+
     // Process each project with detailed phase-wise breakdown
     const projectsWithDetails = projects.map(p => {
       const projectValue = p.paymentDetails?.totalAmount || p.proposal?.price || 0;
@@ -333,11 +340,12 @@ const getCompanyRevenue = async (req, res) => {
       const phaseBreakdown = buildCompanyPhasePaymentSummary(p).map((phase, index) => {
         const phaseId = `phase${index + 1}`;
         const pending = Math.max(phase.phaseAmount - phase.companyReceived, 0);
+        const bucket = ensurePhaseBucket(phaseId);
 
-        phaseAnalytics[phaseId].total += phase.phaseAmount;
-        phaseAnalytics[phaseId].received += phase.companyReceived;
-        phaseAnalytics[phaseId].pending += pending;
-        phaseAnalytics[phaseId].count += 1;
+        bucket.total += phase.phaseAmount;
+        bucket.received += phase.companyReceived;
+        bucket.pending += pending;
+        bucket.count += 1;
 
         return {
           name: phase.phaseName,

@@ -157,7 +157,7 @@ io.on("connection", (socket) => {
     socket.roomId = roomId;
 
     const authResult = await authorizeChatAccess(roomId, userId, userRole);
-    if (authResult.authorized) {
+    if (authResult.authorized && authResult.otherUserId) {
       const otherUserId = authResult.otherUserId.toString();
       const other = onlineUsers[otherUserId];
       if (other) {
@@ -166,6 +166,8 @@ io.on("connection", (socket) => {
       } else {
         socket.emit("userStatus", { isOnline: false });
       }
+    } else if (!authResult.authorized) {
+      socket.emit("userStatus", { isOnline: false });
     }
   });
 
