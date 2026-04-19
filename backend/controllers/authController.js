@@ -27,11 +27,27 @@ const authCookieOptions = {
 };
 
 const normalizeEmail = (email) => String(email || '').trim().toLowerCase();
+const normalizeRole = (role) => String(role || '').trim().toLowerCase();
+
+const inferRoleFromModel = (user) => {
+  const modelName = String(user?.constructor?.modelName || '').toLowerCase();
+  if (modelName === 'customer') return 'customer';
+  if (modelName === 'company') return 'company';
+  if (modelName === 'worker') return 'worker';
+  return null;
+};
+
+const resolveUserRole = (user) => {
+  const directRole = normalizeRole(user?.role);
+  if (['customer', 'company', 'worker'].includes(directRole)) return directRole;
+  return inferRoleFromModel(user);
+};
 
 const getModelForRole = (role) => {
-  if (role === 'customer') return Customer;
-  if (role === 'company') return Company;
-  if (role === 'worker') return Worker;
+  const normalizedRole = normalizeRole(role);
+  if (normalizedRole === 'customer') return Customer;
+  if (normalizedRole === 'company') return Company;
+  if (normalizedRole === 'worker') return Worker;
   return null;
 };
 
@@ -49,14 +65,20 @@ const createOtpCode = () => `${Math.floor(100000 + Math.random() * 900000)}`;
 const hashOtp = (otp) => crypto.createHash('sha256').update(otp).digest('hex');
 
 const getRedirectByRole = (role) => {
-  if (role === 'customer') return '/customerdashboard';
-  if (role === 'company') return '/companydashboard';
-  if (role === 'worker') return '/workerdashboard';
+  const normalizedRole = normalizeRole(role);
+  if (normalizedRole === 'customer') return '/customerdashboard';
+  if (normalizedRole === 'company') return '/companydashboard';
+  if (normalizedRole === 'worker') return '/workerdashboard';
   return null;
 };
 
 const setAuthCookie = (res, user) => {
-  const token = jwt.sign({ user_id: user._id.toString(), role: user.role }, JWT_SECRET, { expiresIn: '1d' });
+  const resolvedRole = resolveUserRole(user);
+  if (!resolvedRole) {
+    throw new Error('User role is not configured for authentication');
+  }
+
+  const token = jwt.sign({ user_id: user._id.toString(), role: resolvedRole }, JWT_SECRET, { expiresIn: '1d' });
   res.cookie('token', token, authCookieOptions);
 };
 
@@ -289,8 +311,13 @@ const login = async (req, res) => {
     let user = await findUserByEmail(email);
     if (!user) return res.status(401).json({ message: 'Invalid email or password' });
 
+    const userRole = resolveUserRole(user);
+    if (!userRole) {
+      return res.status(500).json({ message: 'Account role is not configured. Please contact support.' });
+    }
+
     // Block login for company/worker if not verified
-    if ((user.role === 'company' || user.role === 'worker')) {
+    if ((userRole === 'company' || userRole === 'worker')) {
       if (user.status === 'pending') {
         return res.status(403).json({ message: 'Your application is yet to be accepted', status: 'pending' });
       }
@@ -319,7 +346,7 @@ const login = async (req, res) => {
     }
 
     setAuthCookie(res, user);
-    const redirect = getRedirectByRole(user.role);
+    const redirect = getRedirectByRole(userRole);
     if (!redirect) return res.status(500).json({ message: 'Server error' });
 
     res.status(200).json({ message: 'Login successful', redirect });
@@ -358,7 +385,12 @@ const loginWithGoogle = async (req, res) => {
       });
     }
 
-    if ((user.role === 'company' || user.role === 'worker')) {
+    const userRole = resolveUserRole(user);
+    if (!userRole) {
+      return res.status(500).json({ message: 'Account role is not configured. Please contact support.' });
+    }
+
+    if ((userRole === 'company' || userRole === 'worker')) {
       if (user.status === 'pending') {
         return res.status(403).json({ message: 'Your application is yet to be accepted', status: 'pending' });
       }
@@ -384,7 +416,7 @@ const loginWithGoogle = async (req, res) => {
     }
 
     setAuthCookie(res, user);
-    const redirect = getRedirectByRole(user.role);
+    const redirect = getRedirectByRole(userRole);
     if (!redirect) return res.status(500).json({ message: 'Server error' });
 
     return res.status(200).json({ message: 'Login successful', redirect });
@@ -432,8 +464,13 @@ const verifyLoginTwoFactor = async (req, res) => {
     const user = await Model.findById(payload.user_id);
     if (!user) return res.status(404).json({ message: 'User not found' });
 
+    const userRole = resolveUserRole(user);
+    if (!userRole) {
+      return res.status(500).json({ message: 'Account role is not configured. Please contact support.' });
+    }
+
     setAuthCookie(res, user);
-    const redirect = getRedirectByRole(user.role);
+    const redirect = getRedirectByRole(userRole);
     if (!redirect) return res.status(500).json({ message: 'Server error' });
 
     res.status(200).json({ message: 'Login successful', redirect });
