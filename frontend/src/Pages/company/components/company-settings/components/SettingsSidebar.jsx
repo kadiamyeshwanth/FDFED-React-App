@@ -5,7 +5,7 @@ export default function SettingsSidebar({ activeSection, onSectionChange }) {
   const handleLogout = async () => {
     try {
       await axios.get("/api/logout", {}, { withCredentials: true });
-      window.location.href = "http://localhost:5173/";
+      window.location.href = "/";
     } catch (error) {
       console.error("Logout error:", error);
     }

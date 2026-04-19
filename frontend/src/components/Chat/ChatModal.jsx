@@ -47,7 +47,7 @@ const ChatModal = ({
           socketRef.current = null;
         }
 
-        socketRef.current = io("http://localhost:3000", {
+        socketRef.current = io("https://fdfed-react-app.onrender.com", {
           withCredentials: true,
         });
 

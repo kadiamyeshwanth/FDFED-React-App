@@ -26,7 +26,7 @@ const CompanyProjectRequests = () => {
   const fetchProjects = async () => {
     try {
       setLoading(true);
-      const res = await fetch("http://localhost:3000/api/project_requests", {
+      const res = await fetch("https://fdfed-react-app.onrender.com/api/project_requests", {
         credentials: "include",
       });
       if (!res.ok) throw new Error("Failed to fetch project requests");
@@ -142,7 +142,7 @@ const CompanyProjectRequests = () => {
       };
 
       const res = await fetch(
-        "http://localhost:3000/api/company/submit-proposal",
+        "https://fdfed-react-app.onrender.com/api/company/submit-proposal",
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -172,7 +172,7 @@ const CompanyProjectRequests = () => {
 
     try {
       const res = await fetch(
-        `http://localhost:3000/api/projects/${projectId}/rejected`,
+        `https://fdfed-react-app.onrender.com/api/projects/${projectId}/rejected`,
         {
           method: "PATCH",
           credentials: "include",

@@ -19,7 +19,7 @@ const NotFound = () => {
 
   useEffect(() => {
     // Log 404 error to backend
-    fetch("http://localhost:3000/api/log-client-error", {
+    fetch("https://fdfed-react-app.onrender.com/api/log-client-error", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({

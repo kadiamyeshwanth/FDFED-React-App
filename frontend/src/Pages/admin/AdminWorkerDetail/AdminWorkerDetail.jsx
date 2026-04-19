@@ -25,7 +25,7 @@ import "./AdminWorkerDetail.css";
 const getDocumentUrl = (path) => {
   if (!path) return "";
   if (path.startsWith("http")) return path;
-  return `http://localhost:3000${path.startsWith("/") ? "" : "/"}${path}`;
+  return `https://fdfed-react-app.onrender.com${path.startsWith("/") ? "" : "/"}${path}`;
 };
 
 const formatCurrency = (value) =>

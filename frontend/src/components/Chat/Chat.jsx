@@ -53,7 +53,7 @@ const Chat = ({ userRole }) => {
   };
 
   const initializeSocket = (data) => {
-    socketRef.current = io("http://localhost:3000", {
+    socketRef.current = io("https://fdfed-react-app.onrender.com", {
       withCredentials: true,
     });
 

@@ -53,7 +53,7 @@ const CompanyBids = () => {
     const load = async () => {
       setLoading(true);
       try {
-        const res = await fetch("http://localhost:3000/api/companybids", {
+        const res = await fetch("https://fdfed-react-app.onrender.com/api/companybids", {
           credentials: "include",
         });
 
@@ -127,7 +127,7 @@ const CompanyBids = () => {
     }
 
     try {
-      const res = await fetch("http://localhost:3000/api/submit-bid", {
+      const res = await fetch("https://fdfed-react-app.onrender.com/api/submit-bid", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         credentials: "include",

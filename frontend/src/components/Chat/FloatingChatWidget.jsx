@@ -68,7 +68,7 @@ const FloatingChatWidget = ({
           socketRef.current = null;
         }
 
-        const socket = io("http://localhost:3000", {
+        const socket = io("https://fdfed-react-app.onrender.com", {
           withCredentials: true,
         });
         socketRef.current = socket;

@@ -51,7 +51,7 @@ const CompanyOngoing = () => {
     try {
       setLoading(true);
       const res = await fetch(
-        "http://localhost:3000/api/companyongoing_projects",
+        "https://fdfed-react-app.onrender.com/api/companyongoing_projects",
         {
           credentials: "include",
         },
@@ -64,7 +64,7 @@ const CompanyOngoing = () => {
       // Fetch unviewed complaints count (from customers)
       try {
         const complaintsRes = await fetch(
-          "http://localhost:3000/api/company/unviewed-customer-messages",
+          "https://fdfed-react-app.onrender.com/api/company/unviewed-customer-messages",
           {
             credentials: "include",
           },
@@ -137,7 +137,7 @@ const CompanyOngoing = () => {
 
       try {
         await fetch(
-          `http://localhost:3000/api/company/mark-messages-viewed/${id}`,
+          `https://fdfed-react-app.onrender.com/api/company/mark-messages-viewed/${id}`,
           {
             method: "POST",
             credentials: "include",

@@ -1076,7 +1076,7 @@ const CustomerOngoing = () => {
                                       }
                                       onClick={() =>
                                         window.open(
-                                          `http://localhost:3000/${img}`,
+                                          `https://fdfed-react-app.onrender.com/${img}`,
                                           "_blank",
                                         )
                                       }

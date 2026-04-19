@@ -515,10 +515,10 @@ const ProjectUpdates = ({ project, expandedUpdates, onRefresh }) => {
                 {project.completionImages.map((img, idx) => (
                   <img
                     key={idx}
-                    src={`http://localhost:3000/${img}`}
+                    src={`https://fdfed-react-app.onrender.com/${img}`}
                     alt={`Completion ${idx + 1}`}
                     className="completion-image"
-                    onClick={() => window.open(`http://localhost:3000/${img}`, '_blank')}
+                    onClick={() => window.open(`https://fdfed-react-app.onrender.com/${img}`, '_blank')}
                   />
                 ))}
               </div>

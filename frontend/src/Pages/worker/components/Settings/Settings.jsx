@@ -183,7 +183,7 @@ const Settings = () => {
 
       // Redirect to landing page regardless of response body
       if (res.ok) {
-        navigate('http://localhost:5173/');
+        navigate('/');
       } else {
         // Fallback in case API not reachable
         window.location.href = '/';
