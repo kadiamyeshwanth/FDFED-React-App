@@ -533,6 +533,7 @@ const getBidSpace = async (req, res) => {
 const postConstructionForm = async (req, res) => {
   try {
     const {
+      companyId,
       projectName,
       customerName,
       customerEmail,
@@ -549,6 +550,10 @@ const postConstructionForm = async (req, res) => {
       energyEfficiency,
       floors,
     } = req.body;
+
+    if (!companyId) {
+      return res.status(400).json({ error: "companyId is required" });
+    }
 
     const siteFilepaths = req.files ? req.files.map((file) => file.path) : [];
 
@@ -581,6 +586,7 @@ const postConstructionForm = async (req, res) => {
       accessibilityNeeds,
       energyEfficiency,
       siteFilepaths,
+      companyId,
       customerId: req.user ? req.user.user_id : null,
       status: "pending",
     });
