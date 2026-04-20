@@ -1,115 +1,115 @@
 <?xml version="1.0" encoding="UTF-8" ?>
-<testsuites name="vitest tests" tests="54" failures="0" errors="0" time="3.832">
-    <testsuite name="src/App.routes.test.jsx" timestamp="2026-04-20T18:45:59.742Z" hostname="Prudhvi-2412" tests="52" failures="0" errors="0" skipped="0" time="0.2161167">
-        <testcase classname="src/App.routes.test.jsx" name="App route smoke tests &gt; renders expected page for route /" time="0.0540084">
+<testsuites name="vitest tests" tests="54" failures="0" errors="0" time="3.096">
+    <testsuite name="src/App.routes.test.jsx" timestamp="2026-04-20T18:55:17.281Z" hostname="Prudhvi-2412" tests="52" failures="0" errors="0" skipped="0" time="0.1295272">
+        <testcase classname="src/App.routes.test.jsx" name="App route smoke tests &gt; renders expected page for route /" time="0.0327586">
         </testcase>
-        <testcase classname="src/App.routes.test.jsx" name="App route smoke tests &gt; renders expected page for route /admin-login" time="0.0077833">
+        <testcase classname="src/App.routes.test.jsx" name="App route smoke tests &gt; renders expected page for route /admin-login" time="0.0044095">
         </testcase>
-        <testcase classname="src/App.routes.test.jsx" name="App route smoke tests &gt; renders expected page for route /platform-manager-login" time="0.0054017">
+        <testcase classname="src/App.routes.test.jsx" name="App route smoke tests &gt; renders expected page for route /platform-manager-login" time="0.0037674">
         </testcase>
-        <testcase classname="src/App.routes.test.jsx" name="App route smoke tests &gt; renders expected page for route /customerdashboard" time="0.0063866">
+        <testcase classname="src/App.routes.test.jsx" name="App route smoke tests &gt; renders expected page for route /customerdashboard" time="0.0035073">
         </testcase>
-        <testcase classname="src/App.routes.test.jsx" name="App route smoke tests &gt; renders expected page for route /customerdashboard/" time="0.0052062">
+        <testcase classname="src/App.routes.test.jsx" name="App route smoke tests &gt; renders expected page for route /customerdashboard/" time="0.0035095">
         </testcase>
-        <testcase classname="src/App.routes.test.jsx" name="App route smoke tests &gt; renders expected page for route /customerdashboard/profile" time="0.0048791">
+        <testcase classname="src/App.routes.test.jsx" name="App route smoke tests &gt; renders expected page for route /customerdashboard/profile" time="0.0019991">
         </testcase>
-        <testcase classname="src/App.routes.test.jsx" name="App route smoke tests &gt; renders expected page for route /customerdashboard/projects" time="0.0050705">
+        <testcase classname="src/App.routes.test.jsx" name="App route smoke tests &gt; renders expected page for route /customerdashboard/projects" time="0.0020233">
         </testcase>
-        <testcase classname="src/App.routes.test.jsx" name="App route smoke tests &gt; renders expected page for route /customerdashboard/jobs" time="0.0053516">
+        <testcase classname="src/App.routes.test.jsx" name="App route smoke tests &gt; renders expected page for route /customerdashboard/jobs" time="0.0017857">
         </testcase>
-        <testcase classname="src/App.routes.test.jsx" name="App route smoke tests &gt; renders expected page for route /customerdashboard/settings" time="0.0058157">
+        <testcase classname="src/App.routes.test.jsx" name="App route smoke tests &gt; renders expected page for route /customerdashboard/settings" time="0.0029899">
         </testcase>
-        <testcase classname="src/App.routes.test.jsx" name="App route smoke tests &gt; renders expected page for route /customerdashboard/ongoing" time="0.0041369">
+        <testcase classname="src/App.routes.test.jsx" name="App route smoke tests &gt; renders expected page for route /customerdashboard/ongoing" time="0.0019784">
         </testcase>
-        <testcase classname="src/App.routes.test.jsx" name="App route smoke tests &gt; renders expected page for route /customerdashboard/history" time="0.0031602">
+        <testcase classname="src/App.routes.test.jsx" name="App route smoke tests &gt; renders expected page for route /customerdashboard/history" time="0.0015375">
         </testcase>
-        <testcase classname="src/App.routes.test.jsx" name="App route smoke tests &gt; renders expected page for route /companydashboard" time="0.0022959">
+        <testcase classname="src/App.routes.test.jsx" name="App route smoke tests &gt; renders expected page for route /companydashboard" time="0.0015498">
         </testcase>
-        <testcase classname="src/App.routes.test.jsx" name="App route smoke tests &gt; renders expected page for route /companydashboard/" time="0.002352">
+        <testcase classname="src/App.routes.test.jsx" name="App route smoke tests &gt; renders expected page for route /companydashboard/" time="0.0015536">
         </testcase>
-        <testcase classname="src/App.routes.test.jsx" name="App route smoke tests &gt; renders expected page for route /companydashboard/projects" time="0.0027769">
+        <testcase classname="src/App.routes.test.jsx" name="App route smoke tests &gt; renders expected page for route /companydashboard/projects" time="0.0014351">
         </testcase>
-        <testcase classname="src/App.routes.test.jsx" name="App route smoke tests &gt; renders expected page for route /companydashboard/revenue" time="0.0025735">
+        <testcase classname="src/App.routes.test.jsx" name="App route smoke tests &gt; renders expected page for route /companydashboard/revenue" time="0.0014063">
         </testcase>
-        <testcase classname="src/App.routes.test.jsx" name="App route smoke tests &gt; renders expected page for route /companydashboard/hiring" time="0.0024837">
+        <testcase classname="src/App.routes.test.jsx" name="App route smoke tests &gt; renders expected page for route /companydashboard/hiring" time="0.0019533">
         </testcase>
-        <testcase classname="src/App.routes.test.jsx" name="App route smoke tests &gt; renders expected page for route /companydashboard/bids" time="0.0029544">
+        <testcase classname="src/App.routes.test.jsx" name="App route smoke tests &gt; renders expected page for route /companydashboard/bids" time="0.0016237">
         </testcase>
-        <testcase classname="src/App.routes.test.jsx" name="App route smoke tests &gt; renders expected page for route /companydashboard/settings" time="0.0035819">
+        <testcase classname="src/App.routes.test.jsx" name="App route smoke tests &gt; renders expected page for route /companydashboard/settings" time="0.0015959">
         </testcase>
-        <testcase classname="src/App.routes.test.jsx" name="App route smoke tests &gt; renders expected page for route /companydashboard/employees" time="0.0036524">
+        <testcase classname="src/App.routes.test.jsx" name="App route smoke tests &gt; renders expected page for route /companydashboard/employees" time="0.0016873">
         </testcase>
-        <testcase classname="src/App.routes.test.jsx" name="App route smoke tests &gt; renders expected page for route /workerdashboard" time="0.0028754">
+        <testcase classname="src/App.routes.test.jsx" name="App route smoke tests &gt; renders expected page for route /workerdashboard" time="0.0017088">
         </testcase>
-        <testcase classname="src/App.routes.test.jsx" name="App route smoke tests &gt; renders expected page for route /workerdashboard/" time="0.0030017">
+        <testcase classname="src/App.routes.test.jsx" name="App route smoke tests &gt; renders expected page for route /workerdashboard/" time="0.0018047">
         </testcase>
-        <testcase classname="src/App.routes.test.jsx" name="App route smoke tests &gt; renders expected page for route /workerdashboard/jobs" time="0.0029585">
+        <testcase classname="src/App.routes.test.jsx" name="App route smoke tests &gt; renders expected page for route /workerdashboard/jobs" time="0.0018782">
         </testcase>
-        <testcase classname="src/App.routes.test.jsx" name="App route smoke tests &gt; renders expected page for route /workerdashboard/ongoing" time="0.0040446">
+        <testcase classname="src/App.routes.test.jsx" name="App route smoke tests &gt; renders expected page for route /workerdashboard/ongoing" time="0.0017871">
         </testcase>
-        <testcase classname="src/App.routes.test.jsx" name="App route smoke tests &gt; renders expected page for route /workerdashboard/settings" time="0.0028372">
+        <testcase classname="src/App.routes.test.jsx" name="App route smoke tests &gt; renders expected page for route /workerdashboard/settings" time="0.0023752">
         </testcase>
-        <testcase classname="src/App.routes.test.jsx" name="App route smoke tests &gt; renders expected page for route /workerdashboard/profile" time="0.0035991">
+        <testcase classname="src/App.routes.test.jsx" name="App route smoke tests &gt; renders expected page for route /workerdashboard/profile" time="0.002102">
         </testcase>
-        <testcase classname="src/App.routes.test.jsx" name="App route smoke tests &gt; renders expected page for route /workerdashboard/my-company" time="0.0029543">
+        <testcase classname="src/App.routes.test.jsx" name="App route smoke tests &gt; renders expected page for route /workerdashboard/my-company" time="0.001973">
         </testcase>
-        <testcase classname="src/App.routes.test.jsx" name="App route smoke tests &gt; renders expected page for route /admin-view" time="0.0047708">
+        <testcase classname="src/App.routes.test.jsx" name="App route smoke tests &gt; renders expected page for route /admin-view" time="0.0015673">
         </testcase>
-        <testcase classname="src/App.routes.test.jsx" name="App route smoke tests &gt; renders expected page for route /admin-view/" time="0.0017132">
+        <testcase classname="src/App.routes.test.jsx" name="App route smoke tests &gt; renders expected page for route /admin-view/" time="0.0016257">
         </testcase>
-        <testcase classname="src/App.routes.test.jsx" name="App route smoke tests &gt; renders expected page for route /admin-view/users" time="0.0016173">
+        <testcase classname="src/App.routes.test.jsx" name="App route smoke tests &gt; renders expected page for route /admin-view/users" time="0.0015516">
         </testcase>
-        <testcase classname="src/App.routes.test.jsx" name="App route smoke tests &gt; renders expected page for route /admin-view/revenue" time="0.0019009">
+        <testcase classname="src/App.routes.test.jsx" name="App route smoke tests &gt; renders expected page for route /admin-view/revenue" time="0.0014382">
         </testcase>
-        <testcase classname="src/App.routes.test.jsx" name="App route smoke tests &gt; renders expected page for route /admin-view/analytics" time="0.0025131">
+        <testcase classname="src/App.routes.test.jsx" name="App route smoke tests &gt; renders expected page for route /admin-view/analytics" time="0.0014952">
         </testcase>
-        <testcase classname="src/App.routes.test.jsx" name="App route smoke tests &gt; renders expected page for route /admin-view/settings" time="0.0024373">
+        <testcase classname="src/App.routes.test.jsx" name="App route smoke tests &gt; renders expected page for route /admin-view/settings" time="0.0014596">
         </testcase>
-        <testcase classname="src/App.routes.test.jsx" name="App route smoke tests &gt; renders expected page for route /platform-manager" time="0.0030185">
+        <testcase classname="src/App.routes.test.jsx" name="App route smoke tests &gt; renders expected page for route /platform-manager" time="0.0016972">
         </testcase>
-        <testcase classname="src/App.routes.test.jsx" name="App route smoke tests &gt; renders expected page for route /platform-manager/" time="0.0026915">
+        <testcase classname="src/App.routes.test.jsx" name="App route smoke tests &gt; renders expected page for route /platform-manager/" time="0.0015675">
         </testcase>
-        <testcase classname="src/App.routes.test.jsx" name="App route smoke tests &gt; renders expected page for route /platform-manager/dashboard" time="0.0032131">
+        <testcase classname="src/App.routes.test.jsx" name="App route smoke tests &gt; renders expected page for route /platform-manager/dashboard" time="0.0015534">
         </testcase>
-        <testcase classname="src/App.routes.test.jsx" name="App route smoke tests &gt; renders expected page for route /platform-manager/verification" time="0.0033912">
+        <testcase classname="src/App.routes.test.jsx" name="App route smoke tests &gt; renders expected page for route /platform-manager/verification" time="0.0040705">
         </testcase>
-        <testcase classname="src/App.routes.test.jsx" name="App route smoke tests &gt; renders expected page for route /platform-manager/payments" time="0.0021721">
+        <testcase classname="src/App.routes.test.jsx" name="App route smoke tests &gt; renders expected page for route /platform-manager/payments" time="0.0016511">
         </testcase>
-        <testcase classname="src/App.routes.test.jsx" name="App route smoke tests &gt; renders expected page for route /platform-manager/complaints" time="0.003485">
+        <testcase classname="src/App.routes.test.jsx" name="App route smoke tests &gt; renders expected page for route /platform-manager/complaints" time="0.0016461">
         </testcase>
-        <testcase classname="src/App.routes.test.jsx" name="App route smoke tests &gt; renders expected page for route /not-found" time="0.0018947">
+        <testcase classname="src/App.routes.test.jsx" name="App route smoke tests &gt; renders expected page for route /not-found" time="0.0016007">
         </testcase>
-        <testcase classname="src/App.routes.test.jsx" name="App route smoke tests &gt; renders expected page for route /unauthorized" time="0.0022739">
+        <testcase classname="src/App.routes.test.jsx" name="App route smoke tests &gt; renders expected page for route /unauthorized" time="0.0016495">
         </testcase>
-        <testcase classname="src/App.routes.test.jsx" name="App route smoke tests &gt; renders expected page for route /some-random-route" time="0.0021753">
+        <testcase classname="src/App.routes.test.jsx" name="App route smoke tests &gt; renders expected page for route /some-random-route" time="0.0017327">
         </testcase>
-        <testcase classname="src/App.routes.test.jsx" name="App route smoke tests &gt; renders expected page for route /random" time="0.0017084">
+        <testcase classname="src/App.routes.test.jsx" name="App route smoke tests &gt; renders expected page for route /random" time="0.0016048">
         </testcase>
-        <testcase classname="src/App.routes.test.jsx" name="App route smoke tests &gt; renders expected page for route /unknown/path" time="0.0017231">
+        <testcase classname="src/App.routes.test.jsx" name="App route smoke tests &gt; renders expected page for route /unknown/path" time="0.0013945">
         </testcase>
-        <testcase classname="src/App.routes.test.jsx" name="App route smoke tests &gt; renders expected page for route /admin" time="0.0025275">
+        <testcase classname="src/App.routes.test.jsx" name="App route smoke tests &gt; renders expected page for route /admin" time="0.0012948">
         </testcase>
-        <testcase classname="src/App.routes.test.jsx" name="App route smoke tests &gt; renders expected page for route /customer" time="0.0018088">
+        <testcase classname="src/App.routes.test.jsx" name="App route smoke tests &gt; renders expected page for route /customer" time="0.0012415">
         </testcase>
-        <testcase classname="src/App.routes.test.jsx" name="App route smoke tests &gt; renders expected page for route /company" time="0.0016575">
+        <testcase classname="src/App.routes.test.jsx" name="App route smoke tests &gt; renders expected page for route /company" time="0.0012487">
         </testcase>
-        <testcase classname="src/App.routes.test.jsx" name="App route smoke tests &gt; renders expected page for route /worker" time="0.0018521">
+        <testcase classname="src/App.routes.test.jsx" name="App route smoke tests &gt; renders expected page for route /worker" time="0.00128">
         </testcase>
-        <testcase classname="src/App.routes.test.jsx" name="App route smoke tests &gt; renders expected page for route /platform" time="0.0021962">
+        <testcase classname="src/App.routes.test.jsx" name="App route smoke tests &gt; renders expected page for route /platform" time="0.0012472">
         </testcase>
-        <testcase classname="src/App.routes.test.jsx" name="App route smoke tests &gt; renders expected page for route /__invalid__" time="0.0017057">
+        <testcase classname="src/App.routes.test.jsx" name="App route smoke tests &gt; renders expected page for route /__invalid__" time="0.0012836">
         </testcase>
-        <testcase classname="src/App.routes.test.jsx" name="App route smoke tests &gt; renders expected page for route /...." time="0.00159">
+        <testcase classname="src/App.routes.test.jsx" name="App route smoke tests &gt; renders expected page for route /...." time="0.001263">
         </testcase>
-        <testcase classname="src/App.routes.test.jsx" name="App route smoke tests &gt; renders expected page for route /123" time="0.0022969">
+        <testcase classname="src/App.routes.test.jsx" name="App route smoke tests &gt; renders expected page for route /123" time="0.001245">
         </testcase>
-        <testcase classname="src/App.routes.test.jsx" name="App route smoke tests &gt; renders expected page for route /abc/def/ghi" time="0.0022925">
+        <testcase classname="src/App.routes.test.jsx" name="App route smoke tests &gt; renders expected page for route /abc/def/ghi" time="0.0012933">
         </testcase>
     </testsuite>
-    <testsuite name="src/api/axiosInstance.test.js" timestamp="2026-04-20T18:45:59.755Z" hostname="Prudhvi-2412" tests="2" failures="0" errors="0" skipped="0" time="0.0033509">
-        <testcase classname="src/api/axiosInstance.test.js" name="axiosInstance &gt; enables credentials by default" time="0.0016037">
+    <testsuite name="src/api/axiosInstance.test.js" timestamp="2026-04-20T18:55:17.293Z" hostname="Prudhvi-2412" tests="2" failures="0" errors="0" skipped="0" time="0.0026866">
+        <testcase classname="src/api/axiosInstance.test.js" name="axiosInstance &gt; enables credentials by default" time="0.0012591">
         </testcase>
-        <testcase classname="src/api/axiosInstance.test.js" name="axiosInstance &gt; has a string baseURL value" time="0.000294">
+        <testcase classname="src/api/axiosInstance.test.js" name="axiosInstance &gt; has a string baseURL value" time="0.0002858">
         </testcase>
     </testsuite>
 </testsuites>
